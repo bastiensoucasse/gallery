@@ -74,7 +74,7 @@ public class ImageControllerTests {
     public void createImageShouldReturnSuccess() throws Exception {
         MockMultipartFile file = new MockMultipartFile("file", "osabat.jpg", MediaType.IMAGE_JPEG_VALUE,
                 new FileInputStream(
-                        "/home/bastiensoucasse/workspace/school/pdl/backend/src/main/resources/osabat.jpg"));
+                    System.getProperty("user.dir") + "/src/main/resources/osabat.jpg"));
         this.mockMvc.perform(multipart("/images").file(file)).andDo(print()).andExpect(status().isCreated());
     }
 
@@ -83,7 +83,7 @@ public class ImageControllerTests {
     public void createImageShouldReturnUnsupportedMediaType() throws Exception {
         MockMultipartFile file = new MockMultipartFile("file", "osabat.png", MediaType.IMAGE_PNG_VALUE,
                 new FileInputStream(
-                        "/home/bastiensoucasse/workspace/school/pdl/backend/src/main/resources/osabat.png"));
+                    System.getProperty("user.dir") +"/src/main/resources/osabat.png"));
         this.mockMvc.perform(multipart("/images").file(file)).andDo(print())
                 .andExpect(status().isUnsupportedMediaType());
     }
