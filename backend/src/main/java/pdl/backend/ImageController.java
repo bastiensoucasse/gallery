@@ -1,8 +1,15 @@
 package pdl.backend;
 
+import java.awt.image.BufferedImage;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.io.IOException;
 
+import javax.imageio.ImageIO;
+
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 
@@ -131,5 +138,19 @@ public class ImageController {
             }
 
         return nodes;
+    }
+
+    public void saveImagesFolder() throws IOException {
+        for (JsonNode an : getImageList()) {
+            ResponseEntity<?> re = getImage(an.get("id").asLong());
+            // re.getStatusCode().compareTo(HttpStatus.BAD_REQUEST);
+            byte[] b = (byte[]) re.getBody();
+            ByteArrayInputStream bis = new ByteArrayInputStream(b);
+            BufferedImage image = ImageIO.read(bis);
+            ImageIO.write(image, "jpeg", new File("output.jpeg"));
+        }
+        // Check the extension
+        // Create image object
+        // Save it in a folder
     }
 }
