@@ -1,5 +1,6 @@
 package pdl.backend;
 
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.util.ArrayList;
@@ -7,6 +8,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+
+import javax.imageio.ImageIO;
 
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Repository;
@@ -19,7 +22,12 @@ public class ImageDAO implements DAO<Image> {
         final ClassPathResource imgFile = new ClassPathResource("osabat.jpg");
         byte[] fileContent;
         try {
-            fileContent = Files.readAllBytes(imgFile.getFile().toPath());
+            final File file = imgFile.getFile();
+            //ImageIO.read(file).getWidth() 
+            //ImageIO.read(file).getWidth()
+            //ImageIO.read(file).getColorModel().getNumComponents() ); 
+            //Files.probeContentType(file.toPath()));
+            fileContent = Files.readAllBytes(file.toPath());
             final Image img = new Image("osabat.jpg", fileContent);
             images.put(img.getId(), img);
         } catch (final IOException e) {
