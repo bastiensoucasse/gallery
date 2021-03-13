@@ -1,15 +1,18 @@
 package pdl.backend;
 
-import java.awt.image.BufferedImage;
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.LinkOption;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
-import javax.imageio.ImageIO;
+import javax.annotation.PostConstruct;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 
@@ -140,17 +143,35 @@ public class ImageController {
         return nodes;
     }
 
-    public void saveImagesFolder() throws IOException {
-        for (JsonNode an : getImageList()) {
-            ResponseEntity<?> re = getImage(an.get("id").asLong());
-            // re.getStatusCode().compareTo(HttpStatus.BAD_REQUEST);
-            byte[] b = (byte[]) re.getBody();
-            ByteArrayInputStream bis = new ByteArrayInputStream(b);
-            BufferedImage image = ImageIO.read(bis);
-            ImageIO.write(image, "jpeg", new File("output.jpeg"));
+    /**
+     * Upload all images in the images folder on the server.
+     * 
+     * @throws IOException
+     */
+    @PostConstruct
+    public void saveImagesFolder() {
+        Path path = Paths.get(System.getProperty("user.dir"), "/images");
+        if (Files.notExists(path, LinkOption.NOFOLLOW_LINKS)) {
+            try {
+                throw new Exception("Folder Images does not exist");
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         }
-        // Check the extension
-        // Create image object
-        // Save it in a folder
+        Set<String> listImages = new HashSet<>();
+        try {
+            listImages = listFiles(path);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        listImages.forEach(i -> imageDAO.create(new Image(Paths.get(i).getFileName().toString(), i.getBytes())));
+    }
+
+    public Set<String> listFiles(Path p) throws IOException {
+        try (Stream<Path> stream = Files.walk(p)) {
+            return stream.filter(file -> !Files.isDirectory(file))
+                    .filter(file -> file.endsWith(".jpeg") || file.endsWith(".tif")).map(path -> path.getFileName())
+                    .map(Path::toString).collect(Collectors.toSet());
+        }
     }
 }
