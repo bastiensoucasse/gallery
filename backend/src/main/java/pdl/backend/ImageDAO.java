@@ -12,6 +12,7 @@ import java.util.Optional;
 import javax.imageio.ImageIO;
 
 import org.springframework.core.io.ClassPathResource;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Repository;
 
 @Repository
@@ -22,13 +23,12 @@ public class ImageDAO implements DAO<Image> {
         final ClassPathResource imgFile = new ClassPathResource("osabat.jpg");
         byte[] fileContent;
         try {
-            final File file = imgFile.getFile();
-            //ImageIO.read(file).getWidth() 
-            //ImageIO.read(file).getWidth()
-            //ImageIO.read(file).getColorModel().getNumComponents() ); 
-            //Files.probeContentType(file.toPath()));
-            fileContent = Files.readAllBytes(file.toPath());
-            final Image img = new Image("osabat.jpg", fileContent);
+            final File file = imgFile.getFile(); 
+            fileContent = Files.readAllBytes(file.toPath()); // get all the bytes of the image
+            MediaType type = MediaType.parseMediaType(Files.probeContentType(file.toPath())); // get the type of file
+            String size = "" + ImageIO.read(file).getWidth() + ImageIO.read(file).getHeight() + ImageIO.read(file).getColorModel().getNumComponents();
+            //final Image img = new Image("osabat.jpg", fileContent);
+            final Image img = new Image("osabat.jpg", fileContent, type, size); // create an object image from the file
             images.put(img.getId(), img);
         } catch (final IOException e) {
             e.printStackTrace();

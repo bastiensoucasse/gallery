@@ -89,7 +89,6 @@ public class ImageController {
     @RequestMapping(value = "/images/{id}", method = RequestMethod.DELETE)
     public ResponseEntity<?> deleteImage(@PathVariable("id") final long id) {
         final Image image = imageDAO.retrieve(id).orElse(null);
-
         if (image == null)
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
 
