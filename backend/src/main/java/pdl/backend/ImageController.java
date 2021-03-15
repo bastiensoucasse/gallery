@@ -2,6 +2,7 @@ package pdl.backend;
 
 import java.io.IOException;
 import java.nio.file.Files;
+<<<<<<< HEAD
 import java.nio.file.LinkOption;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -9,6 +10,8 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+=======
+>>>>>>> create image with type and size when uploading images
 
 import javax.annotation.PostConstruct;
 
@@ -111,7 +114,9 @@ public class ImageController {
             return new ResponseEntity<>(HttpStatus.UNSUPPORTED_MEDIA_TYPE);
 
         try {
-            final Image image = new Image(file.getOriginalFilename(), file.getBytes());
+            BufferedImage bufferedImage= ImageIO.read(file.getInputStream());
+            String size = "" + bufferedImage.getWidth() + "*" + bufferedImage.getHeight() + "*" + bufferedImage.getColorModel().getNumComponents();
+            final Image image = new Image(file.getOriginalFilename(), file.getBytes(), MediaType.parseMediaType(file.getContentType()), size);
             imageDAO.create(image);
         } catch (final IOException e) {
             e.printStackTrace();
