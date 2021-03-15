@@ -133,7 +133,7 @@ public class ImageController {
         for (final Image image : imageDAO.retrieveAll())
             try {
                 nodes.add(mapper
-                        .readTree("{ \"id\": \"" + image.getId() + "\", \"name\": \"" + image.getName() + "\" }"));
+                        .readTree("{ \"id\": \"" + image.getId() + "\", \"name\": \"" + image.getName() + "\", \"type\": \"" + image.getType() + "\", \"size\": \"" + image.getSize() + "\"" + "}"));
             } catch (final JsonProcessingException e) {
                 e.printStackTrace();
             }
