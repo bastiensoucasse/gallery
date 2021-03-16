@@ -153,7 +153,7 @@ public class ImageController {
         Path path = Paths.get(System.getProperty("user.dir"), "/images");
         if (Files.notExists(path, LinkOption.NOFOLLOW_LINKS)) {
             try {
-                throw new Exception("Folder Images does not exist");
+                throw new Exception("Folder Images does not exist\n");
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -169,9 +169,8 @@ public class ImageController {
 
     public Set<String> listFiles(Path p) throws IOException {
         try (Stream<Path> stream = Files.walk(p)) {
-            return stream.filter(file -> !Files.isDirectory(file))
-                    .filter(file -> file.endsWith(".jpeg") || file.endsWith(".tif")).map(path -> path.getFileName())
-                    .map(Path::toString).collect(Collectors.toSet());
+            return stream.map(path -> path.getFileName()).map(Path::toString)
+                    .filter(file -> file.endsWith(".jpeg") || file.endsWith(".tif")).collect(Collectors.toSet());
         }
     }
 }
