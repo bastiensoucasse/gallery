@@ -58,9 +58,9 @@ export default {
 
             axios
                 .get("images/" + this.selected, { responseType: "blob" })
-                .then((response) => {
+                .then((r) => {
                     var reader = new window.FileReader();
-                    reader.readAsDataURL(response.data);
+                    reader.readAsDataURL(r.data);
                     reader.onload = function () {
                         imageEl.setAttribute("src", reader.result);
                     };
@@ -72,9 +72,9 @@ export default {
         downloadSelected() {
             axios
                 .get("images/" + this.selected, { responseType: "blob" })
-                .then((response) => {
+                .then((r) => {
                     var reader = new window.FileReader();
-                    reader.readAsDataURL(response.data);
+                    reader.readAsDataURL(r.data);
                     reader.onload = function () {
                         const link = document.createElement("a");
                         link.href = reader.result;
