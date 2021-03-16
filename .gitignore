@@ -1,4 +1,6 @@
+.settings/
 .vscode/
 node/
 node_modules/
 target/
+.project
