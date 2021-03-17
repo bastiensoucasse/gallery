@@ -2,7 +2,6 @@ package pdl.backend;
 
 import java.io.IOException;
 import java.nio.file.Files;
-<<<<<<< HEAD
 import java.nio.file.LinkOption;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -10,8 +9,6 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-=======
->>>>>>> create image with type and size when uploading images
 
 import javax.annotation.PostConstruct;
 
