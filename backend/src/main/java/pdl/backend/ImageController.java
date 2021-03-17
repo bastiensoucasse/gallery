@@ -164,13 +164,19 @@ public class ImageController {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        listImages.forEach(i -> imageDAO.create(new Image(Paths.get(i).getFileName().toString(), i.getBytes())));
+        listImages.forEach(i -> {
+            try {
+                imageDAO.create(new Image(Paths.get(i).getFileName().toString(), Files.readAllBytes(Paths.get(i))));
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        });
     }
 
     public Set<String> listFiles(Path p) throws IOException {
         try (Stream<Path> stream = Files.walk(p)) {
-            return stream.map(path -> path.getFileName()).map(Path::toString)
-                    .filter(file -> file.endsWith(".jpeg") || file.endsWith(".tif")).collect(Collectors.toSet());
+            return stream.map(Path::toString).filter(file -> file.endsWith(".jpeg") || file.endsWith(".tif"))
+                    .collect(Collectors.toSet());
         }
     }
 }
