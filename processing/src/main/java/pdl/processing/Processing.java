@@ -155,12 +155,14 @@ public class Processing {
     }
 
     public static void equalizeHistogram(final Img<UnsignedByteType> input, final Img<UnsignedByteType> output,
-            final int dmin, final int dmax) {
-        final RandomAccess<UnsignedByteType> inputRandomAccess = input.randomAccess();
-        final RandomAccess<UnsignedByteType> outputRandomAccess = output.randomAccess();
-
+            final int channel) {
+        final RandomAccess<UnsignedByteType> inputRandomAccess = input.randomAccess(),
+                outputRandomAccess = output.randomAccess();
         final int[] histogram = new int[101], cumulativeHistogram = new int[101];
         int total = 0;
+
+        final float[][][] ivalues = new float[(int) input.dimension(0)][(int) input.dimension(1)][3],
+                fvalues = new float[(int) input.dimension(0)][(int) input.dimension(1)][3];
 
         for (long x = input.min(0); x <= input.max(0); x++) {
             inputRandomAccess.setPosition(x, 0);
@@ -168,15 +170,15 @@ public class Processing {
             for (long y = input.min(1); y <= input.max(1); y++) {
                 inputRandomAccess.setPosition(y, 1);
 
-                int[] rgb = new int[(int) input.dimension(2)];
-                for (long channel = input.min(2); channel <= input.max(2); channel++) {
-                    inputRandomAccess.setPosition(channel, 2);
-                    rgb[(int) channel] = inputRandomAccess.get().get();
+                int[] rgb = new int[3];
+                for (int c = 0; c < 3; c++) {
+                    inputRandomAccess.setPosition(c, 2);
+                    rgb[c] = inputRandomAccess.get().get();
                 }
 
-                final float[] hsv = Computing.rgbToHsv(rgb);
-
-                histogram[(int) (hsv[2] * 100)]++;
+                float[] hsv = Computing.rgbToHsv(rgb);
+                ivalues[(int) x][(int) y] = hsv;
+                histogram[(int) (hsv[channel] * 100)]++;
                 total++;
             }
         }
@@ -196,27 +198,26 @@ public class Processing {
                 inputRandomAccess.setPosition(y, 1);
                 outputRandomAccess.setPosition(y, 1);
 
-                int[] rgb = new int[(int) input.dimension(2)];
-                for (long channel = input.min(2); channel <= input.max(2); channel++) {
-                    inputRandomAccess.setPosition(channel, 2);
-                    rgb[(int) channel] = inputRandomAccess.get().get();
+                int[] rgb = new int[3];
+                for (int c = 0; c < 3; c++) {
+                    inputRandomAccess.setPosition(c, 2);
+                    rgb[c] = inputRandomAccess.get().get();
                 }
 
-                final float[] hsv = Computing.rgbToHsv(rgb);
-                hsv[2] = (float) ((double) cumulativeHistogram[(int) (hsv[2] * 100)] / (double) total
-                        * (double) (dmax - dmin) + (double) dmin);
-
+                float[] hsv = Computing.rgbToHsv(rgb);
+                hsv[channel] = (float) (cumulativeHistogram[(int) (hsv[channel] * 100)]) / (float) total;
+                fvalues[(int) x][(int) y] = hsv;
                 rgb = Computing.hsvToRgb(hsv);
-                for (long channel = input.min(2); channel <= input.max(2); channel++) {
-                    outputRandomAccess.setPosition(channel, 2);
-                    outputRandomAccess.get().set(rgb[(int) channel]);
+
+                // System.out.println("Replacing hsv(" + ivalues[(int) x][(int) y][0] + ", " + ivalues[(int) x][(int) y][1]
+                //         + ", " + ivalues[(int) x][(int) y][2] + ") by hsv(" + fvalues[(int) x][(int) y][0] + ", "
+                //         + fvalues[(int) x][(int) y][1] + ", " + fvalues[(int) x][(int) y][2] + ")...");
+                for (int c = 0; c < 3; c++) {
+                    outputRandomAccess.setPosition(c, 2);
+                    outputRandomAccess.get().set(rgb[c]);
                 }
             }
         }
-    }
-
-    public static void equalizeHistogram(final Img<UnsignedByteType> input, final Img<UnsignedByteType> output) {
-        equalizeHistogram(input, output, 0, 100);
     }
 
     public static void main(final String[] args) throws ImgIOException, IncompatibleTypeException {
@@ -236,16 +237,7 @@ public class Processing {
         System.out.println("Opened Image: " + inputFilename);
 
         // Process
-        double minimalDuration = Double.MAX_VALUE;
-        for (int i = 0; i < 10; i++) {
-            final long startTime = System.nanoTime();
-            // function to test
-            final long elapsedNanos = System.nanoTime() - startTime;
-            final double elapsedMillis = elapsedNanos / 1e+6;
-            if (minimalDuration > elapsedMillis)
-                minimalDuration = elapsedMillis;
-        }
-        System.out.println("Minimal duration: " + minimalDuration + " ms.");
+        equalizeHistogram(input, output, 1);
 
         // Output Save
         final String outputFilename = args[1];
