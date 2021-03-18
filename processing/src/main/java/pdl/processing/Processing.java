@@ -229,7 +229,7 @@ public class Processing {
         System.out.println("Opened Image: " + inputFilename);
 
         // Process
-        Convolution.gaussianFilter(input, output, 2);
+        Convolution.contour(input, output);
 
         // Output Save
         final String outputFilename = args[1];

@@ -59,6 +59,9 @@ public class Convolution {
                         value += neighborhoodCursor.get().get() * kernel[i][j];
                     }
 
+                if (value < 0) value = 0;
+                if (value > 255) value = 255;
+
                 outputRA.get().set((int) value);
             }
         }
@@ -72,5 +75,32 @@ public class Convolution {
     public static void gaussianFilter(final Img<UnsignedByteType> input, final Img<UnsignedByteType> output,
             final int radius) {
         convolution(input, output, generateGaussianFilter(radius, 4. / 3.));
+    }
+
+    public static void contour(final Img<UnsignedByteType> input, final Img<UnsignedByteType> output) {
+        final double[][] sobelX = { { -1., 0., 1. }, { -2., 0., 2. }, { -1., 0., 1. } };
+        final double[][] sobelY = { { -1., -2., -1. }, { 0., 0., 0. }, { 1., 2., 1. } };
+
+        final Img<UnsignedByteType> grayscaleInput = input.copy();
+        Processing.toGrayscale(input, grayscaleInput);
+
+        final Img<UnsignedByteType> inputSobelX = grayscaleInput.copy();
+        final Img<UnsignedByteType> inputSobelY = grayscaleInput.copy();
+
+        convolution(grayscaleInput, inputSobelX, sobelX);
+        convolution(grayscaleInput, inputSobelY, sobelY);
+
+        final Cursor<UnsignedByteType> cursorSobelX = inputSobelX.cursor();
+        final Cursor<UnsignedByteType> cursorSobelY = inputSobelY.cursor();
+        final Cursor<UnsignedByteType> cursorOutput = output.cursor();
+
+        while (cursorOutput.hasNext()) {
+            cursorSobelX.fwd();
+            cursorSobelY.fwd();
+            cursorOutput.fwd();
+
+            double value = Math.sqrt(cursorSobelX.get().get() * cursorSobelX.get().get() + cursorSobelY.get().get() * cursorSobelY.get().get());
+            cursorOutput.get().set((int) value);
+        }
     }
 }
