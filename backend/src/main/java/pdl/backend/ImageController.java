@@ -1,5 +1,6 @@
 package pdl.backend;
 
+import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.LinkOption;
@@ -11,6 +12,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import javax.annotation.PostConstruct;
+import javax.imageio.ImageIO;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -89,7 +91,6 @@ public class ImageController {
     @RequestMapping(value = "/images/{id}", method = RequestMethod.DELETE)
     public ResponseEntity<?> deleteImage(@PathVariable("id") final long id) {
         final Image image = imageDAO.retrieve(id).orElse(null);
-
         if (image == null)
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
 
@@ -112,13 +113,14 @@ public class ImageController {
             return new ResponseEntity<>(HttpStatus.UNSUPPORTED_MEDIA_TYPE);
 
         try {
-            final Image image = new Image(file.getOriginalFilename(), file.getBytes());
+            BufferedImage bufferedImage= ImageIO.read(file.getInputStream());
+            String size = "" + bufferedImage.getWidth() + "*" + bufferedImage.getHeight() + "*" + bufferedImage.getColorModel().getNumComponents();
+            final Image image = new Image(file.getOriginalFilename(), file.getBytes(), MediaType.parseMediaType(file.getContentType()), size);
             imageDAO.create(image);
         } catch (final IOException e) {
             e.printStackTrace();
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
-
         return new ResponseEntity<>(HttpStatus.CREATED);
     }
 
@@ -135,7 +137,7 @@ public class ImageController {
         for (final Image image : imageDAO.retrieveAll())
             try {
                 nodes.add(mapper
-                        .readTree("{ \"id\": \"" + image.getId() + "\", \"name\": \"" + image.getName() + "\" }"));
+                        .readTree("{ \"id\": \"" + image.getId() + "\", \"name\": \"" + image.getName() + "\", \"type\": \"" + image.getType() + "\", \"size\": \"" + image.getSize() + "\"" + "}"));
             } catch (final JsonProcessingException e) {
                 e.printStackTrace();
             }
@@ -161,12 +163,17 @@ public class ImageController {
         Set<String> listImages = new HashSet<>();
         try {
             listImages = listFiles(path);
+            System.out.println(listImages);
+            
         } catch (IOException e) {
             e.printStackTrace();
         }
         listImages.forEach(i -> {
             try {
-                imageDAO.create(new Image(Paths.get(i).getFileName().toString(), Files.readAllBytes(Paths.get(i))));
+                MediaType type = MediaType.parseMediaType(Files.probeContentType(Paths.get(i)));
+                BufferedImage bufferedImage = ImageIO.read(Paths.get(i).toFile());
+                String size = "" + bufferedImage.getWidth() + "*" + bufferedImage.getHeight() + "*" + bufferedImage.getColorModel().getNumComponents();
+                imageDAO.create(new Image(Paths.get(i).getFileName().toString(), Files.readAllBytes(Paths.get(i)), type, size));
             } catch (IOException e) {
                 e.printStackTrace();
             }
