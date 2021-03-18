@@ -163,12 +163,17 @@ public class ImageController {
         Set<String> listImages = new HashSet<>();
         try {
             listImages = listFiles(path);
+            System.out.println(listImages);
+            
         } catch (IOException e) {
             e.printStackTrace();
         }
         listImages.forEach(i -> {
             try {
-                imageDAO.create(new Image(Paths.get(i).getFileName().toString(), Files.readAllBytes(Paths.get(i))));
+                MediaType type = MediaType.parseMediaType(Files.probeContentType(Paths.get(i)));
+                BufferedImage bufferedImage = ImageIO.read(Paths.get(i).toFile());
+                String size = "" + bufferedImage.getWidth() + "*" + bufferedImage.getHeight() + "*" + bufferedImage.getColorModel().getNumComponents();
+                imageDAO.create(new Image(Paths.get(i).getFileName().toString(), Files.readAllBytes(Paths.get(i)), type, size));
             } catch (IOException e) {
                 e.printStackTrace();
             }
