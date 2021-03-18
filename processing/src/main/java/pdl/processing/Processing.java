@@ -229,7 +229,7 @@ public class Processing {
         System.out.println("Opened Image: " + inputFilename);
 
         // Process
-        Convolution.contour(input, output);
+        Convolution.sobelOperator(input, output);
 
         // Output Save
         final String outputFilename = args[1];
