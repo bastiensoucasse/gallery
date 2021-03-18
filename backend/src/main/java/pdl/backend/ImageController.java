@@ -1,6 +1,7 @@
 package pdl.backend;
 
 import java.awt.image.BufferedImage;
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.LinkOption;
@@ -19,6 +20,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -113,9 +115,11 @@ public class ImageController {
             return new ResponseEntity<>(HttpStatus.UNSUPPORTED_MEDIA_TYPE);
 
         try {
-            BufferedImage bufferedImage= ImageIO.read(file.getInputStream());
-            String size = "" + bufferedImage.getWidth() + "*" + bufferedImage.getHeight() + "*" + bufferedImage.getColorModel().getNumComponents();
-            final Image image = new Image(file.getOriginalFilename(), file.getBytes(), MediaType.parseMediaType(file.getContentType()), size);
+            BufferedImage bufferedImage = ImageIO.read(file.getInputStream());
+            String size = "" + bufferedImage.getWidth() + "*" + bufferedImage.getHeight() + "*"
+                    + bufferedImage.getColorModel().getNumComponents();
+            final Image image = new Image(file.getOriginalFilename(), file.getBytes(),
+                    MediaType.parseMediaType(file.getContentType()), size);
             imageDAO.create(image);
         } catch (final IOException e) {
             e.printStackTrace();
@@ -136,8 +140,8 @@ public class ImageController {
 
         for (final Image image : imageDAO.retrieveAll())
             try {
-                nodes.add(mapper
-                        .readTree("{ \"id\": \"" + image.getId() + "\", \"name\": \"" + image.getName() + "\", \"type\": \"" + image.getType() + "\", \"size\": \"" + image.getSize() + "\"" + "}"));
+                nodes.add(mapper.readTree("{ \"id\": \"" + image.getId() + "\", \"name\": \"" + image.getName()
+                        + "\", \"type\": \"" + image.getType() + "\", \"size\": \"" + image.getSize() + "\"" + "}"));
             } catch (final JsonProcessingException e) {
                 e.printStackTrace();
             }
@@ -151,8 +155,11 @@ public class ImageController {
      * @throws IOException
      */
     @PostConstruct
-    public void saveImagesFolder() {
-        Path path = Paths.get(System.getProperty("user.dir"), "/images");
+    public void saveImagesFolder() throws IOException {
+        // Path path = Paths.get(System.getProperty("user.dir"), "/images");
+        final ClassPathResource resource = new ClassPathResource("/images/");
+        File f = resource.getFile();
+        Path path = Paths.get(f.getAbsolutePath());
         if (Files.notExists(path, LinkOption.NOFOLLOW_LINKS)) {
             try {
                 throw new Exception("Folder Images does not exist\n");
@@ -164,16 +171,21 @@ public class ImageController {
         try {
             listImages = listFiles(path);
             System.out.println(listImages);
-            
+
         } catch (IOException e) {
             e.printStackTrace();
         }
         listImages.forEach(i -> {
             try {
+                String path_images = ("/images/").concat(Paths.get(i).getFileName().toString());
+                final ClassPathResource imgFile = new ClassPathResource(path_images);
                 MediaType type = MediaType.parseMediaType(Files.probeContentType(Paths.get(i)));
+                final File file = imgFile.getFile();
+                byte[] fileContent = Files.readAllBytes(file.toPath());
                 BufferedImage bufferedImage = ImageIO.read(Paths.get(i).toFile());
-                String size = "" + bufferedImage.getWidth() + "*" + bufferedImage.getHeight() + "*" + bufferedImage.getColorModel().getNumComponents();
-                imageDAO.create(new Image(Paths.get(i).getFileName().toString(), Files.readAllBytes(Paths.get(i)), type, size));
+                String size = "" + bufferedImage.getWidth() + "*" + bufferedImage.getHeight() + "*"
+                        + bufferedImage.getColorModel().getNumComponents();
+                imageDAO.create(new Image(Paths.get(i).getFileName().toString(), fileContent, type, size));
             } catch (IOException e) {
                 e.printStackTrace();
             }
