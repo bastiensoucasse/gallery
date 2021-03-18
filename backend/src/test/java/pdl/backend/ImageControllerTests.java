@@ -21,6 +21,8 @@ import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.test.web.servlet.MockMvc;
+
+
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Set;
@@ -93,10 +95,8 @@ public class ImageControllerTests {
     @Test
     @Order(9)
     public void listFilesShouldReturnSucess() throws Exception {
-        ImageDAO i = new ImageDAO();
-        ImageController c = new ImageController(i);
-        Path path = Paths.get(System.getProperty("user.dir"), "/images");
-        Set<String> images = c.listFiles(path);
+        Path path = Paths.get(System.getProperty("user.dir"), "/src/main/resources/images");
+        Set<String> images = Utils.listFiles(path);
         assertTrue(images.size() != 0);
         images.forEach(ima -> assertTrue(ima.contains(".tif") || ima.contains(".jpeg")));
         images.forEach(s -> System.out.println(s));

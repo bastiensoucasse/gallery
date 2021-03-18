@@ -1,6 +1,5 @@
 package pdl.backend;
 
-import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -9,11 +8,8 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.HashSet;
 import java.util.Set;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import javax.annotation.PostConstruct;
-import javax.imageio.ImageIO;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -32,6 +28,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+
 
 @RestController
 public class ImageController {
@@ -113,13 +110,8 @@ public class ImageController {
             final RedirectAttributes redirectAttributes) {
         if (!file.getContentType().equals(MediaType.IMAGE_JPEG_VALUE))
             return new ResponseEntity<>(HttpStatus.UNSUPPORTED_MEDIA_TYPE);
-
         try {
-            BufferedImage bufferedImage = ImageIO.read(file.getInputStream());
-            String size = "" + bufferedImage.getWidth() + "*" + bufferedImage.getHeight() + "*"
-                    + bufferedImage.getColorModel().getNumComponents();
-            final Image image = new Image(file.getOriginalFilename(), file.getBytes(),
-                    MediaType.parseMediaType(file.getContentType()), size);
+            final Image image = new Image(file.getOriginalFilename(), file.getBytes(), Utils.typeOfFile(file), Utils.sizeOfImage(file));
             imageDAO.create(image);
         } catch (final IOException e) {
             e.printStackTrace();
@@ -169,7 +161,7 @@ public class ImageController {
         }
         Set<String> listImages = new HashSet<>();
         try {
-            listImages = listFiles(path);
+            listImages = Utils.listFiles(path);
             System.out.println(listImages);
 
         } catch (IOException e) {
@@ -179,23 +171,14 @@ public class ImageController {
             try {
                 String path_images = ("/images/").concat(Paths.get(i).getFileName().toString());
                 final ClassPathResource imgFile = new ClassPathResource(path_images);
-                MediaType type = MediaType.parseMediaType(Files.probeContentType(Paths.get(i)));
                 final File file = imgFile.getFile();
                 byte[] fileContent = Files.readAllBytes(file.toPath());
-                BufferedImage bufferedImage = ImageIO.read(Paths.get(i).toFile());
-                String size = "" + bufferedImage.getWidth() + "*" + bufferedImage.getHeight() + "*"
-                        + bufferedImage.getColorModel().getNumComponents();
-                imageDAO.create(new Image(Paths.get(i).getFileName().toString(), fileContent, type, size));
+                imageDAO.create(new Image(Paths.get(i).getFileName().toString(), fileContent, Utils.typeOfFile(file), Utils.sizeOfImage(file)));
             } catch (IOException e) {
                 e.printStackTrace();
             }
         });
     }
 
-    public Set<String> listFiles(Path p) throws IOException {
-        try (Stream<Path> stream = Files.walk(p)) {
-            return stream.map(Path::toString).filter(file -> file.endsWith(".jpeg") || file.endsWith(".tif"))
-                    .collect(Collectors.toSet());
-        }
-    }
+    
 }
