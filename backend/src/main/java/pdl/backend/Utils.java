@@ -5,6 +5,9 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -80,6 +83,18 @@ public final class Utils{
         BufferedImage bufferedImage = ImageIO.read(file.getInputStream());
         return "" + bufferedImage.getWidth() + "*" + bufferedImage.getHeight() + "*"
                     + bufferedImage.getColorModel().getNumComponents();
+    }
+
+    public static ArrayList<Integer> parseListOfArguments(Collection<String> values){
+        ArrayList<Integer> args = new ArrayList<>();
+        for (String arg : values) {
+            try{
+                args.add(Integer.parseInt(arg));
+            }catch( NumberFormatException e){
+                return null;
+            }
+        }
+        return args;
     }
 
 

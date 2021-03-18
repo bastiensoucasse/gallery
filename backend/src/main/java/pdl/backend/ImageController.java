@@ -6,7 +6,9 @@ import java.nio.file.Files;
 import java.nio.file.LinkOption;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 import javax.annotation.PostConstruct;
@@ -120,6 +122,8 @@ public class ImageController {
         return new ResponseEntity<>(HttpStatus.CREATED);
     }
 
+    
+
     /**
      * Gets the image list from the DAO.
      * 
@@ -140,6 +144,43 @@ public class ImageController {
 
         return nodes;
     }
+
+
+    /**
+     * Apply an algorithm to an Image
+     * @param id id of the image
+     * @param algorithm algorithm passed as parameters through URL
+     * @return ResponseEntity:  (200): if the image was processed
+     *                          (400):  -if the algorithm doesn't exist
+     *                                  -one of the paramter doesn't exist
+     *                                  -the value of the parameter are invalid
+     * 
+     *                          (404): if no images exist with the given id
+     *                          (500): if the algorithm fail for internal reason
+     */
+    @RequestMapping(value = "/images/{id}", params = "algorithm", method = RequestMethod.GET, produces = MediaType.IMAGE_JPEG_VALUE)
+    @ResponseBody
+    public ResponseEntity<?> executeAlgorithm(@PathVariable("id") final long id, @RequestParam Map<String, String> algorithm){
+        final Image image = imageDAO.retrieve(id).orElse(null);
+        if (image == null)
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        
+        String method = algorithm.get("algorithm"); // get the name of the algorithm
+        algorithm.remove("algorithm"); // remove from the set
+
+        System.out.println(method); // debug
+        System.out.println(algorithm.entrySet()); //debug
+
+        ArrayList<Integer> args = Utils.parseListOfArguments(algorithm.values());
+        System.out.println(args);
+        
+        //TO DO
+        
+
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
+
+
 
     /**
      * Upload all images in the images folder on the server.
