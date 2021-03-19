@@ -4,7 +4,6 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
-import java.nio.file.LinkOption;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.HashSet;
@@ -149,39 +148,34 @@ public class ImageController {
         return nodes;
     }
 
+    @PostConstruct
     /**
-     * Upload all images in the images folder on the server.
+     * Method launches when the server is starting
+     */
+    public void onStart() {
+        String path = "/images/";
+        try {
+            Path path_of_resource = getPathOfResource(path);
+            saveImagesFolder(path_of_resource);
+        } catch (IOException e1) {
+            e1.printStackTrace();
+        }
+    }
+
+    /**
+     * Upload all images (jpeg, tif) in the images folder on the server.
      * 
      * @throws IOException
      */
-    @PostConstruct
-    public void saveImagesFolder() throws IOException {
-        // Path path = Paths.get(System.getProperty("user.dir"), "/images");
-        final ClassPathResource resource = new ClassPathResource("/images/");
-        File f = resource.getFile();
-        Path path = Paths.get(f.getAbsolutePath());
-        if (Files.notExists(path, LinkOption.NOFOLLOW_LINKS)) {
-            try {
-                throw new Exception("Folder Images does not exist\n");
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }
+    public void saveImagesFolder(Path path_of_resource) throws IOException {
+        Path path = path_of_resource;
         Set<String> listImages = new HashSet<>();
-        try {
-            listImages = listFiles(path);
-            System.out.println(listImages);
-
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        listImages = listFiles(path);
+        System.out.println(listImages);
         listImages.forEach(i -> {
             try {
-                String path_images = ("/images/").concat(Paths.get(i).getFileName().toString());
-                final ClassPathResource imgFile = new ClassPathResource(path_images);
+                byte[] fileContent = Files.readAllBytes(Paths.get(i));
                 MediaType type = MediaType.parseMediaType(Files.probeContentType(Paths.get(i)));
-                final File file = imgFile.getFile();
-                byte[] fileContent = Files.readAllBytes(file.toPath());
                 BufferedImage bufferedImage = ImageIO.read(Paths.get(i).toFile());
                 String size = "" + bufferedImage.getWidth() + "*" + bufferedImage.getHeight() + "*"
                         + bufferedImage.getColorModel().getNumComponents();
@@ -192,10 +186,22 @@ public class ImageController {
         });
     }
 
+    /**
+     * 
+     * @param p the parent file you need to scan
+     * @return a set of strings, indicating the full path of jpeg and tif images.
+     * @throws IOException
+     */
     public Set<String> listFiles(Path p) throws IOException {
         try (Stream<Path> stream = Files.walk(p)) {
             return stream.map(Path::toString).filter(file -> file.endsWith(".jpeg") || file.endsWith(".tif"))
                     .collect(Collectors.toSet());
         }
+    }
+
+    public Path getPathOfResource(String p) throws IOException {
+        final ClassPathResource resource = new ClassPathResource(p);
+        File f = resource.getFile();
+        return Paths.get(f.getAbsolutePath());
     }
 }

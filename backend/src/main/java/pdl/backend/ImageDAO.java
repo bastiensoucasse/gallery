@@ -23,11 +23,12 @@ public class ImageDAO implements DAO<Image> {
         final ClassPathResource imgFile = new ClassPathResource("osabat.jpg");
         byte[] fileContent;
         try {
-            final File file = imgFile.getFile(); 
+            final File file = imgFile.getFile();
             fileContent = Files.readAllBytes(file.toPath()); // get all the bytes of the image
             MediaType type = MediaType.parseMediaType(Files.probeContentType(file.toPath())); // get the type of file
-            String size = "" + ImageIO.read(file).getWidth() + "*" + ImageIO.read(file).getHeight() + "*" + ImageIO.read(file).getColorModel().getNumComponents();
-            //final Image img = new Image("osabat.jpg", fileContent);
+            String size = "" + ImageIO.read(file).getWidth() + "*" + ImageIO.read(file).getHeight() + "*"
+                    + ImageIO.read(file).getColorModel().getNumComponents();
+            // final Image img = new Image("osabat.jpg", fileContent);
             final Image img = new Image("osabat.jpg", fileContent, type, size); // create an object image from the file
             images.put(img.getId(), img);
         } catch (final IOException e) {
@@ -73,5 +74,14 @@ public class ImageDAO implements DAO<Image> {
                 return;
             }
         }
+    }
+
+    public long getId(String name) {
+        long id = -1;
+        for (Image i : images.values()) {
+            if (i.getName().equals(name))
+                id = i.getId();
+        }
+        return id;
     }
 }
