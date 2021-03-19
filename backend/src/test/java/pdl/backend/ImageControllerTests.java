@@ -125,8 +125,9 @@ public class ImageControllerTests {
         Path path_of_images = Paths.get(f.getAbsolutePath());
         Set<String> images = c.listFiles(path_of_images);
 
-        images.forEach(s -> System.out.println(s));
-        assertTrue(images.size() != 0);
+        Path path = Paths.get(System.getProperty("user.dir"), "/src/main/resources/images");
+        Set<String> image_set = Utils.listFiles(path);
+        assertTrue(image_set.size() != 0);
         images.forEach(ima -> assertTrue(ima.contains(".tif") || ima.contains(".jpeg")));
         assertFalse(images.contains(path_image_1.toString()));
         assertTrue(images.contains(path_image_2.toString()));

@@ -6,7 +6,9 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -112,13 +114,9 @@ public class ImageController {
             final RedirectAttributes redirectAttributes) {
         if (!file.getContentType().equals(MediaType.IMAGE_JPEG_VALUE))
             return new ResponseEntity<>(HttpStatus.UNSUPPORTED_MEDIA_TYPE);
-
         try {
-            BufferedImage bufferedImage = ImageIO.read(file.getInputStream());
-            String size = "" + bufferedImage.getWidth() + "*" + bufferedImage.getHeight() + "*"
-                    + bufferedImage.getColorModel().getNumComponents();
-            final Image image = new Image(file.getOriginalFilename(), file.getBytes(),
-                    MediaType.parseMediaType(file.getContentType()), size);
+            final Image image = new Image(file.getOriginalFilename(), file.getBytes(), Utils.typeOfFile(file),
+                    Utils.sizeOfImage(file));
             imageDAO.create(image);
         } catch (final IOException e) {
             e.printStackTrace();
@@ -160,6 +158,40 @@ public class ImageController {
         } catch (IOException e1) {
             e1.printStackTrace();
         }
+    }
+
+    /**
+     * Apply an algorithm to an Image
+     * 
+     * @param id        id of the image
+     * @param algorithm algorithm passed as parameters through URL
+     * @return ResponseEntity: (200): if the image was processed (400): -if the
+     *         algorithm doesn't exist -one of the paramter doesn't exist -the value
+     *         of the parameter are invalid
+     * 
+     *         (404): if no images exist with the given id (500): if the algorithm
+     *         fail for internal reason
+     */
+    @RequestMapping(value = "/images/{id}", params = "algorithm", method = RequestMethod.GET, produces = MediaType.IMAGE_JPEG_VALUE)
+    @ResponseBody
+    public ResponseEntity<?> executeAlgorithm(@PathVariable("id") final long id,
+            @RequestParam Map<String, String> algorithm) {
+        final Image image = imageDAO.retrieve(id).orElse(null);
+        if (image == null)
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+
+        String method = algorithm.get("algorithm"); // get the name of the algorithm
+        algorithm.remove("algorithm"); // remove from the set
+
+        System.out.println(method); // debug
+        System.out.println(algorithm.entrySet()); // debug
+
+        ArrayList<Integer> args = Utils.parseListOfArguments(algorithm.values());
+        System.out.println(args);
+
+        // TO DO
+
+        return new ResponseEntity<>(HttpStatus.OK);
     }
 
     /**
