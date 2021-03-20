@@ -27,11 +27,23 @@ import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.MvcResult;
+
+import ch.qos.logback.classic.pattern.Util;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.Set;
+
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -164,19 +176,42 @@ public class ImageControllerTests {
     }
 
     @Test
-    @Order(10)
+    @Order(12)
     public void testGetMetaData() throws Exception {
         //!! TO DO
-        /*Path path = Paths.get(System.getProperty("user.dir"), "/src/main/resources/images");
-        Set<String> images = Utils.listFiles(path);
-        String jsonData = "";
-        int id = 1;
-        for(String s : images){
-            System.out.println(s);
-        }*/
-        mockMvc.perform(get("/images")).andDo(print())
-        .andExpect(content().contentType("application/json; charset=UTF-8"));
-        //.andExpect(content().json(jsonContent));
-        //!!
+        ObjectMapper objectMapper = new ObjectMapper();
+        
+
+        Path path = Paths.get(System.getProperty("user.dir"), "/src/main/resources/images");
+        Set<String> resourcesImages = Utils.listFiles(path);
+
+        final ClassPathResource imgOsabat = new ClassPathResource("osabat.jpg");
+        Map<String, File> expectedImages = new HashMap<>();
+        expectedImages.put(imgOsabat.getFilename(), imgOsabat.getFile());
+
+        for (String fileName : resourcesImages) {
+            final ClassPathResource resource = new ClassPathResource("/images/" +fileName);
+            expectedImages.put(resource.getFilename(), resource.getFile());
+        }
+
+
+        MvcResult result = mockMvc.perform(get("/images"))
+        .andExpect(content().contentType("application/json; charset=UTF-8")).andReturn();
+        String jsonData = result.getResponse().getContentAsString();
+        System.out.println(jsonData);
+        List<Image> listImages = objectMapper.readValue(jsonData, new TypeReference<List<Image>>(){});
+        assertTrue(listImages.size() == expectedImages.size());
+
+
+        int id = 0;
+        for (Image image : listImages) {
+            String imageName = image.getName();
+            assertTrue(image.getId() >= id);
+            assertTrue(expectedImages.containsKey(imageName));
+            //assertTrue(MediaType.parseMediaType(image.getType()) quals(MediaType.IMAGE_JPEG));
+            assertTrue(image.getSize().equals(Utils.sizeOfImage(expectedImages.get(imageName))));
+            id++;
+            
+        }                              
     }
 }
