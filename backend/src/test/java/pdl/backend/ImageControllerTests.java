@@ -7,6 +7,8 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -159,5 +161,22 @@ public class ImageControllerTests {
         assertFalse(i2.getSize().equals("null"));
         assertFalse(i2.getData() == null);
         assertTrue(i2.getType() == MediaType.IMAGE_JPEG || i1.getType() == MediaType.valueOf("Image/tif"));
+    }
+
+    @Test
+    @Order(10)
+    public void testGetMetaData() throws Exception {
+        //!! TO DO
+        /*Path path = Paths.get(System.getProperty("user.dir"), "/src/main/resources/images");
+        Set<String> images = Utils.listFiles(path);
+        String jsonData = "";
+        int id = 1;
+        for(String s : images){
+            System.out.println(s);
+        }*/
+        mockMvc.perform(get("/images")).andDo(print())
+        .andExpect(content().contentType("application/json; charset=UTF-8"));
+        //.andExpect(content().json(jsonContent));
+        //!!
     }
 }
