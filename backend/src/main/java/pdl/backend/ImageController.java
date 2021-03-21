@@ -180,16 +180,23 @@ public class ImageController {
         if (image == null)
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
 
-        String method = algorithm.get("algorithm"); // get the name of the algorithm
+        String name = algorithm.get("algorithm"); // get the name of the algorithm
         algorithm.remove("algorithm"); // remove from the set
 
-        System.out.println(method); // debug
-        System.out.println(algorithm.entrySet()); // debug
+        System.out.println(name); // debug
+        Image processedImage;
+        try {
+            processedImage = AlgorithmManager.Instance().applyAlgorithm(name, algorithm.values(), image);
+            imageDAO.create(processedImage);
+        } catch (Exception e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+        //System.out.println(algorithm.entrySet()); // debug
 
-        ArrayList<Integer> args = Utils.parseListOfArguments(algorithm.values());
-        System.out.println(args);
-
-        // TO DO
+        //ArrayList<Integer> args = Utils.parseListOfArguments(algorithm.values());
+        //System.out.println(args);
+        
 
         return new ResponseEntity<>(HttpStatus.OK);
     }

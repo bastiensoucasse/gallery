@@ -6,6 +6,7 @@ import io.scif.img.ImgIOException;
 import io.scif.img.ImgOpener;
 import io.scif.img.ImgSaver;
 import io.scif.img.SCIFIOImgPlus;
+import net.imagej.ImgPlus;
 import net.imglib2.Cursor;
 import net.imglib2.RandomAccess;
 import net.imglib2.exception.IncompatibleTypeException;
@@ -34,7 +35,7 @@ public class Processing {
         }
     }
 
-    public static void toGrayscale(final Img<UnsignedByteType> input, final Img<UnsignedByteType> output) {
+    public static void toGrayscale(final SCIFIOImgPlus<UnsignedByteType> input, final ImgPlus<UnsignedByteType> output) {
         final RandomAccess<UnsignedByteType> inputRandomAccess = input.randomAccess();
         final RandomAccess<UnsignedByteType> outputRandomAccess = output.randomAccess();
 
@@ -92,8 +93,8 @@ public class Processing {
         }
     }
 
-    public static void extendDynamics(final Img<UnsignedByteType> input, final Img<UnsignedByteType> output,
-            final Img<UnsignedByteType> temp, final int dmin, final int dmax) {
+    public static void extendDynamics(final SCIFIOImgPlus<UnsignedByteType> input, final Img<UnsignedByteType> output,
+            final ImgPlus<UnsignedByteType> temp, final int dmin, final int dmax) {
         toGrayscale(input, temp);
 
         final RandomAccess<UnsignedByteType> tempRandomAccess = temp.randomAccess();
@@ -149,8 +150,8 @@ public class Processing {
         }
     }
 
-    public static void extendDynamics(final Img<UnsignedByteType> input, final Img<UnsignedByteType> output,
-            final Img<UnsignedByteType> temp) {
+    public static void extendDynamics(final SCIFIOImgPlus<UnsignedByteType> input, final Img<UnsignedByteType> output,
+            final ImgPlus<UnsignedByteType> temp) {
         extendDynamics(input, output, temp, 0, 255);
     }
 
@@ -229,7 +230,7 @@ public class Processing {
         System.out.println("Opened Image: " + inputFilename);
 
         // Process
-        Convolution.sobelOperator(input, output);
+        //Convolution.sobelOperator(input, output);
 
         // Output Save
         final String outputFilename = args[1];

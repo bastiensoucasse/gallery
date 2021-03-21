@@ -77,7 +77,7 @@ public class Convolution {
         convolution(input, output, generateGaussianFilter(radius, 4. / 3.));
     }
 
-    public static void sobelOperator(final Img<UnsignedByteType> input, final Img<UnsignedByteType> output) {
+    /*public static void sobelOperator(final Img<UnsignedByteType> input, final Img<UnsignedByteType> output) {
         final double[][] sobelX = { { -1., 0., 1. }, { -2., 0., 2. }, { -1., 0., 1. } };
         final double[][] sobelY = { { -1., -2., -1. }, { 0., 0., 0. }, { 1., 2., 1. } };
 
@@ -106,5 +106,5 @@ public class Convolution {
             
             outputCursor.get().set((int) value);
         }
-    }
+    }*/
 }
