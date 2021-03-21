@@ -4,3 +4,4 @@ node/
 node_modules/
 target/
 .project
+backend/src/main/resources/public/index.html
