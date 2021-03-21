@@ -10,6 +10,11 @@ public class Image {
     private String size;
     private byte[] data;
 
+
+    public Image(){
+        super();
+    }
+
     public Image(final String name, final byte[] data) {
         this.id = count++;
         this.name = name;
@@ -22,6 +27,14 @@ public class Image {
         this.data = data;
         this.type = MediaType.IMAGE_JPEG;
         this.size = size;
+    }
+
+    public Image(long id, String name, MediaType type, String size){
+        this.id = id;
+        this.name = name;
+        this.type = type;
+        this.size = size;
+        this.data = null;
     }
 
     public long getId() {
@@ -46,5 +59,22 @@ public class Image {
 
     public byte[] getData() {
         return data;
+    }
+
+    @Override
+    public String toString() {
+        return "{\"id\":\"" + getId() + "\", \"name\": \"" + name + "\", \"type\": \"" + type.getSubtype() + "\", \"size\": \"" + size + "\"" + "}"; 
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if(obj == null || obj.getClass() != this.getClass())
+            return false;
+        final Image other = (Image) obj;
+        if(obj == this)
+            return true;
+
+        return other.name.equals(name) && other.data.equals(data) && other.id.equals(id) && other.size.equals(size) && other.type.equals(type) ;
+        
     }
 }

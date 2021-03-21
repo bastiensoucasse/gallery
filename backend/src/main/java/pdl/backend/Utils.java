@@ -5,6 +5,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Optional;
@@ -29,10 +30,12 @@ public final class Utils{
      */
     public static Set<String> listFiles(Path p) throws IOException {
         try (Stream<Path> stream = Files.walk(p)) {
-            return stream.map(Path::toString).filter(file -> file.endsWith(".jpeg") || file.endsWith(".tif"))
+            return stream.map(Path::getFileName).map(Path::toString).filter(file -> file.endsWith(".jpeg") || file.endsWith(".tif"))
                     .collect(Collectors.toSet());
         }
     }
+
+
 
     /**
      * Give the type of an Image 
