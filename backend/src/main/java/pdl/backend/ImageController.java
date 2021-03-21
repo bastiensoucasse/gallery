@@ -34,6 +34,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+
 @RestController
 public class ImageController {
     /**
@@ -182,16 +183,27 @@ public class ImageController {
 
         String name = algorithm.get("algorithm"); // get the name of the algorithm
         algorithm.remove("algorithm"); // remove from the set
-
+        
+        
         System.out.println(name); // debug
-        Image processedImage;
+        for (String o : algorithm.values()) {
+            System.out.println(o.getClass() + ", -> " + o);
+        }
         try {
-            processedImage = AlgorithmManager.Instance().applyAlgorithm(name, algorithm.values(), image);
-            imageDAO.create(processedImage);
+            AlgorithmManager.Instance().applyAlgorithm(name, algorithm.values(), image);
         } catch (Exception e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
         }
+
+        /*Image processedImage;
+        try {
+            processedImage = AlgorithmManager.Instance().applyAlgorithm(name, new ArrayList<>(algorithm.values()), image);
+            imageDAO.create(processedImage);
+        } catch (Exception e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }*/
         //System.out.println(algorithm.entrySet()); // debug
 
         //ArrayList<Integer> args = Utils.parseListOfArguments(algorithm.values());
