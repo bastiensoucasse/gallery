@@ -15,6 +15,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 
 import org.junit.jupiter.api.MethodOrderer.OrderAnnotation;
+import org.mockito.Mock;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
@@ -29,13 +30,16 @@ import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 
-
+import io.scif.SCIFIO;
+import io.scif.img.SCIFIOImgPlus;
+import net.imglib2.img.Img;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -210,5 +214,29 @@ public class ImageControllerTests {
             id++;
             
         }                              
+    }
+
+
+    @Test
+    @Order(13)
+    public void testAlgorithmExecutionShouldReturnSuccess() throws Exception{
+        Set<String> algorithms = AlgorithmManager.Instance().listAlgorithms(); // get all the algorithms
+        for (String algorithm : algorithms) { // for each algorithm
+            ArrayList<Class<?>[]> parametersType = AlgorithmManager.Instance().listOfParameterType(algorithm); // get their list of parameters
+            Iterator<Class<?>[]> iterator = parametersType.iterator(); 
+            while(iterator.hasNext()){ //iterate on the parameter list
+                Class<?>[] types = iterator.next();
+                String parameters = algorithm;
+                int i = 0;
+                for (Class<?> type : types){
+                    if(type != SCIFIOImgPlus.class){
+                        parameters += "&x"+ i +"=" + String.valueOf(Utils.getRandomNumber(type, 0, 2)) + "";
+                    }
+                    i++;
+                }
+                mockMvc.perform(get("/images/0?algorithm=" + parameters)).andExpect(status().isOk());
+            }
+        }
+
     }
 }

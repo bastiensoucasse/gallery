@@ -189,21 +189,25 @@ public class ImageController {
         for (String o : algorithm.values()) {
             System.out.println(o.getClass() + ", -> " + o);
         }
+        
         try {
             Image proccessedImage = AlgorithmManager.Instance().applyAlgorithm(name, algorithm.values(), image);
             imageDAO.create(proccessedImage);
         } catch (NoSuchMethodException e){
-            // TO DO
             e.printStackTrace();
+            new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+            return ResponseEntity.badRequest().body("Algorithm doesn't exists");
         } catch (NumberFormatException e){
-            //TO DO
             e.printStackTrace();
+            new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+            return ResponseEntity.badRequest().body("Impossible to parse Parameters not a Number");
         } catch (IllegalArgumentException e){
-            // TO DO
             e.printStackTrace();
+            new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+            return ResponseEntity.badRequest().body("Invalid Arguments");
         } catch (Exception e){
-            //TO DO
             e.printStackTrace();
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
         
 

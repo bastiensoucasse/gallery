@@ -92,8 +92,8 @@ public class Processing {
         }
     }
 
-    public static void extendDynamics(final SCIFIOImgPlus<UnsignedByteType> input, final SCIFIOImgPlus<UnsignedByteType> output,
-            final SCIFIOImgPlus<UnsignedByteType> temp, final int dmin, final int dmax) {
+    public static void extendDynamics(final SCIFIOImgPlus<UnsignedByteType> input, final SCIFIOImgPlus<UnsignedByteType> output, final int dmin, final int dmax) {
+        SCIFIOImgPlus<UnsignedByteType> temp = input.copy();
         toGrayscale(input, temp);
 
         final RandomAccess<UnsignedByteType> tempRandomAccess = temp.randomAccess();
@@ -149,9 +149,8 @@ public class Processing {
         }
     }
 
-    public static void extendDynamics(final SCIFIOImgPlus<UnsignedByteType> input, final SCIFIOImgPlus<UnsignedByteType> output,
-            final SCIFIOImgPlus<UnsignedByteType> temp) {
-        extendDynamics(input, output, temp, 0, 255);
+    public static void extendDynamics(final SCIFIOImgPlus<UnsignedByteType> input, final SCIFIOImgPlus<UnsignedByteType> output) {
+        extendDynamics(input, output, 0, 255);
     }
 
     public static void equalizeHistogram(final SCIFIOImgPlus<UnsignedByteType> input, final SCIFIOImgPlus<UnsignedByteType> output,
@@ -212,7 +211,7 @@ public class Processing {
         }
     }
 
-    public static void main(final String[] args) throws ImgIOException, IncompatibleTypeException {
+    /*public static void main(final String[] args) throws ImgIOException, IncompatibleTypeException {
         // Usage Check
         if (args.length < 2) {
             System.out.println("Missing input or output image filename.");
@@ -240,5 +239,5 @@ public class Processing {
         imgSaver.saveImg(outputFilename, output);
         imgSaver.context().dispose();
         System.out.println("Saved Image: " + outputFilename);
-    }
+    }*/
 }

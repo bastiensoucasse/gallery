@@ -1,5 +1,6 @@
 package pdl.processing;
 
+import io.scif.img.SCIFIOImgPlus;
 import net.imglib2.Cursor;
 import net.imglib2.RandomAccessibleInterval;
 import net.imglib2.algorithm.neighborhood.Neighborhood;
@@ -67,21 +68,21 @@ public class Convolution {
         }
     }
 
-    public static void meanFilter(final Img<UnsignedByteType> input, final Img<UnsignedByteType> output,
+    public static void meanFilter(final SCIFIOImgPlus<UnsignedByteType> input, final SCIFIOImgPlus<UnsignedByteType> output,
             final int radius) {
         convolution(input, output, generateMeanFilter(radius));
     }
 
-    public static void gaussianFilter(final Img<UnsignedByteType> input, final Img<UnsignedByteType> output,
+    public static void gaussianFilter(final SCIFIOImgPlus<UnsignedByteType> input, final SCIFIOImgPlus<UnsignedByteType> output,
             final int radius) {
         convolution(input, output, generateGaussianFilter(radius, 4. / 3.));
     }
 
-    /*public static void sobelOperator(final Img<UnsignedByteType> input, final Img<UnsignedByteType> output) {
+    public static void sobelOperator(final SCIFIOImgPlus<UnsignedByteType> input, final SCIFIOImgPlus<UnsignedByteType> output) {
         final double[][] sobelX = { { -1., 0., 1. }, { -2., 0., 2. }, { -1., 0., 1. } };
         final double[][] sobelY = { { -1., -2., -1. }, { 0., 0., 0. }, { 1., 2., 1. } };
 
-        final Img<UnsignedByteType> inputGrayscale = input.copy();
+        final SCIFIOImgPlus<UnsignedByteType> inputGrayscale = input.copy();
         Processing.toGrayscale(input, inputGrayscale);
 
         final Img<UnsignedByteType> inputX = inputGrayscale.copy();
@@ -106,5 +107,5 @@ public class Convolution {
             
             outputCursor.get().set((int) value);
         }
-    }*/
+    }
 }
