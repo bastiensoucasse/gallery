@@ -21,7 +21,7 @@ public class ImageDAO implements DAO<Image> {
         try {
             final File file = imgFile.getFile();
             fileContent = Files.readAllBytes(file.toPath()); // get all the bytes of the image
-            final Image img = new Image("osabat.jpg", fileContent, Utils.typeOfFile(file), Utils.sizeOfImage(file)); // create
+            final Image img = new Image("osabat.jpeg", fileContent, Utils.typeOfFile(file), Utils.sizeOfImage(file)); // create
                                                                                                                      // an
                                                                                                                      // object
                                                                                                                      // image

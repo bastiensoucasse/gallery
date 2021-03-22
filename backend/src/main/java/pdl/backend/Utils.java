@@ -5,8 +5,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.Collection;
+
 import java.util.Random;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -90,6 +89,15 @@ public final class Utils {
                 + bufferedImage.getColorModel().getNumComponents();
     }
 
+    /**
+     * Return a random Number depending on the type specified
+     * int, float long, or double
+     * @param c Class<?> to specify the number
+     * @param min int minimum
+     * @param max int maxmum inclusive
+     * @return Obect 
+     * @throws IllegalArgumentException If the min >= max or wrong Class passed in parameters
+     */
     public static Object getRandomNumber(Class<?> c, int min, int max) throws IllegalArgumentException {
         if(min >= max){
             throw new IllegalArgumentException("max has to be greater than min !");

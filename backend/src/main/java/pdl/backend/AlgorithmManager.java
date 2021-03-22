@@ -11,9 +11,7 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 
-import io.scif.FormatException;
 import io.scif.img.SCIFIOImgPlus;
-import net.imglib2.algorithm.convolution.Convolution;
 import net.imglib2.type.numeric.integer.UnsignedByteType;
 import pdl.processing.ImageConverter;
 import pdl.processing.Processing;
