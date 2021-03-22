@@ -10,9 +10,7 @@ import java.util.Map;
 import java.util.Set;
 
 import io.scif.img.SCIFIOImgPlus;
-import net.imagej.ImgPlus;
 
-import net.imglib2.img.array.ArrayImgFactory;
 import net.imglib2.type.numeric.integer.UnsignedByteType;
 import pdl.processing.ImageConverter;
 import pdl.processing.Processing;
@@ -165,39 +163,36 @@ public class AlgorithmManager {
         if (c != null) {
             System.out.println("You got the class " + c.getName()); // debug
 
-            SCIFIOImgPlus<UnsignedByteType> input = ImageConverter.imageFromJPEGBytes(image.getData()); // convert Image
-                                                                                                        // to
-                                                                                                        // ImgPlus<UnsignedByteType>
-            final ArrayImgFactory<UnsignedByteType> factory = new ArrayImgFactory<UnsignedByteType>(
-                    new UnsignedByteType()); // ArrayImgFactory
-            ImgPlus<UnsignedByteType> output = SCIFIOImgPlus.wrap(factory.create(input), SCIFIOImgPlus.wrap(input)); // Create
-                                                                                                                     // an
-                                                                                                                     // output
-                                                                                                                     // image
+            SCIFIOImgPlus<UnsignedByteType> input = ImageConverter.imageFromJPEGBytes(image.getData()); // Convert the input image as SCIFIOImgPlus<>
+            SCIFIOImgPlus<UnsignedByteType> output = input.copy(); // create a copy of the input
 
             Object[] arguments = new Object[args.size() + 2]; // list of arguments to apply to the method
-            arguments[0] = input;
-            arguments[1] = output;
+            arguments[0] = input; // load input as first argument
+            arguments[1] = output; //load output as second argument
 
-            ArrayList<Class<?>[]> typeOfParameters = parameters.get(name);
-            int type = parseParameters(args, typeOfParameters, arguments);
+            
+            int type = parseParameters(name, args, arguments);
 
             System.out.println("After Parsing " + type);
             // debug
             for (Object object : arguments) {
                 System.out.println(object);
             }
-            Method m = c.getMethod(name, typeOfParameters.get(type));
-            System.out.println("You got The method " + m.getName());
-            System.out.println("Try to call the method");
-            m.invoke(null, arguments);
+            Method m = c.getMethod(name, parameters.get(name).get(type));
+            System.out.println("You got The method " + m.getName()); // debug
+            System.out.println("Try to call the method"); //debug
+            m.invoke(null, arguments); //call the method
 
-            SCIFIOImgPlus<UnsignedByteType> processedOutput = new SCIFIOImgPlus<>(output);
+            System.out.println("Algorithm executed");
 
-            System.out.println(processedOutput);
-            byte[] rawProcessedImage = ImageConverter.imageToJPEGBytes(processedOutput);
+            System.out.println("Input metaData = " + input.getMetadata()); // debug
+            System.out.println("Output metaData = " + output.getMetadata()); // debug
 
-            System.out.println("No BYTES !!!!");
+            byte[] rawProcessedImage = ImageConverter.imageToJPEGBytes(output); // get the bytes of the processedImage
+
+            System.out.println("Succes Conversion to Image"); // debug
+            
+            System.out.println("new image name : " + image.getName() + "_" + name); // debug
             return new Image(image.getName() + "_" + name, rawProcessedImage, image.getType(), image.getSize());
         }
         throw new NoSuchMethodException();
@@ -214,8 +209,9 @@ public class AlgorithmManager {
      *                         parsing
      * @return The index corresponding to the class<?>[] choosen
      */
-    private int parseParameters(Collection<String> args, ArrayList<Class<?>[]> typeOfParameters, Object[] arguments) {
+    private int parseParameters(String name, Collection<String> args, Object[] arguments) {
         int index = 2;
+        ArrayList<Class<?>[]> typeOfParameters = parameters.get(name);
         for (int i = 0; i < typeOfParameters.size(); i++) {
             if (args.size() == typeOfParameters.get(i).length - index) {
                 Class<?>[] types = typeOfParameters.get(i);

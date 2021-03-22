@@ -190,24 +190,21 @@ public class ImageController {
             System.out.println(o.getClass() + ", -> " + o);
         }
         try {
-            AlgorithmManager.Instance().applyAlgorithm(name, algorithm.values(), image);
-        } catch (Exception e) {
-            // TODO Auto-generated catch block
+            Image proccessedImage = AlgorithmManager.Instance().applyAlgorithm(name, algorithm.values(), image);
+            imageDAO.create(proccessedImage);
+        } catch (NoSuchMethodException e){
+            // TO DO
+            e.printStackTrace();
+        } catch (NumberFormatException e){
+            //TO DO
+            e.printStackTrace();
+        } catch (IllegalArgumentException e){
+            // TO DO
+            e.printStackTrace();
+        } catch (Exception e){
+            //TO DO
             e.printStackTrace();
         }
-
-        /*Image processedImage;
-        try {
-            processedImage = AlgorithmManager.Instance().applyAlgorithm(name, new ArrayList<>(algorithm.values()), image);
-            imageDAO.create(processedImage);
-        } catch (Exception e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }*/
-        //System.out.println(algorithm.entrySet()); // debug
-
-        //ArrayList<Integer> args = Utils.parseListOfArguments(algorithm.values());
-        //System.out.println(args);
         
 
         return new ResponseEntity<>(HttpStatus.OK);

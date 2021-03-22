@@ -6,7 +6,6 @@ import io.scif.img.ImgIOException;
 import io.scif.img.ImgOpener;
 import io.scif.img.ImgSaver;
 import io.scif.img.SCIFIOImgPlus;
-import net.imagej.ImgPlus;
 import net.imglib2.Cursor;
 import net.imglib2.RandomAccess;
 import net.imglib2.exception.IncompatibleTypeException;
@@ -15,7 +14,7 @@ import net.imglib2.img.array.ArrayImgFactory;
 import net.imglib2.type.numeric.integer.UnsignedByteType;
 
 public class Processing {
-    public static void changeBrightness(final Img<UnsignedByteType> input, final Img<UnsignedByteType> output,
+    public static void changeBrightness(final SCIFIOImgPlus<UnsignedByteType> input, final SCIFIOImgPlus<UnsignedByteType> output,
             final int delta) {
         final Cursor<UnsignedByteType> inputCursor = input.cursor();
         final Cursor<UnsignedByteType> outputCursor = output.cursor();
@@ -35,9 +34,9 @@ public class Processing {
         }
     }
 
-    public static void toGrayscale(final SCIFIOImgPlus<UnsignedByteType> input, final ImgPlus<UnsignedByteType> output) {
-        final RandomAccess<UnsignedByteType> inputRandomAccess = input.randomAccess();
-        final RandomAccess<UnsignedByteType> outputRandomAccess = output.randomAccess();
+    public static void toGrayscale(final SCIFIOImgPlus<UnsignedByteType> input, final SCIFIOImgPlus<UnsignedByteType> output) {
+        final RandomAccess<UnsignedByteType> inputRandomAccess = input.getImg().randomAccess();
+        final RandomAccess<UnsignedByteType> outputRandomAccess = output.getImg().randomAccess();
 
         for (long x = input.min(0); x <= input.max(0); x++) {
             inputRandomAccess.setPosition(x, 0);
@@ -62,7 +61,7 @@ public class Processing {
         }
     }
 
-    public static void colorize(final Img<UnsignedByteType> input, final Img<UnsignedByteType> output,
+    public static void colorize(final SCIFIOImgPlus<UnsignedByteType> input, final SCIFIOImgPlus<UnsignedByteType> output,
             final float hue) {
         final RandomAccess<UnsignedByteType> inputRandomAccess = input.randomAccess();
         final RandomAccess<UnsignedByteType> outputRandomAccess = output.randomAccess();
@@ -93,8 +92,8 @@ public class Processing {
         }
     }
 
-    public static void extendDynamics(final SCIFIOImgPlus<UnsignedByteType> input, final Img<UnsignedByteType> output,
-            final ImgPlus<UnsignedByteType> temp, final int dmin, final int dmax) {
+    public static void extendDynamics(final SCIFIOImgPlus<UnsignedByteType> input, final SCIFIOImgPlus<UnsignedByteType> output,
+            final SCIFIOImgPlus<UnsignedByteType> temp, final int dmin, final int dmax) {
         toGrayscale(input, temp);
 
         final RandomAccess<UnsignedByteType> tempRandomAccess = temp.randomAccess();
@@ -150,12 +149,12 @@ public class Processing {
         }
     }
 
-    public static void extendDynamics(final SCIFIOImgPlus<UnsignedByteType> input, final Img<UnsignedByteType> output,
-            final ImgPlus<UnsignedByteType> temp) {
+    public static void extendDynamics(final SCIFIOImgPlus<UnsignedByteType> input, final SCIFIOImgPlus<UnsignedByteType> output,
+            final SCIFIOImgPlus<UnsignedByteType> temp) {
         extendDynamics(input, output, temp, 0, 255);
     }
 
-    public static void equalizeHistogram(final Img<UnsignedByteType> input, final Img<UnsignedByteType> output,
+    public static void equalizeHistogram(final SCIFIOImgPlus<UnsignedByteType> input, final SCIFIOImgPlus<UnsignedByteType> output,
             final int channel) {
         final RandomAccess<UnsignedByteType> inputRandomAccess = input.randomAccess(),
                 outputRandomAccess = output.randomAccess();
