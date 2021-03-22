@@ -7,6 +7,7 @@ import java.util.Collection;
 import java.util.HashMap;
 
 import java.util.Map;
+import java.util.Set;
 
 import io.scif.img.SCIFIOImgPlus;
 import net.imagej.ImgPlus;
@@ -22,10 +23,10 @@ import pdl.processing.Processing;
  */
 public class AlgorithmManager {
 
-    private static AlgorithmManager _instance = null;
-    private Map<String, Class<?>> algorithms;
-    private Map<String, ArrayList<Class<?>[]>> parameters;
-    private Class<?>[] Classes = { Processing.class };
+    private static AlgorithmManager _instance = null; // single instance of the class
+    private Map<String, Class<?>> algorithms; // map of all algorithms
+    private Map<String, ArrayList<Class<?>[]>> parameters; // map of list of parameter types for each algorithms, ! contains overload
+    private Class<?>[] Classes = { Processing.class }; // classes to exctract Algorithms from
 
     /**
      * To keep this class as a singleton the class as only one private constructor
@@ -62,6 +63,23 @@ public class AlgorithmManager {
             _instance = new AlgorithmManager();
         }
         return _instance;
+    }
+
+    /**
+     * Return list of names of algorithms
+     * @return Set<String>
+     */
+    public Set<String> listAlgorithms(){
+        return algorithms.keySet();
+    }
+
+    /**
+     * Return the list of each type for each parameters of an algorithm
+     * @param name String name of the algorithm
+     * @return ArrayList<Class<?>[]> if no algorithm correspond to the given name return null
+     */
+    public ArrayList<Class<?>[]> listOfParameterType(String name){
+        return parameters.get(name);
     }
 
     /**
