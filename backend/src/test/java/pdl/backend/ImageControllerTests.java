@@ -223,7 +223,7 @@ public class ImageControllerTests {
     public void testAlgorithmExecutionShouldReturnSuccess() throws Exception{
         Set<String> algorithms = AlgorithmManager.Instance().listAlgorithms(); // get all the algorithms
         for (String algorithm : algorithms) { // for each algorithm
-            ArrayList<Class<?>[]> parametersType = AlgorithmManager.Instance().listOfParameterType(algorithm); // get their list of parameters
+            Set<Class<?>[]> parametersType = AlgorithmManager.Instance().listOfParameterType(algorithm); // get their list of parameters
             Iterator<Class<?>[]> iterator = parametersType.iterator(); 
             while(iterator.hasNext()){ //iterate on the parameter list
                 Class<?>[] types = iterator.next();
@@ -238,9 +238,20 @@ public class ImageControllerTests {
                 }
                 //TO DO: FAIL ON INSTALL FIND WHY !!
                 //then uncoment the following line 
-                //mockMvc.perform(get("/images/0?algorithm=" + parameters)).andExpect(status().isOk());
+                mockMvc.perform(get("/images/0?algorithm=" + parameters)).andExpect(status().isOk());
             }
         }
 
+    }
+
+    @Test
+    @Order(14)
+    public void TestPerformanceAlgorithmExecution() throws Exception{
+        String parameters = "toGrayscale";
+        long start = System.currentTimeMillis();
+        for(int i = 0; i < 100; i++){
+            mockMvc.perform(get("/images/0?algorithm=" + parameters));
+        }
+        System.out.println(System.currentTimeMillis() - start);
     }
 }

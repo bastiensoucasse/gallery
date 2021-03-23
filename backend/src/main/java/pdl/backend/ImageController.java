@@ -184,12 +184,6 @@ public class ImageController {
         String name = algorithm.get("algorithm"); // get the name of the algorithm
         algorithm.remove("algorithm"); // remove from the set
         
-        
-        System.out.println(name); // debug
-        for (String o : algorithm.values()) {
-            System.out.println(o.getClass() + ", -> " + o);
-        }
-        
         try {
             Image proccessedImage = AlgorithmManager.Instance().applyAlgorithm(name, algorithm.values(), image);
             imageDAO.create(proccessedImage);

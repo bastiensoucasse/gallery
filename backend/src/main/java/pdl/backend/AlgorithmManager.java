@@ -163,7 +163,7 @@ public class AlgorithmManager {
             NumberFormatException, NoSuchMethodException, IllegalArgumentException, InvocationTargetException {
         
         Map<Class<?>[], Method> methods = algorithms.get(name);
-        System.out.println(methods);
+        //System.out.println(methods);
         if (methods != null) {
             SCIFIOImgPlus<UnsignedByteType> input = ImageConverter.imageFromJPEGBytes(image.getData()); // Convert the
                                                                                                         // input image
@@ -177,26 +177,26 @@ public class AlgorithmManager {
 
             Class<?>[] parametersType = parseParameters(name, args, methods.keySet(), arguments, 2);
 
-            System.out.println("After Parsing " + parametersType);// debug
-            for (Object object : arguments) {
-                System.out.println(object);//debug
-            }
+            //System.out.println("After Parsing " + parametersType);// debug
+            //for (Object object : arguments) {
+                //System.out.println(object);//debug
+            //}
             Method m = methods.get(parametersType);
     
-            System.out.println("You got The method " + m.getName()); // debug
-            System.out.println("Try to call the method"); // debug
+            //System.out.println("You got The method " + m.getName()); // debug
+            //System.out.println("Try to call the method"); // debug
             m.invoke(null, arguments); // call the method
 
-            System.out.println("Algorithm executed");
+            //System.out.println("Algorithm executed");
 
-            System.out.println("Input metaData = " + input.getMetadata()); // debug
-            System.out.println("Output metaData = " + output.getMetadata()); // debug
+            //System.out.println("Input metaData = " + input.getMetadata()); // debug
+            //System.out.println("Output metaData = " + output.getMetadata()); // debug
 
             byte[] rawProcessedImage = ImageConverter.imageToJPEGBytes(output); // get the bytes of the processedImage
 
-            System.out.println("Succes Conversion to Image"); // debug
+            //System.out.println("Succes Conversion to Image"); // debug
 
-            System.out.println("new image name : " + image.getName() + "_" + name); // debug
+            //System.out.println("new image name : " + image.getName() + "_" + name); // debug
             return new Image(image.getName() + "_" + name, rawProcessedImage, image.getType(), image.getSize());
         }
         throw new NoSuchMethodException();
@@ -233,7 +233,7 @@ public class AlgorithmManager {
                         }
                     }
                 }
-                System.out.println(index + " " + types.length);
+                //System.out.println(index + " " + types.length);
                 if (index == types.length) {
                     return types;
                 }
