@@ -244,8 +244,7 @@ public class ImageControllerTests {
 
     }
 
-    @Test
-    @Order(14)
+    /*@Test
     public void TestPerformanceAlgorithmExecution() throws Exception{
         String parameters = "toGrayscale";
         long start = System.currentTimeMillis();
@@ -253,5 +252,5 @@ public class ImageControllerTests {
             mockMvc.perform(get("/images/0?algorithm=" + parameters));
         }
         System.out.println(System.currentTimeMillis() - start);
-    }
+    }*/
 }

@@ -4,7 +4,6 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.Type;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -16,15 +15,7 @@ import net.imglib2.type.numeric.integer.UnsignedByteType;
 import pdl.processing.ImageConverter;
 import pdl.processing.Processing;
 
-/** Explication :
-    1) je récupère le nom de l'algorithme et ses paramètres dans l'URL et stocke tout ça dans une Map<String, String> 
-    2) j'ai créer une classe AlgorithmManager qui implémente un singleton, cette classe référence toutes les methodes (String) associé avec leur Class<?> ``` Map<String, Class<?>> algorithms ```
-    ainsi que chaque type de chaque paramètres pour chaque méthodes ``` Map<String, ArrayList<Class<?>[]>> ```
-    3) Je parse les arguments pour que ça correspond a la liste de type pour la méthode associé et génère une liste d'arguments ```Object[] arguments ```
-    4) Je récupère la méthode avec sa classe ``` Method m = algorithms.get(name).getMethod(name, class<?>[]) ```
-    5) J'invoque la méthode récupéré avec les arguments ``` m.invoke(null, arguments) ```
 
- */
 
 /**
  * This class is Implemented with the design Pattern Singleton This class is
