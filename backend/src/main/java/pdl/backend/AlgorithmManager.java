@@ -15,8 +15,6 @@ import net.imglib2.type.numeric.integer.UnsignedByteType;
 import pdl.processing.ImageConverter;
 import pdl.processing.Processing;
 
-
-
 /**
  * This class is Implemented with the design Pattern Singleton This class is
  * Managing the execution of algorithms processing images.
@@ -25,7 +23,7 @@ public class AlgorithmManager {
 
     private static AlgorithmManager _instance = null; // single instance of the class
     final private Map<String, Map<Class<?>[], Method>> algorithms; // map of all algorithms
-    
+
     private Class<?>[] Classes = { Processing.class, pdl.processing.Convolution.class }; // classes to exctract
                                                                                          // Algorithms from
 
@@ -36,7 +34,7 @@ public class AlgorithmManager {
      */
     private AlgorithmManager() {
         algorithms = new HashMap<>();
-        
+
         for (Class<?> c : Classes) {
             for (Method m : c.getDeclaredMethods()) {
                 if (Modifier.isPublic(m.getModifiers())) {
@@ -96,6 +94,13 @@ public class AlgorithmManager {
         return (int) Integer.parseInt(s);
     }
 
+    /**
+     * Parse a string into a long
+     * 
+     * @param s String to parse
+     * @return long parsed form the string
+     * @throws NumberFormatException if Error while parsin
+     */
     private long parseStringAsLong(String s) throws NumberFormatException {
         return (int) Long.parseLong(s);
     }
@@ -122,6 +127,15 @@ public class AlgorithmManager {
         return (double) Double.parseDouble(s);
     }
 
+    /**
+     * Parse a String into a one of the following primitive type long, int, double,
+     * float
+     * 
+     * @param s String to parse
+     * @param t Target class
+     * @return Object
+     * @throws NumberFormatException If error while parsing
+     */
     private Object parseStringPrimitiveType(String s, Type t) throws NumberFormatException {
         if (t == int.class)
             return parseStringAsInt(s);
@@ -152,14 +166,11 @@ public class AlgorithmManager {
      */
     public Image applyAlgorithm(String name, Collection<String> args, Image image) throws Exception,
             NumberFormatException, NoSuchMethodException, IllegalArgumentException, InvocationTargetException {
-        
+
         Map<Class<?>[], Method> methods = algorithms.get(name);
-        //System.out.println(methods);
         if (methods != null) {
-            SCIFIOImgPlus<UnsignedByteType> input = ImageConverter.imageFromJPEGBytes(image.getData()); // Convert the
-                                                                                                        // input image
-                                                                                                        // as
-                                                                                                        // SCIFIOImgPlus<>
+            // Convert the Image as a SCIFIOImgPlus<>
+            SCIFIOImgPlus<UnsignedByteType> input = ImageConverter.imageFromJPEGBytes(image.getData());
             SCIFIOImgPlus<UnsignedByteType> output = input.copy(); // create a copy of the input
 
             Object[] arguments = new Object[args.size() + 2]; // list of arguments to apply to the method
@@ -167,27 +178,11 @@ public class AlgorithmManager {
             arguments[1] = output; // load output as second argument
 
             Class<?>[] parametersType = parseParameters(name, args, methods.keySet(), arguments, 2);
-
-            //System.out.println("After Parsing " + parametersType);// debug
-            //for (Object object : arguments) {
-                //System.out.println(object);//debug
-            //}
             Method m = methods.get(parametersType);
-    
-            //System.out.println("You got The method " + m.getName()); // debug
-            //System.out.println("Try to call the method"); // debug
+
             m.invoke(null, arguments); // call the method
 
-            //System.out.println("Algorithm executed");
-
-            //System.out.println("Input metaData = " + input.getMetadata()); // debug
-            //System.out.println("Output metaData = " + output.getMetadata()); // debug
-
             byte[] rawProcessedImage = ImageConverter.imageToJPEGBytes(output); // get the bytes of the processedImage
-
-            //System.out.println("Succes Conversion to Image"); // debug
-
-            //System.out.println("new image name : " + image.getName() + "_" + name); // debug
             return new Image(image.getName() + "_" + name, rawProcessedImage, image.getType(), image.getSize());
         }
         throw new NoSuchMethodException();
@@ -204,8 +199,8 @@ public class AlgorithmManager {
      *                         parsing
      * @return The index corresponding to the class<?>[] choosen
      */
-    private Class<?>[] parseParameters(String name, Collection<String> args, Set<Class<?>[]> parameterTypes, Object[] arguments, int start)
-            throws IllegalArgumentException, NumberFormatException {
+    private Class<?>[] parseParameters(String name, Collection<String> args, Set<Class<?>[]> parameterTypes,
+            Object[] arguments, int start) throws IllegalArgumentException, NumberFormatException {
         Iterator<Class<?>[]> iterator = parameterTypes.iterator();
         Class<?>[] types;
         while (iterator.hasNext()) {
@@ -224,7 +219,6 @@ public class AlgorithmManager {
                         }
                     }
                 }
-                //System.out.println(index + " " + types.length);
                 if (index == types.length) {
                     return types;
                 }

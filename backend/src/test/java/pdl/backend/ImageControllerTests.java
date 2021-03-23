@@ -17,6 +17,7 @@ import java.io.IOException;
 import org.junit.jupiter.api.MethodOrderer.OrderAnnotation;
 import org.mockito.Mock;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestMethodOrder;
@@ -30,6 +31,7 @@ import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 
+import ch.qos.logback.classic.pattern.Util;
 import io.scif.SCIFIO;
 import io.scif.img.SCIFIOImgPlus;
 import net.imglib2.img.Img;
@@ -217,34 +219,100 @@ public class ImageControllerTests {
     }
 
 
-
     @Test
     @Order(13)
-    public void testAlgorithmExecutionShouldReturnSuccess() throws Exception{
-        Set<String> algorithms = AlgorithmManager.Instance().listAlgorithms(); // get all the algorithms
-        for (String algorithm : algorithms) { // for each algorithm
-            Set<Class<?>[]> parametersType = AlgorithmManager.Instance().listOfParameterType(algorithm); // get their list of parameters
-            Iterator<Class<?>[]> iterator = parametersType.iterator(); 
-            while(iterator.hasNext()){ //iterate on the parameter list
-                Class<?>[] types = iterator.next();
-                String parameters = algorithm;
-                int i = 0;
-                for (Class<?> type : types){
-                    if(type != SCIFIOImgPlus.class){
-                        parameters += "&x"+ i +"=" + String.valueOf(Utils.getRandomNumber(type, 0, 2)) + "";
-                        i++;
-                    }
-                    
+    public void changeBrightnessShouldReturnSucess() throws Exception{
+        String args = "&delta=" + Utils.getRandomNumber(int.class, 0, 255);
+        mockMvc.perform(get("/images/1?algorithm=changeBrightness"+ args)).andExpect(status().isOk());
+    }
+
+    @Test
+    @Order(14)
+    public void toGrayScaleShouldReturnSuccess()throws Exception{
+        mockMvc.perform(get("/images/1?algorithm=toGrayscale")).andExpect(status().isOk());
+    }
+
+    @Test
+    @Order(15)
+    public void colorizeShouldReturnSuccess() throws Exception{
+        String args = "&delta=" + Utils.getRandomNumber(int.class, 0, 360);
+        mockMvc.perform(get("/images/1?algorithm=colorize"+ args)).andExpect(status().isOk());
+    }
+
+    @Test
+    @Order(16)
+    public void extendDynamicsNoArgsShouldReturnSuccess() throws Exception{
+        mockMvc.perform(get("/images/1?algorithm=extendDynamics")).andExpect(status().isOk());
+    }
+
+    @Test
+    @Order(17)
+    public void extendDynamicsShouldReturnSuccess() throws Exception{
+        String args = "&min=" + Utils.getRandomNumber(int.class, 0, 255) + "&max=" + Utils.getRandomNumber(int.class, 0, 255);
+        mockMvc.perform(get("/images/1?algorithm=extendDynamics" + args)).andExpect(status().isOk());
+    }
+
+    @Test
+    @Order(18)
+    public void equalizeHistogramShouldReturnSuccess() throws Exception{
+        String args = "&x=" + Utils.getRandomNumber(int.class, 0, 2);
+        mockMvc.perform(get("/images/1?algorithm=equalizeHistogram" + args)).andExpect(status().isOk());
+    }
+
+    @Test
+    @Order(19)
+    public void meanFilterShouldReturnSuccess() throws Exception{
+        String args = "&radius=" + Utils.getRandomNumber(int.class, 0, 7);
+        mockMvc.perform(get("/images/1?algorithm=meanFilter" + args)).andExpect(status().isOk());
+    }
+
+    @Test
+    @Order(20)
+    public void gaussianFilterShouldReturnSuccces() throws Exception {
+        String args = "&radius=" + Utils.getRandomNumber(int.class, 0, 7);
+        mockMvc.perform(get("/images/1?algorithm=gaussianFilter" + args)).andExpect(status().isOk());
+
+    }
+
+    @Test
+    @Order(21)
+    public void sobelOperatorShouldReturnSuccess() throws Exception{
+        mockMvc.perform(get("/images/1?algorithm=sobelOperator")).andExpect(status().isOk());
+    }
+
+    @Test
+    @Order(22)
+    public void executeAlgorithmShouldReturnBadRequest() throws Exception{
+        Set<String> listOfAlgorithms = AlgorithmManager.Instance().listAlgorithms();
+        for (String name : listOfAlgorithms) {
+            mockMvc.perform(get("/images/1?algorithm=" + name + "&x=1&y=2&z=5&delta=50")).andExpect(status().isBadRequest());
+            mockMvc.perform(get("/images/1?algorithm=" + name.toUpperCase())).andExpect(status().isBadRequest());
+            Set<Class<?>[]> parameterTypes = AlgorithmManager.Instance().listOfParameterType(name);
+            for (Class<?>[] types : parameterTypes) {
+                if(types.length > 2){
+                    mockMvc.perform(get("/images/1?algorithm=" + name + "&x=Hello World !")).andExpect(status().isBadRequest());
                 }
-                //TO DO: FAIL ON INSTALL FIND WHY !!
-                //then uncoment the following line 
-                mockMvc.perform(get("/images/0?algorithm=" + parameters)).andExpect(status().isOk());
             }
+        }
+    }
+
+    @Test
+    @Order(23)
+    public void executeAlgorithmShouldReturnNotFound() throws Exception{
+        ObjectMapper objectMapper = new ObjectMapper();
+
+        MvcResult result = mockMvc.perform(get("/images")).andReturn();
+        String jsonData = result.getResponse().getContentAsString();
+        List<Image> listImages = objectMapper.readValue(jsonData, new TypeReference<List<Image>>(){});
+        Set<String> listOfAlgorithms = AlgorithmManager.Instance().listAlgorithms();
+        for (String name : listOfAlgorithms) {
+            mockMvc.perform(get("/images/" + (listImages.size()+1) +"?algorithm=" + name)).andExpect(status().isNotFound());
         }
 
     }
 
-    /*@Test
+    @Disabled
+    @Test
     public void TestPerformanceAlgorithmExecution() throws Exception{
         String parameters = "toGrayscale";
         long start = System.currentTimeMillis();
@@ -252,5 +320,5 @@ public class ImageControllerTests {
             mockMvc.perform(get("/images/0?algorithm=" + parameters));
         }
         System.out.println(System.currentTimeMillis() - start);
-    }*/
+    }
 }

@@ -2,6 +2,8 @@ package pdl.processing;
 
 import java.io.File;
 
+import org.scijava.plugin.Parameter;
+
 import io.scif.img.ImgIOException;
 import io.scif.img.ImgOpener;
 import io.scif.img.ImgSaver;
