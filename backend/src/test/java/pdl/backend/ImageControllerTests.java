@@ -61,6 +61,8 @@ public class ImageControllerTests {
         ReflectionTestUtils.setField(Image.class, "count", Long.valueOf(0));
     }
 
+    
+
     @Test
     @Order(1)
     public void getImageListShouldReturnSuccess() throws Exception {
@@ -88,7 +90,8 @@ public class ImageControllerTests {
     @Test
     @Order(5)
     public void deleteImageShouldReturnNotFound() throws Exception {
-        this.mockMvc.perform(delete("/images/200")).andDo(print()).andExpect(status().isNotFound());
+        long lastId = (long) ReflectionTestUtils.getField(Image.class, "count");
+        this.mockMvc.perform(delete("/images/" + (++lastId) )).andDo(print()).andExpect(status().isNotFound());
     }
 
     @Test
@@ -299,14 +302,11 @@ public class ImageControllerTests {
     @Test
     @Order(23)
     public void executeAlgorithmShouldReturnNotFound() throws Exception{
-        ObjectMapper objectMapper = new ObjectMapper();
+        long lastId = (long) ReflectionTestUtils.getField(Image.class, "count");
 
-        MvcResult result = mockMvc.perform(get("/images")).andReturn();
-        String jsonData = result.getResponse().getContentAsString();
-        List<Image> listImages = objectMapper.readValue(jsonData, new TypeReference<List<Image>>(){});
         Set<String> listOfAlgorithms = AlgorithmManager.Instance().listAlgorithms();
         for (String name : listOfAlgorithms) {
-            mockMvc.perform(get("/images/" + (listImages.size()+1) +"?algorithm=" + name)).andExpect(status().isNotFound());
+            mockMvc.perform(get("/images/" + (++lastId) +"?algorithm=" + name)).andExpect(status().isNotFound());
         }
 
     }

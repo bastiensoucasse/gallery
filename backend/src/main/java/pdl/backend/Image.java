@@ -63,7 +63,7 @@ public class Image {
 
     @Override
     public String toString() {
-        return "{\"id\":\"" + getId() + "\", \"name\": \"" + name + "\", \"type\": \"" + type.getSubtype() + "\", \"size\": \"" + size + "\"" + "}"; 
+        return "{\"id\":\"" + getId() + "\", \"name\": \"" + name + "\", \"type\": \"" + type + "\", \"size\": \"" + size + "\"" + "}"; 
     }
 
     @Override
