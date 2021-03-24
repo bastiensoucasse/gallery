@@ -53,10 +53,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 @AutoConfigureMockMvc
 @TestMethodOrder(OrderAnnotation.class)
 public class ImageControllerTests {
-
-    @Autowired
-    private ImageDAO imageDAO;
-
     @Autowired
     private MockMvc mockMvc;
 
@@ -186,22 +182,43 @@ public class ImageControllerTests {
         assertTrue(i2.getType() == MediaType.IMAGE_JPEG || i1.getType() == MediaType.valueOf("Image/tif"));
     }
 
-    
     @Test
     @Order(12)
     public void testGetMetaData() throws Exception {
-        String jsonContent = "[";
-        List<Image> listImages = imageDAO.retrieveAll(); // get the list of images stored in ImageDAO
-        jsonContent += listImages.get(0).toString(); 
-        listImages.remove(0);
-        for (Image image : listImages) {
-            jsonContent += "," + image.toString(); // do a string of the json representation of all images stored
+        //!! TO DO
+        ObjectMapper objectMapper = new ObjectMapper();
+    
+        Path path = Paths.get(System.getProperty("user.dir"), "/src/main/resources/images"); // directory of images
+        Set<String> resourcesImages = Utils.listFiles(path); // list all the filename
+        Map<String, File> expectedImages = new HashMap<>(); // map of all the expected file
+
+        //go through all the files (jpeg) (tif) in the path
+        for (String fileName : resourcesImages) {
+            final ClassPathResource resource = new ClassPathResource("/images/" +fileName);
+            expectedImages.put(resource.getFilename(), resource.getFile());
+            System.out.println(resource.getFilename());
         }
-        jsonContent += "]"; 
-        System.out.println("String = " + jsonContent);
-        mockMvc.perform(get("/images")).andExpect(content().contentType("application/json; charset=UTF-8"))
-        .andExpect(content().json(jsonContent))
-        .andExpect(status().isOk()); // get (/images) and compare the content with the string                          
+
+
+        MvcResult result = mockMvc.perform(get("/images"))
+        .andExpect(content().contentType("application/json; charset=UTF-8")).andReturn();
+        String jsonData = result.getResponse().getContentAsString();
+        System.out.println(jsonData);
+        List<Image> listImages = objectMapper.readValue(jsonData, new TypeReference<List<Image>>(){});
+        //assertTrue(listImages.size() == expectedImages.size());
+
+
+        int id = 0;
+        for (Image image : listImages) {
+            String imageName = image.getName();
+            assertTrue(image.getId() >= id);
+            System.out.println(expectedImages.containsKey(imageName));
+            assertTrue(expectedImages.containsKey(imageName));
+            //assertTrue(MediaType.parseMediaType(image.getType()) quals(MediaType.IMAGE_JPEG));
+            assertTrue(image.getSize().equals(Utils.sizeOfImage(expectedImages.get(imageName))));
+            id++;
+            
+        }                              
     }
 
 
