@@ -6,18 +6,21 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
-
 
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.List;
+import java.util.Set;
 
-import org.junit.jupiter.api.MethodOrderer.OrderAnnotation;
-import org.mockito.Mock;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.MethodOrderer.OrderAnnotation;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestMethodOrder;
@@ -29,31 +32,11 @@ import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.MvcResult;
-
-import ch.qos.logback.classic.pattern.Util;
-import io.scif.SCIFIO;
-import io.scif.img.SCIFIOImgPlus;
-import net.imglib2.img.Img;
-
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
 
 @SpringBootTest
 @AutoConfigureMockMvc
 @TestMethodOrder(OrderAnnotation.class)
 public class ImageControllerTests {
-    
     @Autowired
     private MockMvc mockMvc;
 
@@ -64,8 +47,6 @@ public class ImageControllerTests {
     public static void reset() {
         ReflectionTestUtils.setField(Image.class, "count", Long.valueOf(0));
     }
-
-    
 
     @Test
     @Order(1)
@@ -95,7 +76,7 @@ public class ImageControllerTests {
     @Order(5)
     public void deleteImageShouldReturnNotFound() throws Exception {
         long lastId = (long) ReflectionTestUtils.getField(Image.class, "count");
-        this.mockMvc.perform(delete("/images/" + (++lastId) )).andDo(print()).andExpect(status().isNotFound());
+        this.mockMvc.perform(delete("/images/" + (++lastId))).andDo(print()).andExpect(status().isNotFound());
     }
 
     @Test
@@ -186,8 +167,6 @@ public class ImageControllerTests {
         assertTrue(i2.getType() == MediaType.IMAGE_JPEG || i1.getType() == MediaType.valueOf("Image/tif"));
     }
 
-
-    
     @Test
     @Order(12)
     public void testGetMetaData() throws Exception {
@@ -201,60 +180,51 @@ public class ImageControllerTests {
         jsonContent += "]";
 
         mockMvc.perform(get("/images")).andExpect(content().contentType("application/json; charset=UTF-8"))
-        .andExpect(content().json(jsonContent));
+                .andExpect(content().json(jsonContent));
     }
-
 
     @Test
     @Order(13)
-    public void changeBrightnessShouldReturnSucess() throws Exception{
-        String args = "&delta=" + Utils.getRandomNumber(int.class, 0, 255);
-        mockMvc.perform(get("/images/1?algorithm=changeBrightness"+ args)).andExpect(status().isOk());
-    }
-
-    @Test
-    @Order(14)
-    public void toGrayScaleShouldReturnSuccess()throws Exception{
+    public void toGrayScaleShouldReturnSuccess() throws Exception {
         mockMvc.perform(get("/images/1?algorithm=toGrayscale")).andExpect(status().isOk());
     }
 
     @Test
+    @Order(14)
+    public void changeBrightnessShouldReturnSucess() throws Exception {
+        String args = "&gain=" + Utils.getRandomNumber(int.class, 0, 255);
+        mockMvc.perform(get("/images/1?algorithm=changeBrightness" + args)).andExpect(status().isOk());
+    }
+
+    @Test
     @Order(15)
-    public void colorizeShouldReturnSuccess() throws Exception{
-        String args = "&delta=" + Utils.getRandomNumber(int.class, 0, 360);
-        mockMvc.perform(get("/images/1?algorithm=colorize"+ args)).andExpect(status().isOk());
+    public void colorizeShouldReturnSuccess() throws Exception {
+        String args = "&hue=" + Utils.getRandomNumber(int.class, 0, 360);
+        mockMvc.perform(get("/images/1?algorithm=colorize" + args)).andExpect(status().isOk());
     }
 
     @Test
     @Order(16)
-    public void extendDynamicsNoArgsShouldReturnSuccess() throws Exception{
+    public void extendDynamicsShouldReturnSuccess() throws Exception {
         mockMvc.perform(get("/images/1?algorithm=extendDynamics")).andExpect(status().isOk());
     }
 
-    @Disabled
     @Test
     @Order(17)
-    public void extendDynamicsShouldReturnSuccess() throws Exception{
-        String args = "&min=" + Utils.getRandomNumber(int.class, 0, 255) + "&max=" + Utils.getRandomNumber(int.class, 0, 255);
-        mockMvc.perform(get("/images/1?algorithm=extendDynamics" + args)).andExpect(status().isOk());
-    }
-
-    @Test
-    @Order(18)
-    public void equalizeHistogramShouldReturnSuccess() throws Exception{
-        String args = "&x=" + Utils.getRandomNumber(int.class, 1, 2);
+    public void equalizeHistogramShouldReturnSuccess() throws Exception {
+        String args = "&channel=" + Utils.getRandomNumber(int.class, 1, 2);
         mockMvc.perform(get("/images/1?algorithm=equalizeHistogram" + args)).andExpect(status().isOk());
     }
 
     @Test
-    @Order(19)
-    public void meanFilterShouldReturnSuccess() throws Exception{
+    @Order(18)
+    public void meanFilterShouldReturnSuccess() throws Exception {
         String args = "&radius=" + Utils.getRandomNumber(int.class, 0, 7);
         mockMvc.perform(get("/images/1?algorithm=meanFilter" + args)).andExpect(status().isOk());
     }
 
     @Test
-    @Order(20)
+    @Order(19)
     public void gaussianFilterShouldReturnSuccces() throws Exception {
         String args = "&radius=" + Utils.getRandomNumber(int.class, 0, 7);
         mockMvc.perform(get("/images/1?algorithm=gaussianFilter" + args)).andExpect(status().isOk());
@@ -262,45 +232,47 @@ public class ImageControllerTests {
     }
 
     @Test
-    @Order(21)
-    public void sobelOperatorShouldReturnSuccess() throws Exception{
+    @Order(20)
+    public void sobelOperatorShouldReturnSuccess() throws Exception {
         mockMvc.perform(get("/images/1?algorithm=sobelOperator")).andExpect(status().isOk());
     }
 
     @Test
-    @Order(22)
-    public void executeAlgorithmShouldReturnBadRequest() throws Exception{
+    @Order(21)
+    public void executeAlgorithmShouldReturnBadRequest() throws Exception {
         Set<String> listOfAlgorithms = AlgorithmManager.Instance().listAlgorithms();
         for (String name : listOfAlgorithms) {
-            mockMvc.perform(get("/images/1?algorithm=" + name + "&x=1&y=2&z=5&delta=50")).andExpect(status().isBadRequest());
+            mockMvc.perform(get("/images/1?algorithm=" + name + "&x=1&y=2&z=5&delta=50"))
+                    .andExpect(status().isBadRequest());
             mockMvc.perform(get("/images/1?algorithm=" + name.toUpperCase())).andExpect(status().isBadRequest());
             Set<Class<?>[]> parameterTypes = AlgorithmManager.Instance().listOfParameterType(name);
             for (Class<?>[] types : parameterTypes) {
-                if(types.length > 2){
-                    mockMvc.perform(get("/images/1?algorithm=" + name + "&x=Hello World !")).andExpect(status().isBadRequest());
+                if (types.length > 2) {
+                    mockMvc.perform(get("/images/1?algorithm=" + name + "&x=Hello World !"))
+                            .andExpect(status().isBadRequest());
                 }
             }
         }
     }
 
     @Test
-    @Order(23)
-    public void executeAlgorithmShouldReturnNotFound() throws Exception{
+    @Order(22)
+    public void executeAlgorithmShouldReturnNotFound() throws Exception {
         long lastId = (long) ReflectionTestUtils.getField(Image.class, "count");
 
         Set<String> listOfAlgorithms = AlgorithmManager.Instance().listAlgorithms();
         for (String name : listOfAlgorithms) {
-            mockMvc.perform(get("/images/" + (++lastId) +"?algorithm=" + name)).andExpect(status().isNotFound());
+            mockMvc.perform(get("/images/" + (++lastId) + "?algorithm=" + name)).andExpect(status().isNotFound());
         }
 
     }
 
-    @Disabled
     @Test
-    public void TestPerformanceAlgorithmExecution() throws Exception{
+    @Disabled
+    public void TestPerformanceAlgorithmExecution() throws Exception {
         String parameters = "toGrayscale";
         long start = System.currentTimeMillis();
-        for(int i = 0; i < 100; i++){
+        for (int i = 0; i < 100; i++) {
             mockMvc.perform(get("/images/0?algorithm=" + parameters));
         }
         System.out.println(System.currentTimeMillis() - start);
