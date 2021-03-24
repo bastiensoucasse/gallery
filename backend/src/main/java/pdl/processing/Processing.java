@@ -1,29 +1,63 @@
 package pdl.processing;
 
-import java.io.File;
-
-import io.scif.img.ImgIOException;
-import io.scif.img.ImgOpener;
-import io.scif.img.ImgSaver;
 import io.scif.img.SCIFIOImgPlus;
 import net.imglib2.Cursor;
 import net.imglib2.RandomAccess;
-import net.imglib2.exception.IncompatibleTypeException;
-import net.imglib2.img.Img;
-import net.imglib2.img.array.ArrayImgFactory;
 import net.imglib2.type.numeric.integer.UnsignedByteType;
 
-public class Processing {
-    public static void changeBrightness(final SCIFIOImgPlus<UnsignedByteType> input, final SCIFIOImgPlus<UnsignedByteType> output,
-            final int delta) {
+public class Processing
+{
+    public static void toGrayscale(final SCIFIOImgPlus<UnsignedByteType> input, final SCIFIOImgPlus<UnsignedByteType> output)
+    {
+        System.out.printf("Converting to grayscale...\n");
+        final RandomAccess<UnsignedByteType> inputRandomAccess = input.getImg().randomAccess();
+        final RandomAccess<UnsignedByteType> outputRandomAccess = output.getImg().randomAccess();
+
+        for (long x = input.min(0); x <= input.max(0); x++)
+        {
+            inputRandomAccess.setPosition(x, 0);
+            outputRandomAccess.setPosition(x, 0);
+
+            for (long y = input.min(1); y <= input.max(1); y++)
+            {
+                inputRandomAccess.setPosition(y, 1);
+                outputRandomAccess.setPosition(y, 1);
+
+                final int[] rgb = new int[(int) input.dimension(2)];
+                for (long channel = input.min(2); channel <= input.max(2); channel++)
+                {
+                    inputRandomAccess.setPosition(channel, 2);
+                    rgb[(int) channel] = inputRandomAccess.get().get();
+                }
+
+                final int value = (int) (.3 * rgb[0] + .59 * rgb[1] + .11 * rgb[2]);
+                for (long channel = input.min(2); channel <= input.max(2); channel++)
+                {
+                    outputRandomAccess.setPosition(channel, 2);
+                    outputRandomAccess.get().set(value);
+                }
+            }
+        }
+    }
+
+    public static void changeBrightness(final SCIFIOImgPlus<UnsignedByteType> input, final SCIFIOImgPlus<UnsignedByteType> output, final int gain)
+    {
+        if (gain < -255 || gain > 255)
+        {
+            System.err.printf("Could not apply a gain of %d to the brightness!\n", gain);
+            return;
+        }
+
+        System.out.printf("Applying a gain of %d to the brightness...\n", gain);
         final Cursor<UnsignedByteType> inputCursor = input.cursor();
         final Cursor<UnsignedByteType> outputCursor = output.cursor();
 
-        while (inputCursor.hasNext()) {
+        while (inputCursor.hasNext())
+        {
             inputCursor.fwd();
             outputCursor.fwd();
 
-            int value = inputCursor.get().get() + delta;
+            int value = inputCursor.get().get() + gain;
 
             if (value < 0)
                 value = 0;
@@ -34,48 +68,31 @@ public class Processing {
         }
     }
 
-    public static void toGrayscale(final SCIFIOImgPlus<UnsignedByteType> input, final SCIFIOImgPlus<UnsignedByteType> output) {
-        final RandomAccess<UnsignedByteType> inputRandomAccess = input.getImg().randomAccess();
-        final RandomAccess<UnsignedByteType> outputRandomAccess = output.getImg().randomAccess();
-
-        for (long x = input.min(0); x <= input.max(0); x++) {
-            inputRandomAccess.setPosition(x, 0);
-            outputRandomAccess.setPosition(x, 0);
-
-            for (long y = input.min(1); y <= input.max(1); y++) {
-                inputRandomAccess.setPosition(y, 1);
-                outputRandomAccess.setPosition(y, 1);
-
-                final int[] rgb = new int[(int) input.dimension(2)];
-                for (long channel = input.min(2); channel <= input.max(2); channel++) {
-                    inputRandomAccess.setPosition(channel, 2);
-                    rgb[(int) channel] = inputRandomAccess.get().get();
-                }
-
-                final int value = (int) (.3 * rgb[0] + .59 * rgb[1] + .11 * rgb[2]);
-                for (long channel = input.min(2); channel <= input.max(2); channel++) {
-                    outputRandomAccess.setPosition(channel, 2);
-                    outputRandomAccess.get().set(value);
-                }
-            }
+    public static void colorize(final SCIFIOImgPlus<UnsignedByteType> input, final SCIFIOImgPlus<UnsignedByteType> output, final float hue)
+    {
+        if (hue < 0f || hue > 360f)
+        {
+            System.err.printf("Could not colorize using hue %f!\n", hue);
+            return;
         }
-    }
 
-    public static void colorize(final SCIFIOImgPlus<UnsignedByteType> input, final SCIFIOImgPlus<UnsignedByteType> output,
-            final float hue) {
+        System.out.printf("Colorizing using hue %f...\n", hue);
         final RandomAccess<UnsignedByteType> inputRandomAccess = input.randomAccess();
         final RandomAccess<UnsignedByteType> outputRandomAccess = output.randomAccess();
 
-        for (long x = input.min(0); x <= input.max(0); x++) {
+        for (long x = input.min(0); x <= input.max(0); x++)
+        {
             inputRandomAccess.setPosition(x, 0);
             outputRandomAccess.setPosition(x, 0);
 
-            for (long y = input.min(1); y <= input.max(1); y++) {
+            for (long y = input.min(1); y <= input.max(1); y++)
+            {
                 inputRandomAccess.setPosition(y, 1);
                 outputRandomAccess.setPosition(y, 1);
 
                 int[] rgb = new int[(int) input.dimension(2)];
-                for (long channel = input.min(2); channel <= input.max(2); channel++) {
+                for (long channel = input.min(2); channel <= input.max(2); channel++)
+                {
                     inputRandomAccess.setPosition(channel, 2);
                     rgb[(int) channel] = inputRandomAccess.get().get();
                 }
@@ -84,7 +101,8 @@ public class Processing {
                 hsv[0] = hue;
 
                 rgb = Computing.hsvToRgb(hsv);
-                for (long channel = input.min(2); channel <= input.max(2); channel++) {
+                for (long channel = input.min(2); channel <= input.max(2); channel++)
+                {
                     outputRandomAccess.setPosition(channel, 2);
                     outputRandomAccess.get().set(rgb[(int) channel]);
                 }
@@ -92,19 +110,22 @@ public class Processing {
         }
     }
 
-    public static void extendDynamics(final SCIFIOImgPlus<UnsignedByteType> input, final SCIFIOImgPlus<UnsignedByteType> output, final int dmin, final int dmax) {
-        SCIFIOImgPlus<UnsignedByteType> temp = input.copy();
-        toGrayscale(input, temp);
+    public static void extendDynamics(final SCIFIOImgPlus<UnsignedByteType> input, final SCIFIOImgPlus<UnsignedByteType> output)
+    {
+        final SCIFIOImgPlus<UnsignedByteType> inputGrayscale = input.copy();
+        toGrayscale(input, inputGrayscale);
 
-        final RandomAccess<UnsignedByteType> tempRandomAccess = temp.randomAccess();
+        System.out.printf("Extending dynamics...\n");
+
+        final RandomAccess<UnsignedByteType> tempRandomAccess = inputGrayscale.randomAccess();
 
         final int LUT[] = new int[256];
+        int min = 255, max = 0;
 
-        int min = 255;
-        int max = 0;
-
-        for (long x = input.min(0); x <= input.max(0); x++) {
-            for (long y = input.min(1); y <= input.max(1); y++) {
+        for (long x = input.min(0); x <= input.max(0); x++)
+        {
+            for (long y = input.min(1); y <= input.max(1); y++)
+            {
                 tempRandomAccess.setPosition(x, 0);
                 tempRandomAccess.setPosition(y, 1);
                 tempRandomAccess.setPosition(input.min(2), 2);
@@ -119,20 +140,23 @@ public class Processing {
         }
 
         for (int i = 0; i < 256; i++)
-            LUT[i] = (int) ((double) ((i - min) / (double) (max - min)) * (double) (dmax - dmin) + (double) dmin);
+            LUT[i] = (int) ((double) ((i - min) / (double) ((max - min) * 255)));
 
         final RandomAccess<UnsignedByteType> inputRandomAccess = input.randomAccess();
         final RandomAccess<UnsignedByteType> outputRandomAccess = output.randomAccess();
 
-        for (long x = input.min(0); x <= input.max(0); x++) {
+        for (long x = input.min(0); x <= input.max(0); x++)
+        {
             inputRandomAccess.setPosition(x, 0);
             outputRandomAccess.setPosition(x, 0);
 
-            for (long y = input.min(1); y <= input.max(1); y++) {
+            for (long y = input.min(1); y <= input.max(1); y++)
+            {
                 inputRandomAccess.setPosition(y, 1);
                 outputRandomAccess.setPosition(y, 1);
 
-                for (long channel = input.min(2); channel <= input.max(2); channel++) {
+                for (long channel = input.min(2); channel <= input.max(2); channel++)
+                {
                     inputRandomAccess.setPosition(channel, 2);
                     outputRandomAccess.setPosition(channel, 2);
 
@@ -149,25 +173,30 @@ public class Processing {
         }
     }
 
-    public static void extendDynamics(final SCIFIOImgPlus<UnsignedByteType> input, final SCIFIOImgPlus<UnsignedByteType> output) {
-        extendDynamics(input, output, 0, 255);
-    }
+    public static void equalizeHistogram(final SCIFIOImgPlus<UnsignedByteType> input, final SCIFIOImgPlus<UnsignedByteType> output, final int channel)
+    {
+        if (channel != 2 && channel != 3)
+        {
+            System.err.printf("Could not equalize histogram using channel %d!", channel);
+            return;
+        }
 
-    public static void equalizeHistogram(final SCIFIOImgPlus<UnsignedByteType> input, final SCIFIOImgPlus<UnsignedByteType> output,
-            final int channel) {
-        final RandomAccess<UnsignedByteType> inputRandomAccess = input.randomAccess(),
-                outputRandomAccess = output.randomAccess();
+        System.out.printf("Equalizing histogram on channel %d...\n", channel);
+        final RandomAccess<UnsignedByteType> inputRandomAccess = input.randomAccess(), outputRandomAccess = output.randomAccess();
         final int[] histogram = new int[101], cumulativeHistogram = new int[101];
         int total = 0;
 
-        for (long x = input.min(0); x <= input.max(0); x++) {
+        for (long x = input.min(0); x <= input.max(0); x++)
+        {
             inputRandomAccess.setPosition(x, 0);
 
-            for (long y = input.min(1); y <= input.max(1); y++) {
+            for (long y = input.min(1); y <= input.max(1); y++)
+            {
                 inputRandomAccess.setPosition(y, 1);
 
                 final int[] rgb = new int[3];
-                for (int c = 0; c < 3; c++) {
+                for (int c = 0; c < 3; c++)
+                {
                     inputRandomAccess.setPosition(c, 2);
                     rgb[c] = inputRandomAccess.get().get();
                 }
@@ -178,23 +207,27 @@ public class Processing {
             }
         }
 
-        for (int i = 0; i < 101; i++) {
+        for (int i = 0; i < 101; i++)
+        {
             if (i == 0)
                 cumulativeHistogram[i] = histogram[i];
             else
                 cumulativeHistogram[i] = histogram[i] + cumulativeHistogram[i - 1];
         }
 
-        for (long x = input.min(0); x <= input.max(0); x++) {
+        for (long x = input.min(0); x <= input.max(0); x++)
+        {
             inputRandomAccess.setPosition(x, 0);
             outputRandomAccess.setPosition(x, 0);
 
-            for (long y = input.min(1); y <= input.max(1); y++) {
+            for (long y = input.min(1); y <= input.max(1); y++)
+            {
                 inputRandomAccess.setPosition(y, 1);
                 outputRandomAccess.setPosition(y, 1);
 
                 int[] rgb = new int[3];
-                for (int c = 0; c < 3; c++) {
+                for (int c = 0; c < 3; c++)
+                {
                     inputRandomAccess.setPosition(c, 2);
                     rgb[c] = inputRandomAccess.get().get();
                 }
@@ -203,41 +236,12 @@ public class Processing {
                 hsv[channel] = (float) (cumulativeHistogram[(int) (hsv[channel] * 100)]) / (float) total;
                 rgb = Computing.hsvToRgb(hsv);
 
-                for (int c = 0; c < 3; c++) {
+                for (int c = 0; c < 3; c++)
+                {
                     outputRandomAccess.setPosition(c, 2);
                     outputRandomAccess.get().set(rgb[c]);
                 }
             }
         }
     }
-
-    /*public static void main(final String[] args) throws ImgIOException, IncompatibleTypeException {
-        // Usage Check
-        if (args.length < 2) {
-            System.out.println("Missing input or output image filename.");
-            System.exit(-1);
-        }
-
-        // Input Open
-        final String inputFilename = args[0];
-        final ArrayImgFactory<UnsignedByteType> factory = new ArrayImgFactory<>(new UnsignedByteType());
-        final ImgOpener imgOpener = new ImgOpener();
-        final Img<UnsignedByteType> input = (Img<UnsignedByteType>) imgOpener.openImgs(inputFilename, factory).get(0);
-        imgOpener.context().dispose();
-        final Img<UnsignedByteType> output = SCIFIOImgPlus.wrap(factory.create(input), SCIFIOImgPlus.wrap(input));
-        System.out.println("Opened Image: " + inputFilename);
-
-        // Process
-        //Convolution.sobelOperator(input, output);
-
-        // Output Save
-        final String outputFilename = args[1];
-        final File path = new File(outputFilename);
-        if (path.exists())
-            path.delete();
-        final ImgSaver imgSaver = new ImgSaver();
-        imgSaver.saveImg(outputFilename, output);
-        imgSaver.context().dispose();
-        System.out.println("Saved Image: " + outputFilename);
-    }*/
 }
