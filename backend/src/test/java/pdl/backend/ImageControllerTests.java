@@ -159,12 +159,13 @@ public class ImageControllerTests {
         Image i1 = i.retrieve(i.getId(image_1)).orElse(null);
         assertFalse(i1.getSize().equals("null"));
         assertFalse(i1.getData() == null);
-        assertTrue(i1.getType() == MediaType.IMAGE_JPEG || i1.getType() == MediaType.valueOf("Image/tif"));
+        System.out.println(i1.getType());
+        assertTrue(i1.getType().equals(MediaType.IMAGE_JPEG) || i1.getType().equals(MediaType.valueOf("image/tiff")));
 
         Image i2 = i.retrieve(i.getId(image_2)).orElse(null);
         assertFalse(i2.getSize().equals("null"));
         assertFalse(i2.getData() == null);
-        assertTrue(i2.getType() == MediaType.IMAGE_JPEG || i1.getType() == MediaType.valueOf("Image/tif"));
+        assertTrue(i2.getType().equals(MediaType.IMAGE_JPEG) || i1.getType().equals(MediaType.valueOf("image/tiff")));
     }
 
     @Test
