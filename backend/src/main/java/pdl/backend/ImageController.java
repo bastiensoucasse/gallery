@@ -6,7 +6,6 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
@@ -65,14 +64,14 @@ public class ImageController {
      * @return the HTTP response (status 200 with image if success, status 404 if no
      *         image was found)
      */
-    @RequestMapping(value = "/images/{id}", method = RequestMethod.GET, produces = MediaType.IMAGE_JPEG_VALUE)
+    @RequestMapping(value = "/images/{id}", method = RequestMethod.GET, produces = {MediaType.IMAGE_JPEG_VALUE, "image/tiff"})
     public ResponseEntity<?> getImage(@PathVariable("id") final long id) {
         final Image image = imageDAO.retrieve(id).orElse(null);
 
         if (image == null)
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
 
-        return ResponseEntity.ok().contentType(MediaType.IMAGE_JPEG).body(image.getData());
+        return ResponseEntity.ok().contentType(image.getType()).body(image.getData());
     }
 
     /**
@@ -113,7 +112,8 @@ public class ImageController {
     @RequestMapping(value = "/images", method = RequestMethod.POST)
     public ResponseEntity<?> addImage(@RequestParam("file") final MultipartFile file,
             final RedirectAttributes redirectAttributes) {
-        if (!file.getContentType().equals(MediaType.IMAGE_JPEG_VALUE))
+                
+        if (! AcceptedMediaTypes.contains(file.getContentType()))
             return new ResponseEntity<>(HttpStatus.UNSUPPORTED_MEDIA_TYPE);
         try {
             final Image image = new Image(file.getOriginalFilename(), file.getBytes(), Utils.typeOfFile(file),
@@ -139,11 +139,9 @@ public class ImageController {
         for (final Image image : imageDAO.retrieveAll())
             try {
                 nodes.add(mapper.readTree(image.toString()));
-                //nodes.add(mapper.readTree("{ \"id\": \"" + image.getId() + "\", \"name\": \"" + image.getName() + "\", \"type\": \"" + image.getType() + "\", \"size\": \"" + image.getSize() + "\"" + "}"));
             } catch (final JsonProcessingException e) {
                 e.printStackTrace();
             }
-
         return nodes;
     }
 
