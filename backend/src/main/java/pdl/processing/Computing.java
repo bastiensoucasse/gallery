@@ -1,6 +1,6 @@
 package pdl.processing;
 
-class Computing
+public class Computing
 {
     /**
      * Converts a RGB color into a HSV color.

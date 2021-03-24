@@ -140,7 +140,7 @@ public class Processing
         }
 
         for (int i = 0; i < 256; i++)
-            LUT[i] = (int) ((double) ((i - min) / (double) ((max - min) * 255)));
+            LUT[i] = (int) (((double) (i - min) / (double) (max - min)) * 255);
 
         final RandomAccess<UnsignedByteType> inputRandomAccess = input.randomAccess();
         final RandomAccess<UnsignedByteType> outputRandomAccess = output.randomAccess();
@@ -175,7 +175,9 @@ public class Processing
 
     public static void equalizeHistogram(final SCIFIOImgPlus<UnsignedByteType> input, final SCIFIOImgPlus<UnsignedByteType> output, final int channel)
     {
-        if (channel != 2 && channel != 3)
+        final int bits = 1000;
+
+        if (channel != 1 && channel != 2)
         {
             System.err.printf("Could not equalize histogram using channel %d!", channel);
             return;
@@ -183,7 +185,7 @@ public class Processing
 
         System.out.printf("Equalizing histogram on channel %d...\n", channel);
         final RandomAccess<UnsignedByteType> inputRandomAccess = input.randomAccess(), outputRandomAccess = output.randomAccess();
-        final int[] histogram = new int[101], cumulativeHistogram = new int[101];
+        final int[] histogram = new int[bits + 1];
         int total = 0;
 
         for (long x = input.min(0); x <= input.max(0); x++)
@@ -202,18 +204,13 @@ public class Processing
                 }
 
                 final float[] hsv = Computing.rgbToHsv(rgb);
-                histogram[(int) (hsv[channel] * 100)]++;
+                histogram[(int) (hsv[channel] * bits)]++;
                 total++;
             }
         }
 
-        for (int i = 0; i < 101; i++)
-        {
-            if (i == 0)
-                cumulativeHistogram[i] = histogram[i];
-            else
-                cumulativeHistogram[i] = histogram[i] + cumulativeHistogram[i - 1];
-        }
+        for (int i = 1; i <= bits; i++)
+            histogram[i] += histogram[i - 1];
 
         for (long x = input.min(0); x <= input.max(0); x++)
         {
@@ -233,7 +230,7 @@ public class Processing
                 }
 
                 final float[] hsv = Computing.rgbToHsv(rgb);
-                hsv[channel] = (float) (cumulativeHistogram[(int) (hsv[channel] * 100)]) / (float) total;
+                hsv[channel] = (float) (histogram[(int) (hsv[channel] * bits)]) / (float) total;
                 rgb = Computing.hsvToRgb(hsv);
 
                 for (int c = 0; c < 3; c++)
