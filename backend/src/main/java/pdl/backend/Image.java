@@ -25,7 +25,7 @@ public class Image {
         this.id = count++;
         this.name = name;
         this.data = data;
-        this.type = MediaType.IMAGE_JPEG;
+        this.type = type;
         this.size = size;
     }
 
