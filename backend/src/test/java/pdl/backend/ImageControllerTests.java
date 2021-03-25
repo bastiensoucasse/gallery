@@ -88,7 +88,7 @@ public class ImageControllerTests {
     @Test
     @Order(7)
     public void createImageShouldReturnSuccess() throws Exception {
-        MockMultipartFile file = new MockMultipartFile("file", "osabat.jpeg", MediaType.IMAGE_JPEG_VALUE,
+        MockMultipartFile file = new MockMultipartFile("file", "osabat.jpg", MediaType.IMAGE_JPEG_VALUE,
                 new FileInputStream(System.getProperty("user.dir") + "/src/main/resources/images/osabat.jpeg"));
         this.mockMvc.perform(multipart("/images").file(file)).andDo(print()).andExpect(status().isCreated());
     }
@@ -125,6 +125,9 @@ public class ImageControllerTests {
         Path path_image_1 = c.getPathOfResource("/image_test/osabat.jpg");
         Path path_image_2 = c.getPathOfResource("/image_test/another_one/cyber.jpeg");
         Path path_image_3 = c.getPathOfResource("/image_test/another_one/jam.jpg");
+        Path path_image_4 = c.getPathOfResource("/image_test/another_one/sacre_coeur.jpg");
+        Path path_image_5 = c.getPathOfResource("/image_test/insanity.jfif");
+        Path path_image_6 = c.getPathOfResource("/image_test/osabat.png");
 
         final ClassPathResource resource = new ClassPathResource("/image_test/");
         File f = resource.getFile();
@@ -134,13 +137,16 @@ public class ImageControllerTests {
         Path path = Paths.get(System.getProperty("user.dir"), "/src/main/resources/images");
         Set<String> image_set = Utils.listFiles(path);
         assertTrue(image_set.size() != 0);
-        images.forEach(ima -> assertTrue(ima.contains(".tif") || ima.contains(".jpeg")));
-        assertFalse(images.contains(path_image_1.toString()));
+        images.forEach(ima -> assertTrue(ima.contains(".tif") || ima.contains(".tif") || ima.contains(".jpeg")
+                || ima.contains(".jpg") || ima.contains(".jpe") || ima.contains(".jfif")));
+        assertTrue(images.contains(path_image_1.toString()));
         assertTrue(images.contains(path_image_2.toString()));
-        assertFalse(images.contains(path_image_3.toString()));
+        assertTrue(images.contains(path_image_4.toString()));
+        assertTrue(images.contains(path_image_5.toString()));
+        assertTrue(images.contains(path_image_3.toString()));
+        assertFalse(images.contains(path_image_6.toString()));
     }
 
-    @Disabled
     @Test
     @Order(11)
     public void testSaveImagesFolder() throws IOException {
@@ -148,6 +154,10 @@ public class ImageControllerTests {
         String image_1 = "autumn.tif";
         String image_2 = "cyber.jpeg";
         String text = "testing.txt";
+        String image_3 = "jam.jpg";
+        String image_4 = "sacre_coeur.jpg";
+        String image_5 = "insanity.jfif";
+
         ImageController c = new ImageController(i);
         int size = i.retrieveAll().size();
         Path p = c.getPathOfResource("/image_test/");
@@ -155,18 +165,36 @@ public class ImageControllerTests {
         assertTrue(size < i.retrieveAll().size());
         assertTrue(i.getId(image_1) > 0);
         assertTrue(i.getId(image_2) > 0);
+        assertTrue(i.getId(image_3) > 0);
+        assertTrue(i.getId(image_4) > 0);
+        assertTrue(i.getId(image_5) > 0);
         assertFalse(i.getId(text) > 0);
 
         Image i1 = i.retrieve(i.getId(image_1)).orElse(null);
-        assertFalse(i1.getSize().equals("null"));
-        assertFalse(i1.getData() == null);
+        assertFalse(i1.getSize().equals(null));
+        assertFalse(i1.getData().equals(null));
         System.out.println(i1.getType());
-        assertTrue(i1.getType().equals(MediaType.IMAGE_JPEG) || i1.getType().equals(MediaType.valueOf("image/tiff")));
+        assertTrue(i1.getType().equals(MediaType.valueOf("image/tiff")));
 
         Image i2 = i.retrieve(i.getId(image_2)).orElse(null);
-        assertFalse(i2.getSize().equals("null"));
-        assertFalse(i2.getData() == null);
-        assertTrue(i2.getType().equals(MediaType.IMAGE_JPEG) || i1.getType().equals(MediaType.valueOf("image/tiff")));
+        assertFalse(i2.getSize().equals(null));
+        assertFalse(i2.getData().equals(null));
+        assertTrue(i2.getType().equals(MediaType.IMAGE_JPEG));
+
+        Image i3 = i.retrieve(i.getId(image_3)).orElse(null);
+        assertFalse(i3.getSize().equals(null));
+        assertFalse(i3.getData().equals(null));
+        assertTrue(i3.getType().equals(MediaType.IMAGE_JPEG));
+
+        Image i4 = i.retrieve(i.getId(image_4)).orElse(null);
+        assertFalse(i4.getSize().equals(null));
+        assertFalse(i4.getData().equals(null));
+        assertTrue(i4.getType().equals(MediaType.IMAGE_JPEG));
+
+        Image i5 = i.retrieve(i.getId(image_5)).orElse(null);
+        assertFalse(i5.getSize().equals(null));
+        assertFalse(i5.getData().equals(null));
+        assertTrue(i5.getType().equals(MediaType.IMAGE_JPEG));
     }
 
     @Test

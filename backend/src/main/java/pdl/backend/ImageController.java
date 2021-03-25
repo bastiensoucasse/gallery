@@ -33,7 +33,6 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-
 @RestController
 public class ImageController {
     /**
@@ -49,7 +48,7 @@ public class ImageController {
 
     /**
      * Creates an {@code ImageController} connected to an {@code ImageDAO}.
-     * 
+     *
      * @param imageDAO the image data access object (database)
      */
     @Autowired
@@ -59,12 +58,13 @@ public class ImageController {
 
     /**
      * Gets an image from the DAO and sends it as an HTTP response.
-     * 
+     *
      * @param id the image identifier (number)
      * @return the HTTP response (status 200 with image if success, status 404 if no
      *         image was found)
      */
-    @RequestMapping(value = "/images/{id}", method = RequestMethod.GET, produces = {MediaType.IMAGE_JPEG_VALUE, "image/tiff"})
+    @RequestMapping(value = "/images/{id}", method = RequestMethod.GET, produces = { MediaType.IMAGE_JPEG_VALUE,
+            "image/tiff" })
     public ResponseEntity<?> getImage(@PathVariable("id") final long id) {
         final Image image = imageDAO.retrieve(id).orElse(null);
 
@@ -76,7 +76,7 @@ public class ImageController {
 
     /**
      * Sends a 400 response when trying to delete an image with no identifier.
-     * 
+     *
      * @return the HTTP response (status 400)
      */
     @RequestMapping(value = "/images", method = RequestMethod.DELETE)
@@ -86,7 +86,7 @@ public class ImageController {
 
     /**
      * Deletes an image from the DAO.
-     * 
+     *
      * @param id the image identifier (number)
      * @return the HTTP response (status 200 if success, status 404 if no image was
      *         found)
@@ -103,7 +103,7 @@ public class ImageController {
 
     /**
      * Add an image to the DAO.
-     * 
+     *
      * @param file               the image (JPEG) to add
      * @param redirectAttributes
      * @return the HTTP response (status 201 if success, status 415 if the image
@@ -112,8 +112,8 @@ public class ImageController {
     @RequestMapping(value = "/images", method = RequestMethod.POST)
     public ResponseEntity<?> addImage(@RequestParam("file") final MultipartFile file,
             final RedirectAttributes redirectAttributes) {
-                
-        if (! AcceptedMediaTypes.contains(file.getContentType()))
+
+        if (!AcceptedMediaTypes.contains(file.getContentType()))
             return new ResponseEntity<>(HttpStatus.UNSUPPORTED_MEDIA_TYPE);
         try {
             final Image image = new Image(file.getOriginalFilename(), file.getBytes(), Utils.typeOfFile(file),
@@ -128,7 +128,7 @@ public class ImageController {
 
     /**
      * Gets the image list from the DAO.
-     * 
+     *
      * @return the raw JSON nodes
      */
     @RequestMapping(value = "/images", method = RequestMethod.GET, produces = "application/json; charset=UTF-8")
@@ -161,13 +161,13 @@ public class ImageController {
 
     /**
      * Apply an algorithm to an Image
-     * 
+     *
      * @param id        id of the image
      * @param algorithm algorithm passed as parameters through URL
      * @return ResponseEntity: (200): if the image was processed (400): -if the
      *         algorithm doesn't exist -one of the paramter doesn't exist -the value
      *         of the parameter are invalid
-     * 
+     *
      *         (404): if no images exist with the given id (500): if the algorithm
      *         fail for internal reason
      */
@@ -181,34 +181,33 @@ public class ImageController {
 
         String name = algorithm.get("algorithm"); // get the name of the algorithm
         algorithm.remove("algorithm"); // remove from the set
-        
+
         try {
             Image proccessedImage = AlgorithmManager.Instance().applyAlgorithm(name, algorithm.values(), image);
             imageDAO.create(proccessedImage);
-        } catch (NoSuchMethodException e){
+        } catch (NoSuchMethodException e) {
             e.printStackTrace();
             new ResponseEntity<>(HttpStatus.BAD_REQUEST);
             return ResponseEntity.badRequest().body("Algorithm doesn't exists");
-        } catch (NumberFormatException e){
+        } catch (NumberFormatException e) {
             e.printStackTrace();
             new ResponseEntity<>(HttpStatus.BAD_REQUEST);
             return ResponseEntity.badRequest().body("Impossible to parse Parameters not a Number");
-        } catch (IllegalArgumentException e){
+        } catch (IllegalArgumentException e) {
             e.printStackTrace();
             new ResponseEntity<>(HttpStatus.BAD_REQUEST);
             return ResponseEntity.badRequest().body("Invalid Arguments");
-        } catch (Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
-        
 
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
     /**
      * Upload all images (jpeg, tif) in the images folder on the server.
-     * 
+     *
      * @throws IOException
      */
     public void saveImagesFolder(Path path_of_resource) throws IOException {
@@ -231,14 +230,16 @@ public class ImageController {
     }
 
     /**
-     * 
+     *
      * @param p the parent file you need to scan
      * @return a set of strings, indicating the full path of jpeg and tif images.
      * @throws IOException
      */
     public Set<String> listFiles(Path p) throws IOException {
         try (Stream<Path> stream = Files.walk(p)) {
-            return stream.map(Path::toString).filter(file -> file.endsWith(".jpeg") || file.endsWith(".tif"))
+            return stream.map(Path::toString)
+                    .filter(file -> file.endsWith(".tif") || file.endsWith(".tiff") || file.endsWith(".jpeg")
+                            || file.endsWith(".jpg") || file.endsWith(".jpe") || file.endsWith(".jfif"))
                     .collect(Collectors.toSet());
         }
     }
