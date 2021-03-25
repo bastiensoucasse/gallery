@@ -6,3 +6,8 @@ target/
 .project
 backend/src/main/resources/public/index.html
 *.sh
+backend/src/main/resources/public/static/css/app.25845f73.css
+backend/src/main/resources/public/static/js/app.0dec4b71.js
+backend/src/main/resources/public/static/js/app.0dec4b71.js.map
+backend/src/main/resources/public/static/js/chunk-vendors.dba6612c.js
+backend/src/main/resources/public/static/js/chunk-vendors.dba6612c.js.map
