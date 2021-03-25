@@ -140,6 +140,7 @@ public class ImageControllerTests {
         assertFalse(images.contains(path_image_3.toString()));
     }
 
+    @Disabled
     @Test
     @Order(11)
     public void testSaveImagesFolder() throws IOException {
