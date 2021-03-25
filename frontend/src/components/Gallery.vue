@@ -19,7 +19,7 @@ import axios from "axios";
 export default {
     name: "Gallery",
 
-    
+
 
     emits: {
         'LoadPreview': Number,

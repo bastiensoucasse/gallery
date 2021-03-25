@@ -23,7 +23,7 @@ export default {
     },
     data() {
         return{
-            currentComponent: Gallery,
+            currentComponent: undefined,
 
         };
     },
@@ -39,8 +39,10 @@ export default {
     },
 
     mounted() {
-
+        console.log(this.currentComponent);
         this.currentComponent = Gallery;
+        console.log(this.currentComponent);
+
     },
 };
 </script>
