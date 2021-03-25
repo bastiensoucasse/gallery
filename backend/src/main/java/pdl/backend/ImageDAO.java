@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import org.checkerframework.common.reflection.qual.GetMethod;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Repository;
 
@@ -16,12 +17,12 @@ public class ImageDAO implements DAO<Image> {
     private final Map<Long, Image> images = new HashMap<>();
 
     public ImageDAO() {
-        final ClassPathResource imgFile = new ClassPathResource("images/osabat.jpg");
+        final ClassPathResource imgFile = new ClassPathResource("images/osabat.jpeg");
         byte[] fileContent;
         try {
             final File file = imgFile.getFile();
             fileContent = Files.readAllBytes(file.toPath()); // get all the bytes of the image
-            final Image img = new Image("osabat.jpg", fileContent, Utils.typeOfFile(file), Utils.sizeOfImage(file)); // create
+            final Image img = new Image("osabat.jpeg", fileContent, Utils.typeOfFile(file), Utils.sizeOfImage(file)); // create
                                                                                                                      // an
                                                                                                                      // object
                                                                                                                      // image

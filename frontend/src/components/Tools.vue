@@ -2,6 +2,11 @@
     <div class="tools">
         <div class="preview">
             <h3>Preview an image</h3>
+            <p>
+                <b>Attention, ceci va bientôt disparaitre.</b><br />
+                Cliquez sur l'image directement pour accéder à toutes ces
+                options désormais.
+            </p>
             <div class="input">
                 <select v-model="selected" @change="loadSelected()">
                     <option v-for="r in response" :key="r.id" :value="r.id">

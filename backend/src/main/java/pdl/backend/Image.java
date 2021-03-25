@@ -25,17 +25,11 @@ public class Image {
         this.id = count++;
         this.name = name;
         this.data = data;
-        this.type = MediaType.IMAGE_JPEG;
+        this.type = type;
         this.size = size;
     }
 
-    public Image(long id, String name, MediaType type, String size){
-        this.id = id;
-        this.name = name;
-        this.type = type;
-        this.size = size;
-        this.data = null;
-    }
+    
 
     public long getId() {
         return id;
@@ -61,9 +55,12 @@ public class Image {
         return data;
     }
 
+    /**
+     * Return a json string representation of the metaData of the image
+     */
     @Override
     public String toString() {
-        return "{\"id\":\"" + getId() + "\", \"name\": \"" + name + "\", \"type\": \"" + type.getSubtype() + "\", \"size\": \"" + size + "\"" + "}"; 
+        return "{\"id\":\"" + getId() + "\", \"name\": \"" + name + "\", \"type\": \"" + type + "\", \"size\": \"" + size + "\"" + "}"; 
     }
 
     @Override

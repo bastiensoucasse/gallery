@@ -1,33 +1,19 @@
 package pdl.backend;
 
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.lang.reflect.Type;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
-
+import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 
 import io.scif.img.SCIFIOImgPlus;
-import net.imagej.ImgPlus;
-
-import net.imglib2.img.array.ArrayImgFactory;
 import net.imglib2.type.numeric.integer.UnsignedByteType;
 import pdl.processing.ImageConverter;
 import pdl.processing.Processing;
-
-/** Explication :
-    1) je récupère le nom de l'algorithme et ses paramètres dans l'URL  et stocke tout ça dans une Map<String, String> 
-    2) j'ai créer une classe AlgorithmManager qui implémente un singleton, cette classe référence toutes les methodes (String) associé avec leur Class<?> ``` Map<String, Class<?>> algorithms ```
-    ainsi que chaque type de chaque paramètres pour chaque méthodes ``` Map<String, ArrayList<Class<?>[]>> ```
-    3) Je parse les arguments pour que ça correspond a la liste de type pour la méthode associé et génère une liste d'arguments ```Object[] arguments ```
-    4) Je récupère la méthode avec sa classe ``` Method m = algorithms.get(name).getMethod(name, class<?>[]) ```
-    5) J'invoque la méthode récupéré avec les arguments ``` m.invoke(null, arguments) ```
-
- */
-
-
 
 /**
  * This class is Implemented with the design Pattern Singleton This class is
@@ -36,9 +22,10 @@ import pdl.processing.Processing;
 public class AlgorithmManager {
 
     private static AlgorithmManager _instance = null; // single instance of the class
-    private Map<String, Class<?>> algorithms; // map of all algorithms
-    private Map<String, ArrayList<Class<?>[]>> parameters; // map of list of parameter types for each algorithms, ! contains overload
-    private Class<?>[] Classes = { Processing.class }; // classes to exctract Algorithms from
+    final private Map<String, Map<Class<?>[], Method>> algorithms; // map of all algorithms
+
+    private Class<?>[] Classes = { Processing.class, pdl.processing.Convolution.class }; // classes to exctract
+                                                                                         // Algorithms from
 
     /**
      * To keep this class as a singleton the class as only one private constructor
@@ -47,19 +34,18 @@ public class AlgorithmManager {
      */
     private AlgorithmManager() {
         algorithms = new HashMap<>();
-        parameters = new HashMap<>();
+
         for (Class<?> c : Classes) {
             for (Method m : c.getDeclaredMethods()) {
-                String name = m.getName(); // get the name of the method
-                System.out.println("----------- " + name + " -----------");
-                algorithms.put(name, c); // add name of method and associated class
-                if (parameters.containsKey(name)) { // if the method has already types associated
-                    parameters.get(name).add(m.getParameterTypes()); // add the list of parameters to the list
-                } else { // the method doesn't have any associated list of parameters at all
-                    ArrayList<Class<?>[]> listOfParameters = new ArrayList<>(); // create a list of parameters
-                    listOfParameters.add(m.getParameterTypes()); // add the list of parameters to the list
-                    parameters.put(name, listOfParameters); // add to the map the method name and the corresponding list
-                                                            // of types
+                if (Modifier.isPublic(m.getModifiers())) {
+                    Map<Class<?>[], Method> methods = algorithms.get(m.getName());
+                    if (methods == null) {
+                        methods = new HashMap<>();
+                        methods.put(m.getParameterTypes(), m);
+                        algorithms.put(m.getName(), methods);
+                    } else {
+                        methods.put(m.getParameterTypes(), m);
+                    }
                 }
             }
         }
@@ -79,19 +65,22 @@ public class AlgorithmManager {
 
     /**
      * Return list of names of algorithms
+     * 
      * @return Set<String>
      */
-    public Set<String> listAlgorithms(){
+    public Set<String> listAlgorithms() {
         return algorithms.keySet();
     }
 
     /**
      * Return the list of each type for each parameters of an algorithm
+     * 
      * @param name String name of the algorithm
-     * @return ArrayList<Class<?>[]> if no algorithm correspond to the given name return null
+     * @return ArrayList<Class<?>[]> if no algorithm correspond to the given name
+     *         return null
      */
-    public ArrayList<Class<?>[]> listOfParameterType(String name){
-        return parameters.get(name);
+    public Set<Class<?>[]> listOfParameterType(String name) {
+        return algorithms.get(name).keySet();
     }
 
     /**
@@ -105,6 +94,13 @@ public class AlgorithmManager {
         return (int) Integer.parseInt(s);
     }
 
+    /**
+     * Parse a string into a long
+     * 
+     * @param s String to parse
+     * @return long parsed form the string
+     * @throws NumberFormatException if Error while parsin
+     */
     private long parseStringAsLong(String s) throws NumberFormatException {
         return (int) Long.parseLong(s);
     }
@@ -131,6 +127,15 @@ public class AlgorithmManager {
         return (double) Double.parseDouble(s);
     }
 
+    /**
+     * Parse a String into a one of the following primitive type long, int, double,
+     * float
+     * 
+     * @param s String to parse
+     * @param t Target class
+     * @return Object
+     * @throws NumberFormatException If error while parsing
+     */
     private Object parseStringPrimitiveType(String s, Type t) throws NumberFormatException {
         if (t == int.class)
             return parseStringAsInt(s);
@@ -159,45 +164,25 @@ public class AlgorithmManager {
      * @throws IllegalArgumentException Arguments passed not accepted, e.g too many
      *                                  Arguments or not enough
      */
-    public Image applyAlgorithm(String name, Collection<String> args, Image image)
-            throws Exception, NumberFormatException, NoSuchMethodException, IllegalArgumentException {
-        Class<?> c = algorithms.get(name);
-        if (c != null) {
-            System.out.println("You got the class " + c.getName()); // debug
+    public Image applyAlgorithm(String name, Collection<String> args, Image image) throws Exception,
+            NumberFormatException, NoSuchMethodException, IllegalArgumentException, InvocationTargetException {
 
-            SCIFIOImgPlus<UnsignedByteType> input = ImageConverter.imageFromJPEGBytes(image.getData()); // convert Image
-                                                                                                        // to
-                                                                                                        // ImgPlus<UnsignedByteType>
-            final ArrayImgFactory<UnsignedByteType> factory = new ArrayImgFactory<UnsignedByteType>(
-                    new UnsignedByteType()); // ArrayImgFactory
-            ImgPlus<UnsignedByteType> output = SCIFIOImgPlus.wrap(factory.create(input), SCIFIOImgPlus.wrap(input)); // Create
-                                                                                                                     // an
-                                                                                                                     // output
-                                                                                                                     // image
+        Map<Class<?>[], Method> methods = algorithms.get(name);
+        if (methods != null) {
+            // Convert the Image as a SCIFIOImgPlus<>
+            SCIFIOImgPlus<UnsignedByteType> input = ImageConverter.imageFromJPEGBytes(image.getData());
+            SCIFIOImgPlus<UnsignedByteType> output = input.copy(); // create a copy of the input
 
             Object[] arguments = new Object[args.size() + 2]; // list of arguments to apply to the method
-            arguments[0] = input;
-            arguments[1] = output;
+            arguments[0] = input; // load input as first argument
+            arguments[1] = output; // load output as second argument
 
-            ArrayList<Class<?>[]> typeOfParameters = parameters.get(name);
-            int type = parseParameters(args, typeOfParameters, arguments);
+            Class<?>[] parametersType = parseParameters(name, args, methods.keySet(), arguments, 2);
+            Method m = methods.get(parametersType);
 
-            System.out.println("After Parsing " + type);
-            // debug
-            for (Object object : arguments) {
-                System.out.println(object);
-            }
-            Method m = c.getMethod(name, typeOfParameters.get(type));
-            System.out.println("You got The method " + m.getName());
-            System.out.println("Try to call the method");
-            m.invoke(null, arguments);
+            m.invoke(null, arguments); // call the method
 
-            SCIFIOImgPlus<UnsignedByteType> processedOutput = new SCIFIOImgPlus<>(output);
-
-            System.out.println(processedOutput);
-            byte[] rawProcessedImage = ImageConverter.imageToJPEGBytes(processedOutput);
-
-            System.out.println("No BYTES !!!!");
+            byte[] rawProcessedImage = ImageConverter.imageToJPEGBytes(output); // get the bytes of the processedImage
             return new Image(image.getName() + "_" + name, rawProcessedImage, image.getType(), image.getSize());
         }
         throw new NoSuchMethodException();
@@ -214,17 +199,29 @@ public class AlgorithmManager {
      *                         parsing
      * @return The index corresponding to the class<?>[] choosen
      */
-    private int parseParameters(Collection<String> args, ArrayList<Class<?>[]> typeOfParameters, Object[] arguments) {
-        int index = 2;
-        for (int i = 0; i < typeOfParameters.size(); i++) {
-            if (args.size() == typeOfParameters.get(i).length - index) {
-                Class<?>[] types = typeOfParameters.get(i);
-                for (String s : args) {
-                    arguments[index] = parseStringPrimitiveType(s, types[index]);
-                    index++;
+    private Class<?>[] parseParameters(String name, Collection<String> args, Set<Class<?>[]> parameterTypes,
+            Object[] arguments, int start) throws IllegalArgumentException, NumberFormatException {
+        Iterator<Class<?>[]> iterator = parameterTypes.iterator();
+        Class<?>[] types;
+        while (iterator.hasNext()) {
+            types = iterator.next();
+            if (types.length - start == args.size()) {
+                int index = start;
+                for (String string : args) {
+                    try {
+                        arguments[index] = parseStringPrimitiveType(string, types[index]);
+                        index++;
+                    } catch (NumberFormatException e) {
+                        if (!iterator.hasNext()) {
+                            throw e;
+                        } else {
+                            break;
+                        }
+                    }
                 }
-                if (index == types.length)
-                    return i;
+                if (index == types.length) {
+                    return types;
+                }
             }
         }
         throw new IllegalArgumentException();
