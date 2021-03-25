@@ -5,7 +5,7 @@
                 class="gallery-content"
                 v-for="image in response"
                 :key="image.id"
-                @click="preview(image.id)"
+                :@click="$emit('LoadPreview', image.id)"
             >
                 <img class="gallery-image" :src="'/images/' + image.id" />
             </div>
@@ -18,6 +18,13 @@ import axios from "axios";
 
 export default {
     name: "Gallery",
+
+    
+
+    emits: {
+        'LoadPreview': Number,
+    },
+
     data() {
         return {
             response: [],
@@ -35,17 +42,7 @@ export default {
                     this.errors.push(e);
                 });
         },
-        delete(id) {
-            axios
-                .delete("images/" + id)
-                .then(() => {
-                    location.reload();
-                })
-                .catch((e) => {
-                    this.errors.push(e);
-                });
-        },
-        preview(id) {
+        /*preview(id) {
             const app = document.getElementById("app");
 
             let pBackground = document.createElement("div");
@@ -134,7 +131,7 @@ export default {
                     </form>
                 </div>
             `;
-        },
+        },*/
     },
     mounted() {
         this.callRestService();
@@ -143,7 +140,7 @@ export default {
 </script>
 
 
-<style>
+<style scoped>
 .gallery-wrapper {
     display: flex;
     justify-content: center;
@@ -179,110 +176,5 @@ export default {
     height: 100%;
     object-fit: cover;
     user-select: none;
-}
-
-.preview-background {
-    position: fixed;
-    top: 0;
-    left: 0;
-    bottom: 0;
-    right: 0;
-    width: 100%;
-    height: 100vh;
-    background-color: #202124;
-    opacity: 0.5;
-}
-
-.preview-window {
-    position: fixed;
-    top: 0;
-    left: 0;
-    bottom: 0;
-    right: 0;
-    width: 100%;
-    height: 100vh;
-    display: grid;
-    grid-template-columns: 100fr;
-}
-
-.preview-header {
-    position: absolute;
-    top: 12px;
-    right: 24px;
-    display: grid;
-    grid-template-columns: 25fr 25fr 25fr 25fr;
-    z-index: 2;
-}
-
-.preview-link {
-    background: none;
-    border: none;
-    cursor: pointer;
-    border-radius: 6px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    user-select: none;
-    color: white;
-    padding: 12px;
-}
-
-.preview-visual {
-    width: 100%;
-    height: 100%;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    background-color: rgba(32, 33, 36, 0.9);
-}
-
-.preview-image {
-    display: block;
-    min-height: 240px;
-    min-width: 240px;
-    max-height: 80vh;
-    max-width: 80%;
-    border-radius: 48px;
-    user-select: none;
-    box-shadow: 0 8px 10px 1px rgba(0, 0, 0, 0.14),
-        0 3px 14px 2px rgba(0, 0, 0, 0.12), 0 5px 5px -3px rgba(0, 0, 0, 0.2);
-    background-color: #323539;
-    overflow: hidden;
-}
-
-.preview-features {
-    width: calc(100% - 2 * 24px);
-    height: calc(100% - 2 * 12px);
-    padding: 96px 24px 0 24px;
-    text-align: left;
-    background-color: rgba(38, 40, 43, 0.9);
-    box-shadow: 0 4px 5px 0 rgba(0, 0, 0, 0.14),
-        0 1px 10px 0 rgba(0, 0, 0, 0.12), 0 2px 4px -1px rgba(0, 0, 0, 0.2);
-    max-height: 100vh;
-    overflow-y: auto;
-    display: none;
-}
-.preview-link:hover {
-    background: rgba(255, 255, 255, .1);
-}
-
-.preview-actions {
-    display: grid;
-    grid-gap: 8px;
-    grid-template-columns: 50fr 50fr;
-    margin: 8px 0 32px 0;
-}
-
-.preview-button {
-    display: block;
-    padding: 2px 8px;
-    cursor: pointer;
-    user-select: none;
-    width: 100%;
-}
-
-.preview-input {
-    display: block;
-    width: calc(100% - 8px);
 }
 </style>
