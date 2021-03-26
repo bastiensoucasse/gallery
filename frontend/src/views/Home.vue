@@ -1,12 +1,10 @@
 <template>
     <div class="home">
         <header>
-            <h1>Gallery</h1>
+            <h1 class="logo">Gallery</h1>
         </header>
 
         <gallery></gallery>
-
-        <footer></footer>
     </div>
 </template>
 

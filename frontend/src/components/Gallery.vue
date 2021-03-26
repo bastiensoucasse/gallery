@@ -11,17 +11,24 @@
             </div>
         </div>
 
+        <div class="gallery-import" @click="loadImporter">
+            <span class="material-icons">add</span>
+        </div>
+
         <preview
             :id="preview"
             :name="name"
             @close="closePreview"
             v-if="preview != -1"
         ></preview>
+
+        <importer @close="closeImporter" v-if="importing"></importer>
     </div>
 </template>
 
 <script>
 import Preview from "@/components/Preview.vue";
+import Importer from "@/components/Importer.vue";
 import axios from "axios";
 
 export default {
@@ -29,6 +36,7 @@ export default {
 
     components: {
         Preview,
+        Importer,
     },
 
     methods: {
@@ -52,6 +60,14 @@ export default {
             this.name = "";
             this.preview = -1;
         },
+
+        loadImporter() {
+            this.importing = true;
+        },
+
+        closeImporter() {
+            this.importing = false;
+        },
     },
 
     data() {
@@ -60,12 +76,14 @@ export default {
             errors: [],
             preview: Number,
             name: String,
+            importing: Boolean,
         };
     },
 
     mounted() {
         this.name = "";
         this.preview = -1;
+        this.importing = false;
         this.callRestService();
     },
 };
@@ -79,8 +97,9 @@ export default {
     flex-wrap: wrap;
     width: 600px;
     max-width: calc(100% - 48px);
-    margin: 24px auto;
     margin: auto;
+    padding: 8px 0;
+    margin-top: 56px;
 }
 
 .gallery-image {
@@ -107,5 +126,29 @@ export default {
     height: 100%;
     object-fit: cover;
     user-select: none;
+}
+
+.gallery-import {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 48px;
+    height: 48px;
+    margin: 24px;
+    border-radius: 50%;
+    background-color: #0064c8;
+    font-weight: 600;
+    font-size: 20px;
+    color: #ffffff;
+    transition: background-color 0.17s ease;
+    cursor: pointer;
+    user-select: none;
+}
+
+.gallery-import:hover {
+    background-color: #0059b3;
 }
 </style>

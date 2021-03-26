@@ -1,23 +1,23 @@
 <template>
     <div class="preview-window">
-        <div class="preview-header">
-            <button
-                class="preview-link"
-                onclick="document.querySelector('.preview-window').style.gridTemplateColumns='100fr 350px';document.querySelector('.preview-features').style.display='block';"
-            >
-                <span class="material-icons">edit</span>
+        <div class="feature-box">
+            <button class="feature-link" @click="$emit('close')">
+                <span class="material-icons">close</span>
             </button>
 
-            <button class="preview-link" @click="download">
-                <span class="material-icons">download</span>
-            </button>
-
-            <button class="preview-link" @click="remove">
+            <button class="feature-link" @click="remove">
                 <span class="material-icons">delete</span>
             </button>
 
-            <button class="preview-link" @click="$emit('close')">
-                <span class="material-icons">close</span>
+            <button class="feature-link" @click="download">
+                <span class="material-icons">download</span>
+            </button>
+
+            <button
+                class="feature-link"
+                onclick="document.querySelector('.preview-window').style.gridTemplateColumns='100fr 350px';document.querySelector('.preview-features').style.display='block';"
+            >
+                <span class="material-icons">edit</span>
             </button>
         </div>
 
@@ -30,36 +30,38 @@
         </div>
 
         <div class="preview-features">
-            <form
-                class="preview-feature"
-                method="get"
-                :action="'/images/' + id"
-            >
-                <b>Convert to grayscale</b>
-                <input type="hidden" name="algorithm" value="toGrayscale" />
-                <div class="preview-actions">
+            <h2 class="title">Edit</h2>
+
+            <div class="preview-details">
+                <form
+                    class="preview-feature"
+                    method="get"
+                    :action="'/images/' + id"
+                >
+                    <h3 class="category">Convert to grayscale</h3>
+
+                    <input type="hidden" name="algorithm" value="toGrayscale" />
+
                     <input
-                        class="preview-button"
+                        class="theme-button"
                         type="submit"
                         value="To grayscale"
                     />
-                </div>
-            </form>
+                </form>
 
-            <form
-                class="preview-feature"
-                method="get"
-                :action="'/images/' + id"
-            >
-                <b>Apply a gain to the brightness</b>
+                <form
+                    class="preview-feature"
+                    method="get"
+                    :action="'/images/' + id"
+                >
+                    <h3 class="category">Apply a gain to the brightness</h3>
 
-                <input
-                    type="hidden"
-                    name="algorithm"
-                    value="changeBrightness"
-                />
+                    <input
+                        type="hidden"
+                        name="algorithm"
+                        value="changeBrightness"
+                    />
 
-                <div class="preview-actions">
                     <input
                         class="preview-input"
                         type="number"
@@ -70,23 +72,21 @@
                     />
 
                     <input
-                        class="preview-button"
+                        class="theme-button"
                         type="submit"
                         value="Change brightness"
                     />
-                </div>
-            </form>
+                </form>
 
-            <form
-                class="preview-feature"
-                method="get"
-                :action="'/images/' + id"
-            >
-                <b>Colorize by setting the hue</b>
+                <form
+                    class="preview-feature"
+                    method="get"
+                    :action="'/images/' + id"
+                >
+                    <h3 class="category">Colorize by setting the hue</h3>
 
-                <input type="hidden" name="algorithm" value="colorize" />
+                    <input type="hidden" name="algorithm" value="colorize" />
 
-                <div class="preview-actions">
                     <input
                         class="preview-input"
                         type="number"
@@ -97,84 +97,82 @@
                     />
 
                     <input
-                        class="preview-button"
+                        class="theme-button"
                         type="submit"
                         value="Colorize"
                     />
-                </div>
-            </form>
+                </form>
 
-            <form
-                class="preview-feature"
-                method="get"
-                :action="'/images/' + id"
-            >
-                <b>Extend the dynamics</b>
+                <form
+                    class="preview-feature"
+                    method="get"
+                    :action="'/images/' + id"
+                >
+                    <h3 class="category">Extend the dynamics</h3>
 
-                <input type="hidden" name="algorithm" value="extendDynamics" />
-
-                <div class="preview-actions">
                     <input
-                        class="preview-button"
+                        type="hidden"
+                        name="algorithm"
+                        value="extendDynamics"
+                    />
+
+                    <input
+                        class="theme-button"
                         type="submit"
                         value="Extend dynamics"
                     />
-                </div>
-            </form>
+                </form>
 
-            <form
-                class="preview-feature"
-                method="get"
-                :action="'/images/' + id"
-            >
-                <b>Equalize the saturation or brightness histogram</b>
+                <form
+                    class="preview-feature"
+                    method="get"
+                    :action="'/images/' + id"
+                >
+                    <h3 class="category">
+                        Equalize the saturation or brightness histogram
+                    </h3>
 
-                <input
-                    type="hidden"
-                    name="algorithm"
-                    value="equalizeHistogram"
-                />
+                    <input
+                        type="hidden"
+                        name="algorithm"
+                        value="equalizeHistogram"
+                    />
 
-                <div class="preview-actions">
-                    <div>
-                        <label
-                            ><input
-                                class="preview-radio"
-                                type="radio"
-                                name="channel"
-                                value="1"
-                                checked
-                            />Saturation</label
-                        ><br />
+                    <div class="choice">
+                        <input
+                            class="preview-radio"
+                            type="radio"
+                            name="channel"
+                            value="1"
+                            checked
+                            id="c1"
+                        />
+                        <label for="c1">Saturation</label>
 
-                        <label
-                            ><input
-                                class="preview-radio"
-                                type="radio"
-                                name="channel"
-                                value="2"
-                            />Brightness</label
-                        ><br />
+                        <input
+                            class="preview-radio"
+                            type="radio"
+                            name="channel"
+                            value="2"
+                            id="c2"
+                        />
+                        <label for="c2">Brightness</label>
                     </div>
 
                     <input
-                        class="preview-button"
+                        class="theme-button"
                         type="submit"
                         value="Equalize histogram"
                     />
-                </div>
-            </form>
+                </form>
 
-            <form
-                class="preview-feature"
-                method="get"
-                :action="'/images/' + id"
-            >
-                <b>Mean filter</b>
+                <form
+                    class="preview-feature"
+                    method="get"
+                    :action="'/images/' + id"
+                >
+                    <h3 class="category">Blur filter</h3>
 
-                <input type="hidden" name="algorithm" value="meanFilter" />
-
-                <div class="preview-actions">
                     <input
                         class="preview-input"
                         type="number"
@@ -184,58 +182,55 @@
                         required
                     />
 
+                    <div class="choice">
+                        <input
+                            class="preview-radio"
+                            type="radio"
+                            name="algorithm"
+                            value="meanFilter"
+                            id="mf"
+                            checked
+                        />
+                        <label for="mf">Mean</label>
+
+                        <input
+                            class="preview-radio"
+                            type="radio"
+                            name="algorithm"
+                            value="gaussianFilter"
+                            id="gf"
+                        />
+                        <label for="gf">Gaussian</label>
+                    </div>
+
                     <input
-                        class="preview-button"
+                        class="theme-button"
                         type="submit"
                         value="Apply filter"
                     />
-                </div>
-            </form>
+                </form>
 
-            <form
-                class="preview-feature"
-                method="get"
-                :action="'/images/' + id"
-            >
-                <b>Gaussian filter</b>
+                <form
+                    class="preview-feature"
+                    method="get"
+                    style="padding-bottom: 60px"
+                    :action="'/images/' + id"
+                >
+                    <h3 class="category">Sobel operator</h3>
 
-                <input type="hidden" name="algorithm" value="gaussianFilter" />
-
-                <div class="preview-actions">
                     <input
-                        class="preview-input"
-                        type="number"
-                        name="radius"
-                        min="1"
-                        max="10"
-                        required
+                        type="hidden"
+                        name="algorithm"
+                        value="sobelOperator"
                     />
 
                     <input
-                        class="preview-button"
-                        type="submit"
-                        value="Apply filter"
-                    />
-                </div>
-            </form>
-
-            <form
-                class="preview-feature"
-                method="get"
-                :action="'/images/' + id"
-            >
-                <b>Sobel operator</b>
-
-                <input type="hidden" name="algorithm" value="sobelOperator" />
-
-                <div class="preview-actions">
-                    <input
-                        class="preview-button"
+                        class="theme-button"
                         type="submit"
                         value="Apply operator"
                     />
-                </div>
-            </form>
+                </form>
+            </div>
         </div>
     </div>
 </template>
@@ -282,18 +277,6 @@ export default {
 </script>
 
 <style scoped>
-.preview-background {
-    position: fixed;
-    top: 0;
-    left: 0;
-    bottom: 0;
-    right: 0;
-    width: 100%;
-    height: 100vh;
-    background-color: #202124;
-    opacity: 0.5;
-}
-
 .preview-window {
     position: fixed;
     top: 0;
@@ -304,28 +287,6 @@ export default {
     height: 100vh;
     display: grid;
     grid-template-columns: 100fr;
-}
-
-.preview-header {
-    position: absolute;
-    top: 12px;
-    right: 24px;
-    display: grid;
-    grid-template-columns: 25fr 25fr 25fr 25fr;
-    z-index: 2;
-}
-
-.preview-link {
-    background: none;
-    border: none;
-    cursor: pointer;
-    border-radius: 6px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    user-select: none;
-    color: white;
-    padding: 12px;
 }
 
 .preview-visual {
@@ -354,36 +315,71 @@ export default {
 .preview-features {
     width: calc(100% - 2 * 24px);
     height: calc(100% - 2 * 12px);
-    padding: 96px 24px 0 24px;
+    padding: 56px 24px 0 24px;
     text-align: left;
-    background-color: rgba(38, 40, 43, 0.9);
+    background-color: rgb(38, 40, 43);
     box-shadow: 0 4px 5px 0 rgba(0, 0, 0, 0.14),
         0 1px 10px 0 rgba(0, 0, 0, 0.12), 0 2px 4px -1px rgba(0, 0, 0, 0.2);
     max-height: 100vh;
-    overflow-y: auto;
+    display: none;
+    overflow: hidden;
+    font-size: 14px;
+}
+
+.preview-details {
+    height: 100%;
+    overflow-y: scroll;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    padding: 2px;
+    padding-top: 6px;
+}
+
+.preview-details::-webkit-scrollbar {
     display: none;
 }
-.preview-link:hover {
-    background: rgba(255, 255, 255, 0.1);
+
+.category {
+    font-size: 14px;
+    margin: 0;
+    margin-bottom: 6px;
 }
 
-.preview-actions {
+input[type="number"] {
+    display: block;
+    width: calc(100% - 12px);
+    height: 22px;
+    margin-bottom: 6px;
+    border: none;
+    border-radius: 4px;
+    padding: 2px 6px;
+}
+
+.choice {
     display: grid;
-    grid-gap: 8px;
     grid-template-columns: 50fr 50fr;
-    margin: 8px 0 32px 0;
+    grid-gap: 6px;
+    margin-bottom: 6px;
 }
 
-.preview-button {
-    display: block;
-    padding: 2px 8px;
+.choice label {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 24px;
+    font-weight: 600;
+    text-align: center;
     cursor: pointer;
+    background-color: #202124;
+    border: 2px solid #202124;
+    border-radius: 4px;
     user-select: none;
-    width: 100%;
 }
 
-.preview-input {
-    display: block;
-    width: calc(100% - 8px);
+.choice input:checked + label {
+    border-color: rgb(0, 89, 179);
+}
+
+.choice input {
+    display: none;
 }
 </style>
