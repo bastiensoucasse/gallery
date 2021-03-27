@@ -195,19 +195,15 @@ public class ImageController {
             proccessedImage = AlgorithmManager.Instance().applyAlgorithm(name, algorithm.values(), image);
             imageDAO.create(proccessedImage);
         } catch (NoSuchMethodException e) {
-            e.printStackTrace();
             new ResponseEntity<>(HttpStatus.BAD_REQUEST);
             return ResponseEntity.badRequest().body("Algorithm doesn't exists");
         } catch (NumberFormatException e) {
-            e.printStackTrace();
             new ResponseEntity<>(HttpStatus.BAD_REQUEST);
             return ResponseEntity.badRequest().body("Impossible to parse Parameters not a Number");
         } catch (IllegalArgumentException e) {
-            e.printStackTrace();
             new ResponseEntity<>(HttpStatus.BAD_REQUEST);
             return ResponseEntity.badRequest().body("Invalid Arguments");
         } catch (Exception e) {
-            e.printStackTrace();
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
 
