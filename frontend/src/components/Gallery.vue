@@ -51,11 +51,25 @@ export default {
                     this.response = r.data;
 
                     if (this.$route.params.preview) {
-                        let i = this.response[
-                            Number(this.$route.params.preview)
-                        ];
+                        console.log(this.response);
 
-                        this.loadPreview(Number(i.id), i.name, i.type, i.size);
+                        for (let i in this.response) {
+                            console.log("Checking ", i);
+
+                            let img = this.response[i];
+                            if (
+                                Number(img.id) ==
+                                Number(this.$route.params.preview)
+                            ) {
+                                this.loadPreview(
+                                    Number(img.id),
+                                    img.name,
+                                    img.type,
+                                    img.size
+                                );
+                                break;
+                            }
+                        }
                     }
                 })
                 .catch((e) => {
