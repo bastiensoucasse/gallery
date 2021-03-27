@@ -3,6 +3,8 @@ package pdl.backend;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -112,18 +114,24 @@ public class ImageController {
     @RequestMapping(value = "/images", method = RequestMethod.POST)
     public ResponseEntity<?> addImage(@RequestParam("file") final MultipartFile file,
             final RedirectAttributes redirectAttributes) {
-
+        Image image;
         if (!AcceptedMediaTypes.contains(file.getContentType()))
             return new ResponseEntity<>(HttpStatus.UNSUPPORTED_MEDIA_TYPE);
         try {
-            final Image image = new Image(file.getOriginalFilename(), file.getBytes(), Utils.typeOfFile(file),
+            image = new Image(file.getOriginalFilename(), file.getBytes(), Utils.typeOfFile(file),
                     Utils.sizeOfImage(file));
             imageDAO.create(image);
         } catch (final IOException e) {
             e.printStackTrace();
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
-        return new ResponseEntity<>(HttpStatus.CREATED);
+
+        try {
+            return ResponseEntity.created(new URI("/" + image.getId())).body("" + image.getId());
+        } catch (URISyntaxException e) {
+            e.printStackTrace();
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        }
     }
 
     /**

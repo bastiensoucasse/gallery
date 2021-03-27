@@ -49,8 +49,8 @@ export default {
                         "Content-Type": "multipart/form-data",
                     },
                 })
-                .then(() => {
-                    location.reload();
+                .then((r) => {
+                    location.href = "/" + r.data;
                 });
         },
     },
