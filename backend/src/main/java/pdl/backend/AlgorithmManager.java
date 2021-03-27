@@ -185,7 +185,7 @@ public class AlgorithmManager {
             byte[] rawProcessedImage = ImageConverter.imageToJPEGBytes(output); // get the bytes of the processedImage
             String[] img = image.getName().toString().split("\\.");
 
-            return new Image(img[0] + "_" + name + img[1], rawProcessedImage, image.getType(), image.getSize());
+            return new Image(img[0] + "_" + name + "." + img[1], rawProcessedImage, image.getType(), image.getSize());
         }
         throw new NoSuchMethodException();
     }
