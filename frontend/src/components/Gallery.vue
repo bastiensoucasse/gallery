@@ -49,6 +49,14 @@ export default {
                 .get("images")
                 .then((r) => {
                     this.response = r.data;
+
+                    if (this.$route.params.preview) {
+                        let i = this.response[
+                            Number(this.$route.params.preview)
+                        ];
+
+                        this.loadPreview(Number(i.id), i.name, i.type, i.size);
+                    }
                 })
                 .catch((e) => {
                     this.errors.push(e);
@@ -82,18 +90,15 @@ export default {
         return {
             response: [],
             errors: [],
-            id: Number,
-            name: String,
-            importing: Boolean,
+            id: -1,
+            name: "",
+            type: "",
+            dimensions: "",
+            importing: false,
         };
     },
 
     mounted() {
-        this.id = -1;
-        this.name = "";
-        this.type = "";
-        this.dimensions = "";
-        this.importing = false;
         this.callRestService();
     },
 };
