@@ -282,7 +282,7 @@ export default {
     methods: {
         remove() {
             axios.delete("images/" + this.id).then(() => {
-                location.reload();
+                location.href = "/";
             });
         },
 
