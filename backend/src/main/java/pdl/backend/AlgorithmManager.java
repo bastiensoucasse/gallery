@@ -183,7 +183,9 @@ public class AlgorithmManager {
             m.invoke(null, arguments); // call the method
 
             byte[] rawProcessedImage = ImageConverter.imageToJPEGBytes(output); // get the bytes of the processedImage
-            return new Image(image.getName() + "_" + name, rawProcessedImage, image.getType(), image.getSize());
+            String[] img = image.getName().toString().split("\\.");
+
+            return new Image(img[0] + "_" + name + img[1], rawProcessedImage, image.getType(), image.getSize());
         }
         throw new NoSuchMethodException();
     }
