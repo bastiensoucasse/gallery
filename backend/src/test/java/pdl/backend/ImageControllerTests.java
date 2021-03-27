@@ -51,38 +51,38 @@ public class ImageControllerTests {
     @Test
     @Order(1)
     public void getImageListShouldReturnSuccess() throws Exception {
-        this.mockMvc.perform(get("/images")).andDo(print()).andExpect(status().isOk());
+        this.mockMvc.perform(get("/images")).andExpect(status().isOk());
     }
 
     @Test
     @Order(2)
     public void getImageShouldReturnNotFound() throws Exception {
-        this.mockMvc.perform(get("/images/200")).andDo(print()).andExpect(status().isNotFound());
+        this.mockMvc.perform(get("/images/200")).andExpect(status().isNotFound());
     }
 
     @Test
     @Order(3)
     public void getImageShouldReturnSuccess() throws Exception {
-        this.mockMvc.perform(get("/images/0")).andDo(print()).andExpect(status().isOk());
+        this.mockMvc.perform(get("/images/0")).andExpect(status().isOk());
     }
 
     @Test
     @Order(4)
     public void deleteImageShouldReturnBadRequest() throws Exception {
-        this.mockMvc.perform(delete("/images")).andDo(print()).andExpect(status().isBadRequest());
+        this.mockMvc.perform(delete("/images")).andExpect(status().isBadRequest());
     }
 
     @Test
     @Order(5)
     public void deleteImageShouldReturnNotFound() throws Exception {
         long lastId = (long) ReflectionTestUtils.getField(Image.class, "count");
-        this.mockMvc.perform(delete("/images/" + (++lastId))).andDo(print()).andExpect(status().isNotFound());
+        this.mockMvc.perform(delete("/images/" + (++lastId))).andExpect(status().isNotFound());
     }
 
     @Test
     @Order(6)
     public void deleteImageShouldReturnSuccess() throws Exception {
-        this.mockMvc.perform(delete("/images/0")).andDo(print()).andExpect(status().isOk());
+        this.mockMvc.perform(delete("/images/0")).andExpect(status().isOk());
     }
 
     @Test
@@ -90,7 +90,7 @@ public class ImageControllerTests {
     public void createImageShouldReturnSuccess() throws Exception {
         MockMultipartFile file = new MockMultipartFile("file", "osabat.jpg", MediaType.IMAGE_JPEG_VALUE,
                 new FileInputStream(System.getProperty("user.dir") + "/src/main/resources/images/osabat.jpeg"));
-        this.mockMvc.perform(multipart("/images").file(file)).andDo(print()).andExpect(status().isCreated());
+        this.mockMvc.perform(multipart("/images").file(file)).andExpect(status().isCreated());
     }
 
     @Test
@@ -98,7 +98,7 @@ public class ImageControllerTests {
     public void createImageShouldReturnUnsupportedMediaType() throws Exception {
         MockMultipartFile file = new MockMultipartFile("file", "osabat.png", MediaType.IMAGE_PNG_VALUE,
                 new FileInputStream(System.getProperty("user.dir") + "/src/main/resources/images/osabat.png"));
-        this.mockMvc.perform(multipart("/images").file(file)).andDo(print())
+        this.mockMvc.perform(multipart("/images").file(file))
                 .andExpect(status().isUnsupportedMediaType());
     }
 
