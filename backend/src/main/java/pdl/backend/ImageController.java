@@ -190,8 +190,9 @@ public class ImageController {
         String name = algorithm.get("algorithm"); // get the name of the algorithm
         algorithm.remove("algorithm"); // remove from the set
 
+        Image proccessedImage;
         try {
-            Image proccessedImage = AlgorithmManager.Instance().applyAlgorithm(name, algorithm.values(), image);
+            proccessedImage = AlgorithmManager.Instance().applyAlgorithm(name, algorithm.values(), image);
             imageDAO.create(proccessedImage);
         } catch (NoSuchMethodException e) {
             e.printStackTrace();
@@ -210,7 +211,7 @@ public class ImageController {
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
 
-        return new ResponseEntity<>(HttpStatus.OK);
+        return ResponseEntity.ok().contentType(MediaType.TEXT_HTML).body("<script>location.href = '/" + proccessedImage.getId() + "';</script>");
     }
 
     /**
