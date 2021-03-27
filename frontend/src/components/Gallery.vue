@@ -4,7 +4,9 @@
             <div
                 :key="image.id"
                 v-for="image in response"
-                v-on:click="loadPreview(image.id, image.name)"
+                v-on:click="
+                    loadPreview(image.id, image.name, image.type, image.size)
+                "
                 class="gallery-image"
             >
                 <img :src="'/images/' + image.id" />
@@ -16,10 +18,12 @@
         </div>
 
         <preview
-            :id="preview"
+            :id="id"
             :name="name"
+            :type="type"
+            :dimensions="dimensions"
             @close="closePreview"
-            v-if="preview != -1"
+            v-if="id != -1"
         ></preview>
 
         <importer @close="closeImporter" v-if="importing"></importer>
@@ -51,14 +55,18 @@ export default {
                 });
         },
 
-        loadPreview(id, name) {
+        loadPreview(id, name, type, dimensions) {
+            this.id = Number(id);
             this.name = name;
-            this.preview = Number(id);
+            this.type = type;
+            this.dimensions = dimensions.replaceAll("*", " × ");
         },
 
         closePreview() {
+            this.id = -1;
             this.name = "";
-            this.preview = -1;
+            this.type = "";
+            this.dimensions = "";
         },
 
         loadImporter() {
@@ -74,15 +82,17 @@ export default {
         return {
             response: [],
             errors: [],
-            preview: Number,
+            id: Number,
             name: String,
             importing: Boolean,
         };
     },
 
     mounted() {
+        this.id = -1;
         this.name = "";
-        this.preview = -1;
+        this.type = "";
+        this.dimensions = "";
         this.importing = false;
         this.callRestService();
     },

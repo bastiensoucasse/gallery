@@ -38,9 +38,20 @@
                     <h3 class="category">ID</h3>
                     <p class="paragraph">{{ id }}</p>
                 </div>
+
                 <div>
                     <h3 class="category">Name</h3>
                     <p class="paragraph">{{ name }}</p>
+                </div>
+
+                <div>
+                    <h3 class="category">Type</h3>
+                    <p class="paragraph">{{ type }}</p>
+                </div>
+
+                <div>
+                    <h3 class="category">Dimensions</h3>
+                    <p class="paragraph">{{ dimensions }}</p>
                 </div>
             </div>
         </div>
@@ -260,6 +271,8 @@ export default {
     props: {
         id: Number,
         name: String,
+        type: String,
+        dimensions: String,
     },
 
     emits: {
