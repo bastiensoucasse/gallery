@@ -13,11 +13,12 @@
                 <span class="material-icons">download</span>
             </button>
 
-            <button
-                class="feature-link"
-                onclick="document.querySelector('.preview-window').style.gridTemplateColumns='100fr 350px';document.querySelector('.preview-features').style.display='block';"
-            >
+            <button class="feature-link" @click="edit">
                 <span class="material-icons">edit</span>
+            </button>
+
+            <button class="feature-link" @click="details">
+                <span class="material-icons-outlined">info</span>
             </button>
         </div>
 
@@ -29,7 +30,22 @@
             />
         </div>
 
-        <div class="preview-features">
+        <div id="details-panel" class="preview-features">
+            <h2 class="title">Details</h2>
+
+            <div class="preview-details">
+                <div>
+                    <h3 class="category">ID</h3>
+                    <p class="paragraph">{{ id }}</p>
+                </div>
+                <div>
+                    <h3 class="category">Name</h3>
+                    <p class="paragraph">{{ name }}</p>
+                </div>
+            </div>
+        </div>
+
+        <div id="edit-panel" class="preview-features">
             <h2 class="title">Edit</h2>
 
             <div class="preview-details">
@@ -271,6 +287,22 @@ export default {
                         link.click();
                     };
                 });
+        },
+
+        edit() {
+            document.querySelector(
+                ".preview-window"
+            ).style.gridTemplateColumns = "100fr 350px";
+            document.querySelector("#details-panel").style.display = "none";
+            document.querySelector("#edit-panel").style.display = "block";
+        },
+
+        details() {
+            document.querySelector(
+                ".preview-window"
+            ).style.gridTemplateColumns = "100fr 350px";
+            document.querySelector("#edit-panel").style.display = "none";
+            document.querySelector("#details-panel").style.display = "block";
         },
     },
 };
