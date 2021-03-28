@@ -2,6 +2,7 @@ package pdl.backend;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
@@ -98,8 +99,7 @@ public class ImageControllerTests {
     public void createImageShouldReturnUnsupportedMediaType() throws Exception {
         MockMultipartFile file = new MockMultipartFile("file", "osabat.png", MediaType.IMAGE_PNG_VALUE,
                 new FileInputStream(System.getProperty("user.dir") + "/src/main/resources/images/osabat.png"));
-        this.mockMvc.perform(multipart("/images").file(file))
-                .andExpect(status().isUnsupportedMediaType());
+        this.mockMvc.perform(multipart("/images").file(file)).andExpect(status().isUnsupportedMediaType());
     }
 
     @Test
@@ -295,6 +295,14 @@ public class ImageControllerTests {
             mockMvc.perform(get("/images/" + (++lastId) + "?algorithm=" + name)).andExpect(status().isNotFound());
         }
 
+    }
+
+    @Test
+    @Order(23)
+    public void getPathResourceShouldReturnFailure() throws IOException {
+        ImageDAO i = new ImageDAO();
+        ImageController c = new ImageController(i);
+        assertThrows(IOException.class, () -> c.getPathOfResource("test"));
     }
 
     @Test

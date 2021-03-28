@@ -207,7 +207,8 @@ public class ImageController {
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
 
-        return ResponseEntity.ok().contentType(MediaType.TEXT_HTML).body("<script>location.href = '/" + proccessedImage.getId() + "';</script>");
+        return ResponseEntity.ok().contentType(MediaType.TEXT_HTML)
+                .body("<script>location.href = '/" + proccessedImage.getId() + "';</script>");
     }
 
     /**
@@ -251,7 +252,12 @@ public class ImageController {
 
     public Path getPathOfResource(String p) throws IOException {
         final ClassPathResource resource = new ClassPathResource(p);
-        File f = resource.getFile();
+        File f;
+        try {
+            f = resource.getFile();
+        } catch (IOException e) {
+            throw new IOException("The image folder does not exist", e.getCause());
+        }
         return Paths.get(f.getAbsolutePath());
     }
 }
