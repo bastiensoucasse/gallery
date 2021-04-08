@@ -1,4 +1,4 @@
-package pdl.backend;
+package pdl.backend.controller;
 
 import java.awt.image.BufferedImage;
 import java.io.File;
@@ -26,6 +26,7 @@ import org.springframework.core.io.ClassPathResource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -35,6 +36,10 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import pdl.backend.AcceptedMediaTypes;
+import pdl.backend.AlgorithmManager;
+import pdl.backend.Utils;
+import pdl.backend.mysqldb.Image;
 import pdl.backend.mysqldb.ImageRepository;
 
 @RestController
@@ -146,19 +151,9 @@ public class ImageController {
      *
      * @return the raw JSON nodes
      */
-    @RequestMapping(value = "/images", method = RequestMethod.GET, produces = "application/json; charset=UTF-8")
-    @ResponseBody
-    public ArrayNode getImageList() {
-        final ArrayNode nodes = mapper.createArrayNode();
-
-        // for (final Image image : imageDAO.retrieveAll())
-        for (final Image image : imageRepository.findAll())
-            try {
-                nodes.add(mapper.readTree(image.toString()));
-            } catch (final JsonProcessingException e) {
-                e.printStackTrace();
-            }
-        return nodes;
+    @GetMapping(path="/images")
+    public @ResponseBody Iterable<Image> getImageList() {
+        return imageRepository.findAll();
     }
 
     /**
@@ -201,7 +196,7 @@ public class ImageController {
 
         Image proccessedImage;
         try {
-            proccessedImage = AlgorithmManager.Instance().applyAlgorithm(name, algorithm.values(), image);
+            proccessedImage = AlgorithmManager.Instance().applyAlgorithm(name, algorithm.keySet(), image);
             //imageDAO.create(proccessedImage);
             imageRepository.save(proccessedImage);
         } catch (NoSuchMethodException e) {

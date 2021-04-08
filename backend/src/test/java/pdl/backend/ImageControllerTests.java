@@ -34,6 +34,8 @@ import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.test.web.servlet.MockMvc;
 
+import pdl.backend.mysqldb.Image;
+
 @SpringBootTest
 @AutoConfigureMockMvc
 @TestMethodOrder(OrderAnnotation.class)
@@ -41,12 +43,12 @@ public class ImageControllerTests {
     @Autowired
     private MockMvc mockMvc;
 
-    @Autowired
-    private ImageDAO imageDAO;
+    //@Autowired
+    //private ImageDAO imageDAO;
 
     @BeforeAll
     public static void reset() {
-        ReflectionTestUtils.setField(Image.class, "count", Long.valueOf(0));
+        ReflectionTestUtils.setField(Image.class, "count", 0);
     }
 
     @Test
@@ -200,7 +202,7 @@ public class ImageControllerTests {
     @Test
     @Order(12)
     public void testGetMetaData() throws Exception {
-        List<Image> listImages = imageDAO.retrieveAll();
+        List<Image> listImages = null;//imageDAO.retrieveAll();
         String jsonContent = "[";
         jsonContent += listImages.get(0).toString();
         listImages.remove(0);

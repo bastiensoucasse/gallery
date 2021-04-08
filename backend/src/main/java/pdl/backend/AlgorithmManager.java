@@ -12,6 +12,7 @@ import java.util.Set;
 
 import io.scif.img.SCIFIOImgPlus;
 import net.imglib2.type.numeric.integer.UnsignedByteType;
+import pdl.backend.mysqldb.Image;
 import pdl.processing.ImageConverter;
 import pdl.processing.Processing;
 

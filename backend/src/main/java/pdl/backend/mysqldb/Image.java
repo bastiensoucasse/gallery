@@ -1,7 +1,11 @@
-package pdl.backend;
+package pdl.backend.mysqldb;
 
+import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.Lob;
 
 import org.springframework.http.MediaType;
 
@@ -10,10 +14,17 @@ public class Image {
     private static int count = 0;
 
     @Id
-    private int id;
+    @GeneratedValue(strategy=GenerationType.AUTO)
+    private Integer id;
+    @Column(name = "name", columnDefinition="VARCHAR(128)")
     private String name;
+    @Column(name = "type", columnDefinition="VARCHAR(128)")
     private MediaType type;
+
+    @Column(name = "size", columnDefinition="VARCHAR(128)")
     private String size;
+    @Lob
+    @Column(name = "data", columnDefinition="LONGBLOB")
     private byte[] data;
 
 
@@ -28,7 +39,7 @@ public class Image {
     }
 
     public Image(final String name, final byte[] data, MediaType type, String size){
-        this.id = count++;
+        //this.id = count++;
         this.name = name;
         this.data = data;
         this.type = type;
@@ -37,7 +48,7 @@ public class Image {
 
 
 
-    public long getId() {
+    public Integer getId() {
         return id;
     }
 
