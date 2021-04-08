@@ -1,10 +1,16 @@
 package pdl.backend;
 
+import javax.persistence.Entity;
+import javax.persistence.Id;
+
 import org.springframework.http.MediaType;
 
+@Entity
 public class Image {
-    private static Long count = Long.valueOf(0);
-    private Long id;
+    private static int count = 0;
+
+    @Id
+    private int id;
     private String name;
     private MediaType type;
     private String size;
@@ -29,7 +35,7 @@ public class Image {
         this.size = size;
     }
 
-    
+
 
     public long getId() {
         return id;
@@ -60,7 +66,7 @@ public class Image {
      */
     @Override
     public String toString() {
-        return "{\"id\":\"" + getId() + "\", \"name\": \"" + name + "\", \"type\": \"" + type + "\", \"size\": \"" + size + "\"" + "}"; 
+        return "{\"id\":\"" + getId() + "\", \"name\": \"" + name + "\", \"type\": \"" + type + "\", \"size\": \"" + size + "\"" + "}";
     }
 
     @Override
@@ -71,7 +77,7 @@ public class Image {
         if(obj == this)
             return true;
 
-        return other.name.equals(name) && other.data.equals(data) && other.id.equals(id) && other.size.equals(size) && other.type.equals(type) ;
-        
+        return other.id == id && other.name.equals(name) && other.data.equals(data) && other.size.equals(size) && other.type.equals(type);
+
     }
 }

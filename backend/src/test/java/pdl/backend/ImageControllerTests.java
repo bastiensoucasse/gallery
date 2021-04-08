@@ -102,9 +102,9 @@ public class ImageControllerTests {
         this.mockMvc.perform(multipart("/images").file(file)).andExpect(status().isUnsupportedMediaType());
     }
 
-    @Test
-    @Order(9)
-    public void testGetPathOfResource() throws IOException {
+    //@Test
+    //@Order(9)
+    /*public void testGetPathOfResource() throws IOException {
         ImageDAO i = new ImageDAO();
         ImageController c = new ImageController(i);
         String path_1 = "/images/";
@@ -145,9 +145,9 @@ public class ImageControllerTests {
         assertTrue(images.contains(path_image_5.toString()));
         assertTrue(images.contains(path_image_3.toString()));
         assertFalse(images.contains(path_image_6.toString()));
-    }
+    }*/
 
-    @Test
+    /*@Test
     @Order(11)
     public void testSaveImagesFolder() throws IOException {
         ImageDAO i = new ImageDAO();
@@ -195,7 +195,7 @@ public class ImageControllerTests {
         assertFalse(i5.getSize().equals(null));
         assertFalse(i5.getData().equals(null));
         assertTrue(i5.getType().equals(MediaType.IMAGE_JPEG));
-    }
+    }*/
 
     @Test
     @Order(12)
@@ -297,13 +297,13 @@ public class ImageControllerTests {
 
     }
 
-    @Test
+    /*@Test
     @Order(23)
     public void getPathResourceShouldReturnFailure() throws IOException {
         ImageDAO i = new ImageDAO();
         ImageController c = new ImageController(i);
         assertThrows(IOException.class, () -> c.getPathOfResource("test"));
-    }
+    }*/
 
     @Test
     @Disabled

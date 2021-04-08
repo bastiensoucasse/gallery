@@ -35,12 +35,17 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import pdl.backend.mysqldb.ImageRepository;
+
 @RestController
 public class ImageController {
     /**
      * Image data access object (database).
      */
-    private final ImageDAO imageDAO;
+    // private final ImageDAO imageDAO;
+
+    @Autowired
+    private ImageRepository imageRepository;
 
     /**
      * JSON mapper.
@@ -53,10 +58,9 @@ public class ImageController {
      *
      * @param imageDAO the image data access object (database)
      */
-    @Autowired
-    public ImageController(final ImageDAO imageDAO) {
-        this.imageDAO = imageDAO;
-    }
+    //public ImageController(/*ImageDAO imageDAO*/) {
+        //this.imageDAO = imageDAO;
+    //}
 
     /**
      * Gets an image from the DAO and sends it as an HTTP response.
@@ -67,8 +71,9 @@ public class ImageController {
      */
     @RequestMapping(value = "/images/{id}", method = RequestMethod.GET, produces = { MediaType.IMAGE_JPEG_VALUE,
             "image/tiff" })
-    public ResponseEntity<?> getImage(@PathVariable("id") final long id) {
-        final Image image = imageDAO.retrieve(id).orElse(null);
+    public ResponseEntity<?> getImage(@PathVariable("id") final int id) {
+        // final Image image = imageDAO.retrieve(id).orElse(null);
+        final Image image = imageRepository.findById(id).orElse(null);
 
         if (image == null)
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
@@ -94,12 +99,13 @@ public class ImageController {
      *         found)
      */
     @RequestMapping(value = "/images/{id}", method = RequestMethod.DELETE)
-    public ResponseEntity<?> deleteImage(@PathVariable("id") final long id) {
-        final Image image = imageDAO.retrieve(id).orElse(null);
-        if (image == null)
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+    public ResponseEntity<?> deleteImage(@PathVariable("id") final int id) {
+        // final Image image = imageDAO.retrieve(id).orElse(null);
+        // if (image == null)
+        //     return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        // imageDAO.delete(image);
 
-        imageDAO.delete(image);
+        imageRepository.deleteById(id);
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
@@ -120,7 +126,8 @@ public class ImageController {
         try {
             image = new Image(file.getOriginalFilename(), file.getBytes(), Utils.typeOfFile(file),
                     Utils.sizeOfImage(file));
-            imageDAO.create(image);
+            //imageDAO.create(image);
+            imageRepository.save(image);
         } catch (final IOException e) {
             e.printStackTrace();
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
@@ -144,7 +151,8 @@ public class ImageController {
     public ArrayNode getImageList() {
         final ArrayNode nodes = mapper.createArrayNode();
 
-        for (final Image image : imageDAO.retrieveAll())
+        // for (final Image image : imageDAO.retrieveAll())
+        for (final Image image : imageRepository.findAll())
             try {
                 nodes.add(mapper.readTree(image.toString()));
             } catch (final JsonProcessingException e) {
@@ -153,10 +161,10 @@ public class ImageController {
         return nodes;
     }
 
-    @PostConstruct
     /**
      * Method launches when the server is starting
      */
+    @PostConstruct
     public void onStart() {
         String path = "/images/";
         try {
@@ -181,9 +189,10 @@ public class ImageController {
      */
     @RequestMapping(value = "/images/{id}", params = "algorithm", method = RequestMethod.GET, produces = MediaType.IMAGE_JPEG_VALUE)
     @ResponseBody
-    public ResponseEntity<?> executeAlgorithm(@PathVariable("id") final long id,
+    public ResponseEntity<?> executeAlgorithm(@PathVariable("id") final int id,
             @RequestParam Map<String, String> algorithm) {
-        final Image image = imageDAO.retrieve(id).orElse(null);
+        // final Image image = imageDAO.retrieve(id).orElse(null);
+        final Image image = imageRepository.findById(id).orElse(null);
         if (image == null)
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
 
@@ -193,7 +202,8 @@ public class ImageController {
         Image proccessedImage;
         try {
             proccessedImage = AlgorithmManager.Instance().applyAlgorithm(name, algorithm.values(), image);
-            imageDAO.create(proccessedImage);
+            //imageDAO.create(proccessedImage);
+            imageRepository.save(proccessedImage);
         } catch (NoSuchMethodException e) {
             new ResponseEntity<>(HttpStatus.BAD_REQUEST);
             return ResponseEntity.badRequest().body("Algorithm doesn't exists");
@@ -206,7 +216,6 @@ public class ImageController {
         } catch (Exception e) {
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
-
         return ResponseEntity.ok().contentType(MediaType.TEXT_HTML)
                 .body("<script>location.href = '/" + proccessedImage.getId() + "';</script>");
     }
@@ -226,9 +235,9 @@ public class ImageController {
                 byte[] fileContent = Files.readAllBytes(Paths.get(i));
                 MediaType type = MediaType.parseMediaType(Files.probeContentType(Paths.get(i)));
                 BufferedImage bufferedImage = ImageIO.read(Paths.get(i).toFile());
-                String size = "" + bufferedImage.getWidth() + "*" + bufferedImage.getHeight() + "*"
-                        + bufferedImage.getColorModel().getNumComponents();
-                imageDAO.create(new Image(Paths.get(i).getFileName().toString(), fileContent, type, size));
+                String size = "" + bufferedImage.getWidth() + "*" + bufferedImage.getHeight() + "*" + bufferedImage.getColorModel().getNumComponents();
+                //imageDAO.create(new Image(Paths.get(i).getFileName().toString(), fileContent, type, size));
+                imageRepository.save(new Image(Paths.get(i).getFileName().toString(), fileContent, type, size));
             } catch (IOException e) {
                 e.printStackTrace();
             }
