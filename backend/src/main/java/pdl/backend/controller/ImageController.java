@@ -63,9 +63,9 @@ public class ImageController {
      *
      * @param imageDAO the image data access object (database)
      */
-    //public ImageController(/*ImageDAO imageDAO*/) {
-        //this.imageDAO = imageDAO;
-    //}
+    // public ImageController(/*ImageDAO imageDAO*/) {
+    // this.imageDAO = imageDAO;
+    // }
 
     /**
      * Gets an image from the DAO and sends it as an HTTP response.
@@ -107,7 +107,7 @@ public class ImageController {
     public ResponseEntity<?> deleteImage(@PathVariable("id") final int id) {
         // final Image image = imageDAO.retrieve(id).orElse(null);
         // if (image == null)
-        //     return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        // return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         // imageDAO.delete(image);
 
         imageRepository.deleteById(id);
@@ -131,7 +131,6 @@ public class ImageController {
         try {
             image = new Image(file.getOriginalFilename(), file.getBytes(), Utils.typeOfFile(file),
                     Utils.sizeOfImage(file));
-            //imageDAO.create(image);
             imageRepository.save(image);
         } catch (final IOException e) {
             e.printStackTrace();
@@ -151,9 +150,16 @@ public class ImageController {
      *
      * @return the raw JSON nodes
      */
-    @GetMapping(path="/images")
-    public @ResponseBody Iterable<Image> getImageList() {
-        return imageRepository.findAll();
+    @GetMapping(path = "/images", produces = "application/json; charset=UTF-8")
+    public @ResponseBody ArrayNode getImageList() {
+        final ArrayNode nodes = mapper.createArrayNode();
+        for (final Image image : imageRepository.findAll())
+            try {
+                nodes.add(mapper.readTree(image.toString()));
+            } catch (final JsonProcessingException e) {
+                e.printStackTrace();
+            }
+        return nodes;
     }
 
     /**
@@ -197,7 +203,7 @@ public class ImageController {
         Image proccessedImage;
         try {
             proccessedImage = AlgorithmManager.Instance().applyAlgorithm(name, algorithm.keySet(), image);
-            //imageDAO.create(proccessedImage);
+            // imageDAO.create(proccessedImage);
             imageRepository.save(proccessedImage);
         } catch (NoSuchMethodException e) {
             new ResponseEntity<>(HttpStatus.BAD_REQUEST);
@@ -221,6 +227,7 @@ public class ImageController {
      * @throws IOException
      */
     public void saveImagesFolder(Path path_of_resource) throws IOException {
+        imageRepository.deleteAll();
         Path path = path_of_resource;
         Set<String> listImages = new HashSet<>();
         listImages = listFiles(path);
@@ -230,8 +237,10 @@ public class ImageController {
                 byte[] fileContent = Files.readAllBytes(Paths.get(i));
                 MediaType type = MediaType.parseMediaType(Files.probeContentType(Paths.get(i)));
                 BufferedImage bufferedImage = ImageIO.read(Paths.get(i).toFile());
-                String size = "" + bufferedImage.getWidth() + "*" + bufferedImage.getHeight() + "*" + bufferedImage.getColorModel().getNumComponents();
-                //imageDAO.create(new Image(Paths.get(i).getFileName().toString(), fileContent, type, size));
+                String size = "" + bufferedImage.getWidth() + "*" + bufferedImage.getHeight() + "*"
+                        + bufferedImage.getColorModel().getNumComponents();
+                // imageDAO.create(new Image(Paths.get(i).getFileName().toString(), fileContent,
+                // type, size));
                 imageRepository.save(new Image(Paths.get(i).getFileName().toString(), fileContent, type, size));
             } catch (IOException e) {
                 e.printStackTrace();

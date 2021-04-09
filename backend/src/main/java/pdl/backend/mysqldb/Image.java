@@ -2,29 +2,31 @@ package pdl.backend.mysqldb;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Lob;
+import javax.persistence.Table;
 
 import org.springframework.http.MediaType;
 
 @Entity
+@Table(name = "image")
 public class Image {
     private static int count = 0;
 
     @Id
-    @GeneratedValue(strategy=GenerationType.AUTO)
     private Integer id;
-    @Column(name = "name", columnDefinition="VARCHAR(128)")
-    private String name;
-    @Column(name = "type", columnDefinition="VARCHAR(128)")
-    private MediaType type;
 
-    @Column(name = "size", columnDefinition="VARCHAR(128)")
+    @Column(name = "name")
+    private String name;
+
+    @Column(name = "type")
+    private String type;
+
+    @Column(name = "size")
     private String size;
+
     @Lob
-    @Column(name = "data", columnDefinition="LONGBLOB")
+    @Column(name = "data")
     private byte[] data;
 
 
@@ -39,12 +41,21 @@ public class Image {
     }
 
     public Image(final String name, final byte[] data, MediaType type, String size){
-        //this.id = count++;
+        this.id = count++;
         this.name = name;
         this.data = data;
+        this.type = type.toString();
+        this.size = size;
+    }
+
+    public Image(Integer id, String name, String type, String size){
+        this.id = id;
+        this.name = name;
         this.type = type;
         this.size = size;
     }
+
+    
 
 
 
@@ -57,7 +68,7 @@ public class Image {
     }
 
     public MediaType getType(){
-        return type;
+        return MediaType.valueOf(type);
     }
 
     public String getSize(){
