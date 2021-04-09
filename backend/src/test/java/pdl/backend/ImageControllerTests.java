@@ -76,8 +76,7 @@ public class ImageControllerTests {
     @Test
     @Order(5)
     public void deleteImageShouldReturnNotFound() throws Exception {
-        long lastId = (long) ReflectionTestUtils.getField(Image.class, "count");
-        System.out.println(lastId);
+        Integer lastId = (Integer) ReflectionTestUtils.getField(Image.class, "count");
         this.mockMvc.perform(delete("/images/" + (++lastId))).andExpect(status().isNotFound()).andDo(print());
     }
 
@@ -299,7 +298,7 @@ public class ImageControllerTests {
     @Test
     @Order(22)
     public void executeAlgorithmShouldReturnNotFound() throws Exception {
-        long lastId = (long) ReflectionTestUtils.getField(Image.class, "count");
+        Integer lastId = (Integer) ReflectionTestUtils.getField(Image.class, "count");
 
         Set<String> listOfAlgorithms = AlgorithmManager.Instance().listAlgorithms();
         for (String name : listOfAlgorithms) {

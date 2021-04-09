@@ -105,11 +105,9 @@ public class ImageController {
      */
     @RequestMapping(value = "/images/{id}", method = RequestMethod.DELETE)
     public ResponseEntity<?> deleteImage(@PathVariable("id") final int id) {
-        // final Image image = imageDAO.retrieve(id).orElse(null);
-        // if (image == null)
-        // return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        // imageDAO.delete(image);
-
+        if(imageRepository.findById(id).isEmpty())
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        
         imageRepository.deleteById(id);
         return new ResponseEntity<>(HttpStatus.OK);
     }
