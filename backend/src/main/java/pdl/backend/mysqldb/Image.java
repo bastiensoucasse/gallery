@@ -55,10 +55,6 @@ public class Image {
         this.size = size;
     }
 
-    
-
-
-
     public Integer getId() {
         return id;
     }
@@ -81,6 +77,10 @@ public class Image {
 
     public byte[] getData() {
         return data;
+    }
+
+    public String getNameWithoutExtension(){
+        return name.split(".")[0];
     }
 
     /**

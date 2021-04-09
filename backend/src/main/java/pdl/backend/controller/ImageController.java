@@ -41,6 +41,7 @@ import pdl.backend.AlgorithmManager;
 import pdl.backend.Utils;
 import pdl.backend.mysqldb.Image;
 import pdl.backend.mysqldb.ImageRepository;
+import pdl.processing.ImageConverter;
 
 @RestController
 public class ImageController {
@@ -233,13 +234,7 @@ public class ImageController {
         listImages.forEach(i -> {
             try {
                 byte[] fileContent = Files.readAllBytes(Paths.get(i));
-                MediaType type = MediaType.parseMediaType(Files.probeContentType(Paths.get(i)));
-                BufferedImage bufferedImage = ImageIO.read(Paths.get(i).toFile());
-                String size = "" + bufferedImage.getWidth() + "*" + bufferedImage.getHeight() + "*"
-                        + bufferedImage.getColorModel().getNumComponents();
-                // imageDAO.create(new Image(Paths.get(i).getFileName().toString(), fileContent,
-                // type, size));
-                imageRepository.save(new Image(Paths.get(i).getFileName().toString(), fileContent, type, size));
+                imageRepository.save(new Image(Paths.get(i).getFileName().toString(), fileContent, Utils.typeOfFile(Paths.get(i)), Utils.sizeOfImage(Paths.get(i))));
             } catch (IOException e) {
                 e.printStackTrace();
             }

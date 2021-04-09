@@ -47,6 +47,10 @@ public final class Utils {
         return MediaType.parseMediaType(Files.probeContentType(file.toPath()));
     }
 
+    public static MediaType typeOfFile(Path p) throws IOException, InvalidMediaTypeException {
+        return MediaType.parseMediaType(Files.probeContentType(p));
+    }
+
     /**
      * Give the size of an Image in a string of the form :
      * "width*height*numberOfComponentsInColorModel" example : "680*480*3" width:
@@ -60,6 +64,12 @@ public final class Utils {
     public static String sizeOfImage(File file) throws IOException {
         return "" + ImageIO.read(file).getWidth() + "*" + ImageIO.read(file).getHeight() + "*"
                 + ImageIO.read(file).getColorModel().getNumComponents();
+    }
+
+    public static String sizeOfImage(Path p) throws IOException {
+        File f = p.toFile();
+        return "" + ImageIO.read(f).getWidth() + "*" + ImageIO.read(f).getHeight() + "*"
+                + ImageIO.read(f).getColorModel().getNumComponents();
     }
 
     /**
