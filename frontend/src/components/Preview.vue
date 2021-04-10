@@ -81,6 +81,22 @@
                     method="get"
                     :action="'/images/' + id"
                 >
+                    <h3 class="category">Convert to negative</h3>
+
+                    <input type="hidden" name="algorithm" value="toNegative" />
+
+                    <input
+                        class="theme-button"
+                        type="submit"
+                        value="To negative"
+                    />
+                </form>
+
+                <form
+                    class="preview-feature"
+                    method="get"
+                    :action="'/images/' + id"
+                >
                     <h3 class="category">Apply a gain to the brightness</h3>
 
                     <input
