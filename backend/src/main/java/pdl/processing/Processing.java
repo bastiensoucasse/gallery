@@ -40,6 +40,22 @@ public class Processing
         }
     }
 
+    public static void toNegative(final SCIFIOImgPlus<UnsignedByteType> input, final SCIFIOImgPlus<UnsignedByteType> output)
+    {
+        System.out.printf("Converting to negative...\n");
+
+        final Cursor<UnsignedByteType> inputCursor = input.getImg().cursor();
+        final Cursor<UnsignedByteType> outputCursor = output.getImg().cursor();
+
+        while (inputCursor.hasNext() && outputCursor.hasNext())
+        {
+            inputCursor.fwd();
+            outputCursor.fwd();
+
+            outputCursor.get().set(255 - inputCursor.get().get());
+        }
+    }
+
     public static void changeBrightness(final SCIFIOImgPlus<UnsignedByteType> input, final SCIFIOImgPlus<UnsignedByteType> output, final int gain)
     {
         if (gain < -255 || gain > 255)
