@@ -164,30 +164,38 @@ public class AlgorithmManager {
      * @throws IllegalArgumentException Arguments passed not accepted, e.g too many
      *                                  Arguments or not enough
      */
-    public Image applyAlgorithm(final String name, final Collection<String> args, final Image image) throws Exception,
-            NumberFormatException, NoSuchMethodException, IllegalArgumentException, InvocationTargetException {
-
+    public Image applyAlgorithm(final String name, final Collection<String> args, final Image image)
+    throws Exception, NumberFormatException, NoSuchMethodException, IllegalArgumentException, InvocationTargetException
+    {
         final Map<Class<?>[], Method> methods = algorithms.get(name);
-        if (methods != null) {
-            // Convert the Image as a SCIFIOImgPlus<>
-            final SCIFIOImgPlus<UnsignedByteType> input = Converter.imageFromJPEGBytes(image.getData());
-            final SCIFIOImgPlus<UnsignedByteType> output = input.copy(); // create a copy of the input
 
-            final Object[] arguments = new Object[args.size() + 2]; // list of arguments to apply to the method
-            arguments[0] = input; // load input as first argument
-            arguments[1] = output; // load output as second argument
+        if (methods == null)
+            throw new NoSuchMethodException();
 
-            final Class<?>[] parametersType = parseParameters(name, args, methods.keySet(), arguments, 2);
-            final Method m = methods.get(parametersType);
+        // Convert the Image as a SCIFIOImgPlus<>
+        final SCIFIOImgPlus<UnsignedByteType> input = Converter.imageFromJPEGBytes(image.getData());
+        final SCIFIOImgPlus<UnsignedByteType> output = input.copy(); // create a copy of the input
 
-            m.invoke(null, arguments); // call the method
+        final Object[] arguments = new Object[args.size() + 2]; // list of arguments to apply to the method
+        arguments[0] = input; // load input as first argument
+        arguments[1] = output; // load output as second argument
 
-            final byte[] rawProcessedImage = Converter.imageToJPEGBytes(output); // get the bytes of the processedImage
-            final String[] img = image.getName().toString().split("\\.");
+        final Class<?>[] parametersType = parseParameters(name, args, methods.keySet(), arguments, 2);
+        final Method m = methods.get(parametersType);
 
-            return new Image(img[0] + "_" + name + "." + img[1], rawProcessedImage, image.getType(), image.getSize());
-        }
-        throw new NoSuchMethodException();
+        System.out.printf("Calling algorithm %s", name);
+        for (String arg : args)
+            System.out.printf(" %s", arg);
+        System.out.printf(" on image #%d.\n", image.getId());
+
+        m.invoke(null, arguments);
+
+        final byte[] rawProcessedImage = Converter.imageToJPEGBytes(output); // get the bytes of the processedImage
+        final String[] img = image.getName().toString().split("\\.");
+
+        Image result = new Image(img[0] + "_" + name + "." + img[1], rawProcessedImage, image.getType(), image.getSize());
+        System.out.printf("Algorithm done resulting image #%d.\n", result.getId());
+        return result;
     }
 
     /**
