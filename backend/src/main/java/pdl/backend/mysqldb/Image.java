@@ -29,8 +29,7 @@ public class Image {
     @Column(name = "data")
     private byte[] data;
 
-
-    public Image(){
+    public Image() {
         super();
     }
 
@@ -40,7 +39,7 @@ public class Image {
         this.data = data;
     }
 
-    public Image(final String name, final byte[] data, MediaType type, String size){
+    public Image(final String name, final byte[] data, final MediaType type, final String size) {
         this.id = count++;
         this.name = name;
         this.data = data;
@@ -48,7 +47,7 @@ public class Image {
         this.size = size;
     }
 
-    public Image(Integer id, String name, String type, String size){
+    public Image(final Integer id, final String name, final String type, final String size) {
         this.id = id;
         this.name = name;
         this.type = type;
@@ -63,11 +62,11 @@ public class Image {
         return name;
     }
 
-    public MediaType getType(){
+    public MediaType getType() {
         return MediaType.valueOf(type);
     }
 
-    public String getSize(){
+    public String getSize() {
         return size;
     }
 
@@ -79,7 +78,7 @@ public class Image {
         return data;
     }
 
-    public String getNameWithoutExtension(){
+    public String getNameWithoutExtension() {
         return name.split(".")[0];
     }
 
@@ -88,18 +87,19 @@ public class Image {
      */
     @Override
     public String toString() {
-        return "{\"id\":\"" + getId() + "\", \"name\": \"" + name + "\", \"type\": \"" + type + "\", \"size\": \"" + size + "\"" + "}";
+        return "{\"id\":\"" + getId() + "\", \"name\": \"" + name + "\", \"type\": \"" + type + "\", \"size\": \""
+                + size + "\"" + "}";
     }
 
     @Override
-    public boolean equals(Object obj) {
-        if(obj == null || obj.getClass() != this.getClass())
+    public boolean equals(final Object obj) {
+        if (obj == null || obj.getClass() != this.getClass())
             return false;
         final Image other = (Image) obj;
-        if(obj == this)
+        if (obj == this)
             return true;
 
-        return other.id == id && other.name.equals(name) && other.data.equals(data) && other.size.equals(size) && other.type.equals(type);
-
+        return other.id == id && other.name.equals(name) && other.data.equals(data) && other.size.equals(size)
+                && other.type.equals(type);
     }
 }

@@ -1,17 +1,14 @@
 package pdl.backend;
 
-
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
-
 
 import java.io.FileInputStream;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Set;
 
 import org.junit.jupiter.api.BeforeAll;
@@ -38,8 +35,8 @@ public class ImageControllerTests {
     @Autowired
     private MockMvc mockMvc;
 
-    //@Autowired
-    //private ImageDAO imageDAO;
+    // @Autowired
+    // private ImageDAO imageDAO;
 
     @Autowired
     private ImageRepository imageRepository;
@@ -89,7 +86,7 @@ public class ImageControllerTests {
     @Test
     @Order(7)
     public void createImageShouldReturnSuccess() throws Exception {
-        MockMultipartFile file = new MockMultipartFile("file", "osabat.jpg", MediaType.IMAGE_JPEG_VALUE,
+        final MockMultipartFile file = new MockMultipartFile("file", "osabat.jpg", MediaType.IMAGE_JPEG_VALUE,
                 new FileInputStream(System.getProperty("user.dir") + "/src/main/resources/images/osabat.jpeg"));
         this.mockMvc.perform(multipart("/images").file(file)).andExpect(status().isCreated());
     }
@@ -97,114 +94,118 @@ public class ImageControllerTests {
     @Test
     @Order(8)
     public void createImageShouldReturnUnsupportedMediaType() throws Exception {
-        MockMultipartFile file = new MockMultipartFile("file", "osabat.png", MediaType.IMAGE_PNG_VALUE,
+        final MockMultipartFile file = new MockMultipartFile("file", "osabat.png", MediaType.IMAGE_PNG_VALUE,
                 new FileInputStream(System.getProperty("user.dir") + "/src/main/resources/images/osabat.png"));
         this.mockMvc.perform(multipart("/images").file(file)).andExpect(status().isUnsupportedMediaType());
     }
 
-    //@Test
-    //@Order(9)
-    /*public void testGetPathOfResource() throws IOException {
-        ImageDAO i = new ImageDAO();
-        ImageController c = new ImageController(i);
-        String path_1 = "/images/";
-        String path_2 = "/image_test/another_one/jam.jpg";
-        String path_3 = "/image_test/osabat.jpg";
-        String path_4 = "/image_test/another_one/testing.txt";
-        assertTrue(Files.exists(c.getPathOfResource(path_1)));
-        assertTrue(Files.exists(c.getPathOfResource(path_2)));
-        assertTrue(Files.exists(c.getPathOfResource(path_3)));
-        assertTrue(Files.exists(c.getPathOfResource(path_4)));
-    }
+    // @Test
+    // @Order(9)
+    // public void testGetPathOfResource() throws IOException {
+    // ImageDAO i = new ImageDAO();
+    // ImageController c = new ImageController(i);
+    // String path_1 = "/images/";
+    // String path_2 = "/image_test/another_one/jam.jpg";
+    // String path_3 = "/image_test/osabat.jpg";
+    // String path_4 = "/image_test/another_one/testing.txt";
+    // assertTrue(Files.exists(c.getPathOfResource(path_1)));
+    // assertTrue(Files.exists(c.getPathOfResource(path_2)));
+    // assertTrue(Files.exists(c.getPathOfResource(path_3)));
+    // assertTrue(Files.exists(c.getPathOfResource(path_4)));
+    // }
 
-    @Test
-    @Order(10)
-    public void listFilesShouldReturnSucess() throws Exception {
-        ImageDAO i = new ImageDAO();
-        ImageController c = new ImageController(i);
-        Path path_image_1 = c.getPathOfResource("/image_test/osabat.jpg");
-        Path path_image_2 = c.getPathOfResource("/image_test/another_one/cyber.jpeg");
-        Path path_image_3 = c.getPathOfResource("/image_test/another_one/jam.jpg");
-        Path path_image_4 = c.getPathOfResource("/image_test/another_one/sacre_coeur.jpg");
-        Path path_image_5 = c.getPathOfResource("/image_test/insanity.jfif");
-        Path path_image_6 = c.getPathOfResource("/image_test/osabat.png");
+    // @Test
+    // @Order(10)
+    // public void listFilesShouldReturnSucess() throws Exception {
+    // ImageDAO i = new ImageDAO();
+    // ImageController c = new ImageController(i);
+    // Path path_image_1 = c.getPathOfResource("/image_test/osabat.jpg");
+    // Path path_image_2 =
+    // c.getPathOfResource("/image_test/another_one/cyber.jpeg");
+    // Path path_image_3 = c.getPathOfResource("/image_test/another_one/jam.jpg");
+    // Path path_image_4 =
+    // c.getPathOfResource("/image_test/another_one/sacre_coeur.jpg");
+    // Path path_image_5 = c.getPathOfResource("/image_test/insanity.jfif");
+    // Path path_image_6 = c.getPathOfResource("/image_test/osabat.png");
 
-        final ClassPathResource resource = new ClassPathResource("/image_test/");
-        File f = resource.getFile();
-        Path path_of_images = Paths.get(f.getAbsolutePath());
-        Set<String> images = c.listFiles(path_of_images);
+    // final ClassPathResource resource = new ClassPathResource("/image_test/");
+    // File f = resource.getFile();
+    // Path path_of_images = Paths.get(f.getAbsolutePath());
+    // Set<String> images = c.listFiles(path_of_images);
 
-        Path path = Paths.get(System.getProperty("user.dir"), "/src/main/resources/images");
-        Set<String> image_set = Utils.listFiles(path);
-        assertTrue(image_set.size() != 0);
-        images.forEach(ima -> assertTrue(ima.contains(".tif") || ima.contains(".tif") || ima.contains(".jpeg")
-                || ima.contains(".jpg") || ima.contains(".jpe") || ima.contains(".jfif")));
-        assertTrue(images.contains(path_image_1.toString()));
-        assertTrue(images.contains(path_image_2.toString()));
-        assertTrue(images.contains(path_image_4.toString()));
-        assertTrue(images.contains(path_image_5.toString()));
-        assertTrue(images.contains(path_image_3.toString()));
-        assertFalse(images.contains(path_image_6.toString()));
-    }*/
+    // Path path = Paths.get(System.getProperty("user.dir"),
+    // "/src/main/resources/images");
+    // Set<String> image_set = Utils.listFiles(path);
+    // assertTrue(image_set.size() != 0);
+    // images.forEach(ima -> assertTrue(ima.contains(".tif") || ima.contains(".tif")
+    // || ima.contains(".jpeg")
+    // || ima.contains(".jpg") || ima.contains(".jpe") || ima.contains(".jfif")));
+    // assertTrue(images.contains(path_image_1.toString()));
+    // assertTrue(images.contains(path_image_2.toString()));
+    // assertTrue(images.contains(path_image_4.toString()));
+    // assertTrue(images.contains(path_image_5.toString()));
+    // assertTrue(images.contains(path_image_3.toString()));
+    // assertFalse(images.contains(path_image_6.toString()));
+    // }
 
-    /*@Test
-    @Order(11)
-    public void testSaveImagesFolder() throws IOException {
-        ImageDAO i = new ImageDAO();
-        String image_1 = "autumn.tif";
-        String image_2 = "cyber.jpeg";
-        String text = "testing.txt";
-        String image_3 = "jam.jpg";
-        String image_4 = "sacre_coeur.jpg";
-        String image_5 = "insanity.jfif";
+    // @Test
+    // @Order(11)
+    // public void testSaveImagesFolder() throws IOException {
+    // ImageDAO i = new ImageDAO();
+    // String image_1 = "autumn.tif";
+    // String image_2 = "cyber.jpeg";
+    // String text = "testing.txt";
+    // String image_3 = "jam.jpg";
+    // String image_4 = "sacre_coeur.jpg";
+    // String image_5 = "insanity.jfif";
 
-        ImageController c = new ImageController(i);
-        int size = i.retrieveAll().size();
-        Path p = c.getPathOfResource("/image_test/");
-        c.saveImagesFolder(p);
-        assertTrue(size < i.retrieveAll().size());
-        assertTrue(i.getId(image_1) > 0);
-        assertTrue(i.getId(image_2) > 0);
-        assertTrue(i.getId(image_3) > 0);
-        assertTrue(i.getId(image_4) > 0);
-        assertTrue(i.getId(image_5) > 0);
-        assertFalse(i.getId(text) > 0);
+    // ImageController c = new ImageController(i);
+    // int size = i.retrieveAll().size();
+    // Path p = c.getPathOfResource("/image_test/");
+    // c.saveImagesFolder(p);
+    // assertTrue(size < i.retrieveAll().size());
+    // assertTrue(i.getId(image_1) > 0);
+    // assertTrue(i.getId(image_2) > 0);
+    // assertTrue(i.getId(image_3) > 0);
+    // assertTrue(i.getId(image_4) > 0);
+    // assertTrue(i.getId(image_5) > 0);
+    // assertFalse(i.getId(text) > 0);
 
-        Image i1 = i.retrieve(i.getId(image_1)).orElse(null);
-        assertFalse(i1.getSize().equals(null));
-        assertFalse(i1.getData().equals(null));
-        System.out.println(i1.getType());
-        assertTrue(i1.getType().equals(MediaType.valueOf("image/tiff")));
+    // Image i1 = i.retrieve(i.getId(image_1)).orElse(null);
+    // assertFalse(i1.getSize().equals(null));
+    // assertFalse(i1.getData().equals(null));
+    // System.out.println(i1.getType());
+    // assertTrue(i1.getType().equals(MediaType.valueOf("image/tiff")));
 
-        Image i2 = i.retrieve(i.getId(image_2)).orElse(null);
-        assertFalse(i2.getSize().equals(null));
-        assertFalse(i2.getData().equals(null));
-        assertTrue(i2.getType().equals(MediaType.IMAGE_JPEG));
+    // Image i2 = i.retrieve(i.getId(image_2)).orElse(null);
+    // assertFalse(i2.getSize().equals(null));
+    // assertFalse(i2.getData().equals(null));
+    // assertTrue(i2.getType().equals(MediaType.IMAGE_JPEG));
 
-        Image i3 = i.retrieve(i.getId(image_3)).orElse(null);
-        assertFalse(i3.getSize().equals(null));
-        assertFalse(i3.getData().equals(null));
-        assertTrue(i3.getType().equals(MediaType.IMAGE_JPEG));
+    // Image i3 = i.retrieve(i.getId(image_3)).orElse(null);
+    // assertFalse(i3.getSize().equals(null));
+    // assertFalse(i3.getData().equals(null));
+    // assertTrue(i3.getType().equals(MediaType.IMAGE_JPEG));
 
-        Image i4 = i.retrieve(i.getId(image_4)).orElse(null);
-        assertFalse(i4.getSize().equals(null));
-        assertFalse(i4.getData().equals(null));
-        assertTrue(i4.getType().equals(MediaType.IMAGE_JPEG));
+    // Image i4 = i.retrieve(i.getId(image_4)).orElse(null);
+    // assertFalse(i4.getSize().equals(null));
+    // assertFalse(i4.getData().equals(null));
+    // assertTrue(i4.getType().equals(MediaType.IMAGE_JPEG));
 
-        Image i5 = i.retrieve(i.getId(image_5)).orElse(null);
-        assertFalse(i5.getSize().equals(null));
-        assertFalse(i5.getData().equals(null));
-        assertTrue(i5.getType().equals(MediaType.IMAGE_JPEG));
-    }*/
+    // Image i5 = i.retrieve(i.getId(image_5)).orElse(null);
+    // assertFalse(i5.getSize().equals(null));
+    // assertFalse(i5.getData().equals(null));
+    // assertTrue(i5.getType().equals(MediaType.IMAGE_JPEG));
+    // }
 
     @Test
     @Order(12)
     public void testGetMetaData() throws Exception {
-        Iterable<Image> listImages = imageRepository.findAll();
-        Iterator<Image> it = listImages.iterator();
+        final Iterable<Image> listImages = imageRepository.findAll();
+        final Iterator<Image> it = listImages.iterator();
         String jsonContent = "[";
         jsonContent += it.next().toString();
-        while(it.hasNext()){
+        while (it.hasNext()) {
             jsonContent += "," + it.next().toString();
         }
         jsonContent += "]";
@@ -224,7 +225,7 @@ public class ImageControllerTests {
     @Test
     @Order(14)
     public void changeBrightnessShouldReturnSucess() throws Exception {
-        String args = "&gain=" + Utils.getRandomNumber(int.class, 0, 255);
+        final String args = "&gain=" + Utils.getRandomNumber(int.class, 0, 255);
         mockMvc.perform(get("/images/1?algorithm=changeBrightness" + args)).andExpect(status().isOk());
     }
 
@@ -232,7 +233,7 @@ public class ImageControllerTests {
     @Test
     @Order(15)
     public void colorizeShouldReturnSuccess() throws Exception {
-        String args = "&hue=" + Utils.getRandomNumber(int.class, 0, 360);
+        final String args = "&hue=" + Utils.getRandomNumber(int.class, 0, 360);
         mockMvc.perform(get("/images/1?algorithm=colorize" + args)).andExpect(status().isOk());
     }
 
@@ -247,7 +248,7 @@ public class ImageControllerTests {
     @Test
     @Order(17)
     public void equalizeHistogramShouldReturnSuccess() throws Exception {
-        String args = "&channel=" + Utils.getRandomNumber(int.class, 1, 2);
+        final String args = "&channel=" + Utils.getRandomNumber(int.class, 1, 2);
         mockMvc.perform(get("/images/1?algorithm=equalizeHistogram" + args)).andExpect(status().isOk());
     }
 
@@ -255,7 +256,7 @@ public class ImageControllerTests {
     @Test
     @Order(18)
     public void meanFilterShouldReturnSuccess() throws Exception {
-        String args = "&radius=" + Utils.getRandomNumber(int.class, 0, 7);
+        final String args = "&radius=" + Utils.getRandomNumber(int.class, 0, 7);
         mockMvc.perform(get("/images/1?algorithm=meanFilter" + args)).andExpect(status().isOk());
     }
 
@@ -263,7 +264,7 @@ public class ImageControllerTests {
     @Test
     @Order(19)
     public void gaussianFilterShouldReturnSuccces() throws Exception {
-        String args = "&radius=" + Utils.getRandomNumber(int.class, 0, 7);
+        final String args = "&radius=" + Utils.getRandomNumber(int.class, 0, 7);
         mockMvc.perform(get("/images/1?algorithm=gaussianFilter" + args)).andExpect(status().isOk());
 
     }
@@ -279,13 +280,13 @@ public class ImageControllerTests {
     @Test
     @Order(21)
     public void executeAlgorithmShouldReturnBadRequest() throws Exception {
-        Set<String> listOfAlgorithms = AlgorithmManager.Instance().listAlgorithms();
-        for (String name : listOfAlgorithms) {
+        final Set<String> listOfAlgorithms = AlgorithmManager.Instance().listAlgorithms();
+        for (final String name : listOfAlgorithms) {
             mockMvc.perform(get("/images/1?algorithm=" + name + "&x=1&y=2&z=5&delta=50"))
                     .andExpect(status().isBadRequest());
             mockMvc.perform(get("/images/1?algorithm=" + name.toUpperCase())).andExpect(status().isBadRequest());
-            Set<Class<?>[]> parameterTypes = AlgorithmManager.Instance().listOfParameterType(name);
-            for (Class<?>[] types : parameterTypes) {
+            final Set<Class<?>[]> parameterTypes = AlgorithmManager.Instance().listOfParameterType(name);
+            for (final Class<?>[] types : parameterTypes) {
                 if (types.length > 2) {
                     mockMvc.perform(get("/images/1?algorithm=" + name + "&x=Hello World !"))
                             .andExpect(status().isBadRequest());
@@ -294,32 +295,31 @@ public class ImageControllerTests {
         }
     }
 
-    
     @Test
     @Order(22)
     public void executeAlgorithmShouldReturnNotFound() throws Exception {
         Integer lastId = (Integer) ReflectionTestUtils.getField(Image.class, "count");
 
-        Set<String> listOfAlgorithms = AlgorithmManager.Instance().listAlgorithms();
-        for (String name : listOfAlgorithms) {
+        final Set<String> listOfAlgorithms = AlgorithmManager.Instance().listAlgorithms();
+        for (final String name : listOfAlgorithms) {
             mockMvc.perform(get("/images/" + (++lastId) + "?algorithm=" + name)).andExpect(status().isNotFound());
         }
 
     }
 
-    /*@Test
-    @Order(23)
-    public void getPathResourceShouldReturnFailure() throws IOException {
-        ImageDAO i = new ImageDAO();
-        ImageController c = new ImageController(i);
-        assertThrows(IOException.class, () -> c.getPathOfResource("test"));
-    }*/
+    // @Test
+    // @Order(23)
+    // public void getPathResourceShouldReturnFailure() throws IOException {
+    // ImageDAO i = new ImageDAO();
+    // ImageController c = new ImageController(i);
+    // assertThrows(IOException.class, () -> c.getPathOfResource("test"));
+    // }
 
     @Test
     @Disabled
     public void TestPerformanceAlgorithmExecution() throws Exception {
-        String parameters = "toGrayscale";
-        long start = System.currentTimeMillis();
+        final String parameters = "toGrayscale";
+        final long start = System.currentTimeMillis();
         for (int i = 0; i < 100; i++) {
             mockMvc.perform(get("/images/0?algorithm=" + parameters));
         }

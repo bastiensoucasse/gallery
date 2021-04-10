@@ -1,6 +1,5 @@
 package pdl.backend.controller;
 
-import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.net.URI;
@@ -15,7 +14,6 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import javax.annotation.PostConstruct;
-import javax.imageio.ImageIO;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -41,7 +39,6 @@ import pdl.backend.AlgorithmManager;
 import pdl.backend.Utils;
 import pdl.backend.mysqldb.Image;
 import pdl.backend.mysqldb.ImageRepository;
-import pdl.processing.ImageConverter;
 
 @RestController
 public class ImageController {
@@ -64,8 +61,8 @@ public class ImageController {
      *
      * @param imageDAO the image data access object (database)
      */
-    // public ImageController(/*ImageDAO imageDAO*/) {
-    // this.imageDAO = imageDAO;
+    // public ImageController(ImageDAO imageDAO) {
+    //     this.imageDAO = imageDAO;
     // }
 
     /**
@@ -108,7 +105,7 @@ public class ImageController {
     public ResponseEntity<?> deleteImage(@PathVariable("id") final int id) {
         if(imageRepository.findById(id).isEmpty())
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        
+
         imageRepository.deleteById(id);
         return new ResponseEntity<>(HttpStatus.OK);
     }
@@ -138,7 +135,7 @@ public class ImageController {
 
         try {
             return ResponseEntity.created(new URI("/" + image.getId())).body("" + image.getId());
-        } catch (URISyntaxException e) {
+        } catch (final URISyntaxException e) {
             e.printStackTrace();
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         }
@@ -166,11 +163,11 @@ public class ImageController {
      */
     @PostConstruct
     public void onStart() {
-        String path = "/images/";
+        final String path = "/images/";
         try {
-            Path path_of_resource = getPathOfResource(path);
+            final Path path_of_resource = getPathOfResource(path);
             saveImagesFolder(path_of_resource);
-        } catch (IOException e1) {
+        } catch (final IOException e1) {
             e1.printStackTrace();
         }
     }
@@ -190,13 +187,13 @@ public class ImageController {
     @RequestMapping(value = "/images/{id}", params = "algorithm", method = RequestMethod.GET, produces = MediaType.IMAGE_JPEG_VALUE)
     @ResponseBody
     public ResponseEntity<?> executeAlgorithm(@PathVariable("id") final int id,
-            @RequestParam Map<String, String> algorithm) {
+            @RequestParam final Map<String, String> algorithm) {
         // final Image image = imageDAO.retrieve(id).orElse(null);
         final Image image = imageRepository.findById(id).orElse(null);
         if (image == null)
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
 
-        String name = algorithm.get("algorithm"); // get the name of the algorithm
+        final String name = algorithm.get("algorithm"); // get the name of the algorithm
         algorithm.remove("algorithm"); // remove from the set
 
         Image proccessedImage;
@@ -204,16 +201,16 @@ public class ImageController {
             proccessedImage = AlgorithmManager.Instance().applyAlgorithm(name, algorithm.keySet(), image);
             // imageDAO.create(proccessedImage);
             imageRepository.save(proccessedImage);
-        } catch (NoSuchMethodException e) {
+        } catch (final NoSuchMethodException e) {
             new ResponseEntity<>(HttpStatus.BAD_REQUEST);
             return ResponseEntity.badRequest().body("Algorithm doesn't exists");
-        } catch (NumberFormatException e) {
+        } catch (final NumberFormatException e) {
             new ResponseEntity<>(HttpStatus.BAD_REQUEST);
             return ResponseEntity.badRequest().body("Impossible to parse Parameters not a Number");
-        } catch (IllegalArgumentException e) {
+        } catch (final IllegalArgumentException e) {
             new ResponseEntity<>(HttpStatus.BAD_REQUEST);
             return ResponseEntity.badRequest().body("Invalid Arguments");
-        } catch (Exception e) {
+        } catch (final Exception e) {
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
         return ResponseEntity.ok().contentType(MediaType.TEXT_HTML)
@@ -225,17 +222,17 @@ public class ImageController {
      *
      * @throws IOException
      */
-    public void saveImagesFolder(Path path_of_resource) throws IOException {
+    public void saveImagesFolder(final Path path_of_resource) throws IOException {
         imageRepository.deleteAll();
-        Path path = path_of_resource;
+        final Path path = path_of_resource;
         Set<String> listImages = new HashSet<>();
         listImages = listFiles(path);
         System.out.println(listImages);
         listImages.forEach(i -> {
             try {
-                byte[] fileContent = Files.readAllBytes(Paths.get(i));
+                final byte[] fileContent = Files.readAllBytes(Paths.get(i));
                 imageRepository.save(new Image(Paths.get(i).getFileName().toString(), fileContent, Utils.typeOfFile(Paths.get(i)), Utils.sizeOfImage(Paths.get(i))));
-            } catch (IOException e) {
+            } catch (final IOException e) {
                 e.printStackTrace();
             }
         });
@@ -247,7 +244,7 @@ public class ImageController {
      * @return a set of strings, indicating the full path of jpeg and tif images.
      * @throws IOException
      */
-    public Set<String> listFiles(Path p) throws IOException {
+    public Set<String> listFiles(final Path p) throws IOException {
         try (Stream<Path> stream = Files.walk(p)) {
             return stream.map(Path::toString)
                     .filter(file -> file.endsWith(".tif") || file.endsWith(".tiff") || file.endsWith(".jpeg")
@@ -256,12 +253,12 @@ public class ImageController {
         }
     }
 
-    public Path getPathOfResource(String p) throws IOException {
+    public Path getPathOfResource(final String p) throws IOException {
         final ClassPathResource resource = new ClassPathResource(p);
         File f;
         try {
             f = resource.getFile();
-        } catch (IOException e) {
+        } catch (final IOException e) {
             throw new IOException("The image folder does not exist", e.getCause());
         }
         return Paths.get(f.getAbsolutePath());

@@ -1,10 +1,7 @@
 package pdl.backend.mysqldb;
 
 import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
 import javax.persistence.Id;
-
 
 @Entity
 public class User {
@@ -15,27 +12,27 @@ public class User {
 
     private String email;
 
-    public Integer getId(){
+    public Integer getId() {
         return id;
     }
 
-    public void setId(Integer id){
+    public void setId(final Integer id) {
         this.id = id;
     }
 
-    public String getName(){
+    public String getName() {
         return name;
     }
 
-    public void setName(String name){
+    public void setName(final String name) {
         this.name = name;
     }
 
-    public String getEmail(){
+    public String getEmail() {
         return email;
     }
 
-    public void setEmail(String email){
+    public void setEmail(final String email) {
         this.email = email;
     }
 }

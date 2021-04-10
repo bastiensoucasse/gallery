@@ -1,4 +1,5 @@
-/*package pdl.backend;
+/*
+package pdl.backend;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -64,4 +65,5 @@ public class ImageDAO implements DAO<Image> {
         }
         return id;
     }
-}*/
+}
+*/

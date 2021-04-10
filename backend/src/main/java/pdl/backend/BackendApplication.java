@@ -5,8 +5,8 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
 public class BackendApplication {
-    public static void main(String[] args) {
-        AlgorithmManager.Instance(); // initialize the singleton before the application is created
+    public static void main(final String[] args) {
+        AlgorithmManager.Instance();
         SpringApplication.run(BackendApplication.class, args);
     }
 }

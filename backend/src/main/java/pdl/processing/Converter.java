@@ -7,19 +7,16 @@ import java.io.IOException;
 import java.nio.file.Files;
 
 import javax.imageio.ImageIO;
-import javax.imageio.stream.ImageOutputStream;
 
 import org.scijava.Context;
 import org.scijava.io.location.BytesLocation;
 import org.springframework.http.MediaType;
 
-import io.scif.BufferedImagePlane;
 import io.scif.FormatException;
 import io.scif.Reader;
 import io.scif.SCIFIO;
 import io.scif.Writer;
 import io.scif.formats.JPEGFormat;
-import io.scif.formats.TIFFFormat;
 import io.scif.img.ImgOpener;
 import io.scif.img.ImgSaver;
 import io.scif.img.SCIFIOImgPlus;
@@ -29,59 +26,59 @@ import pdl.backend.AcceptedMediaTypes;
 import pdl.backend.Utils;
 import pdl.backend.mysqldb.Image;
 
-public class ImageConverter {
-
-
+public class Converter
+{
     public static SCIFIOImgPlus<UnsignedByteType> imageFromJPEGBytes(final byte[] data)
-            throws FormatException, IOException {
+    throws FormatException, IOException
+    {
         final ImgOpener imgOpener = new ImgOpener();
-        final Context c = imgOpener.getContext();
-        final SCIFIO scifio = new SCIFIO(c);
+        final Context context = imgOpener.getContext();
+        final SCIFIO scifio = new SCIFIO(context);
         final JPEGFormat format = scifio.format().getFormatFromClass(JPEGFormat.class);
-        final Reader r = format.createReader();
+        final Reader reader = format.createReader();
         final BytesLocation location = new BytesLocation(data);
-        r.setSource(location);
+        reader.setSource(location);
         final ArrayImgFactory<UnsignedByteType> factory = new ArrayImgFactory<UnsignedByteType>(new UnsignedByteType());
-        final SCIFIOImgPlus<UnsignedByteType> img = imgOpener.openImgs(r, factory, null).get(0);
-        c.dispose();
+        final SCIFIOImgPlus<UnsignedByteType> img = imgOpener.openImgs(reader, factory, null).get(0);
+        context.dispose();
         return img;
     }
 
-    
-
     public static byte[] imageToJPEGBytes(final SCIFIOImgPlus<UnsignedByteType> img)
-            throws FormatException, IOException {
+    throws FormatException, IOException
+    {
         final ImgSaver imgSaver = new ImgSaver();
-        final Context c = imgSaver.getContext();
-        final SCIFIO scifio = new SCIFIO(c);
+        final Context context = imgSaver.getContext();
+        final SCIFIO scifio = new SCIFIO(context);
         final JPEGFormat format = scifio.format().getFormatFromClass(JPEGFormat.class);
-        final Writer w = format.createWriter();
-        final BytesLocation saveLocation = new BytesLocation(10);
-        w.setMetadata(img.getMetadata());
-        w.setDest(saveLocation);
-        imgSaver.saveImg(w, img);
-        final byte[] imageInByte = saveLocation.getByteBank().toByteArray();
-        c.dispose();
+        final Writer writer = format.createWriter();
+        final BytesLocation location = new BytesLocation(10);
+        writer.setMetadata(img.getMetadata());
+        writer.setDest(location);
+        imgSaver.saveImg(writer, img);
+        final byte[] imageInByte = location.getByteBank().toByteArray();
+        context.dispose();
         return imageInByte;
     }
 
 
-    public static Image convertImage(final Image input, MediaType type) throws IOException {
-        if(input.getType().equals(type))
-            throw new IllegalArgumentException("input image has already type: " + type.toString());
-        if(!AcceptedMediaTypes.contains(type.toString()))
+    public static Image convertImage(final Image input, final MediaType type)
+    throws IOException
+    {
+        if (input.getType().equals(type))
+            throw new IllegalArgumentException("Input image already has type " + type.toString());
+
+        if (!AcceptedMediaTypes.contains(type.toString()))
             throw new IllegalArgumentException(type.toString() + " is not supported");
 
         final BufferedImage bufferedImageInput = ImageIO.read(new ByteArrayInputStream(input.getData()));
-        File output = new File(input.getNameWithoutExtension() + type.getSubtype());
-        
-        if(!ImageIO.write(bufferedImageInput, type.getSubtype(), output))
-            throw new IOException("Could not convert TIFF to jpg !");
+        final File output = new File(input.getNameWithoutExtension() + type.getSubtype());
 
-        Image image = new Image(output.getName(), Files.readAllBytes(output.toPath()), Utils.typeOfFile(output), Utils.sizeOfImage(output));
+        if (!ImageIO.write(bufferedImageInput, type.getSubtype(), output))
+            throw new IOException("Could not convert TIFF to JPG");
+
+        final Image image = new Image(output.getName(), Files.readAllBytes(output.toPath()), Utils.typeOfFile(output), Utils.sizeOfImage(output));
         output.delete();
         return image;
     }
-
-    
 }

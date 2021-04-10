@@ -2,14 +2,6 @@ package pdl.processing;
 
 public class Computing
 {
-    /**
-     * Converts a RGB color into a HSV color.
-     *
-     * @param r The red.
-     * @param g The green.
-     * @param b The blue.
-     * @return The HSV color.
-     */
     private static float[] rgbToHsv(final int r, final int g, final int b)
     {
         float h = 0, s = 0, v = 0;
@@ -42,14 +34,6 @@ public class Computing
         return new float[] { h, s, v };
     }
 
-    /**
-     * Converts a HSV color into a RGB color.
-     *
-     * @param h The hue.
-     * @param s The saturation.
-     * @param v The brightness.
-     * @return The RGB color.
-     */
     private static int[] hsvToRgb(final float h, final float s, final float v)
     {
         int r = 0, g = 0, b = 0;
@@ -103,23 +87,11 @@ public class Computing
         return new int[] { r, g, b };
     }
 
-    /**
-     * Converts a RGB color into a HSV color.
-     *
-     * @param rgb The RGB color.
-     * @return The HSV color.
-     */
     public static float[] rgbToHsv(final int[] rgb)
     {
         return rgbToHsv(rgb[0], rgb[1], rgb[2]);
     }
 
-    /**
-     * Converts a HSV color into a RGB color.
-     *
-     * @param hsv The HSV color.
-     * @return The RGB color.
-     */
     public static int[] hsvToRgb(final float[] hsv)
     {
         return hsvToRgb(hsv[0], hsv[1], hsv[2]);
