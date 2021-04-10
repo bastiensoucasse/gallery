@@ -256,7 +256,6 @@
                 <form
                     class="preview-feature"
                     method="get"
-                    style="padding-bottom: 60px"
                     :action="'/images/' + id"
                 >
                     <h3 class="category">Sobel operator</h3>
@@ -271,6 +270,51 @@
                         class="theme-button"
                         type="submit"
                         value="Apply operator"
+                    />
+                </form>
+
+                <form
+                    class="preview-feature"
+                    style="padding-bottom: 60px"
+                    method="get"
+                    :action="'/images/' + id"
+                >
+                    <h3 class="category">Mirror</h3>
+
+                    <div class="choice">
+                        <input
+                            class="preview-radio"
+                            type="radio"
+                            name="algorithm"
+                            value="horizontalMirror"
+                            id="hm"
+                            checked
+                        />
+                        <label for="hm">Horizontal</label>
+
+                        <input
+                            class="preview-radio"
+                            type="radio"
+                            name="algorithm"
+                            value="verticalMirror"
+                            id="vm"
+                        />
+                        <label for="vm">Vertical</label>
+
+                        <input
+                            class="preview-radio"
+                            type="radio"
+                            name="algorithm"
+                            value="completeMirror"
+                            id="cm"
+                        />
+                        <label for="cm" style="grid-column: span 2">Complete</label>
+                    </div>
+
+                    <input
+                        class="theme-button"
+                        type="submit"
+                        value="Apply filter"
                     />
                 </form>
             </div>
@@ -417,7 +461,7 @@ input[type="number"] {
 
 .choice {
     display: grid;
-    grid-template-columns: 50fr 50fr;
+    grid-template-columns: 100fr 100fr;
     grid-gap: 6px;
     margin-bottom: 6px;
 }

@@ -47,7 +47,7 @@ public class Processing
         final Cursor<UnsignedByteType> inputCursor = input.getImg().cursor();
         final Cursor<UnsignedByteType> outputCursor = output.getImg().cursor();
 
-        while (inputCursor.hasNext() && outputCursor.hasNext())
+        while (inputCursor.hasNext())
         {
             inputCursor.fwd();
             outputCursor.fwd();
@@ -255,6 +255,60 @@ public class Processing
                     outputRandomAccess.get().set(rgb[c]);
                 }
             }
+        }
+    }
+
+    public static void horizontalMirror(final SCIFIOImgPlus<UnsignedByteType> input, final SCIFIOImgPlus<UnsignedByteType> output)
+    {
+        System.out.printf("Mirroring horizontally...\n");
+
+        final Cursor<UnsignedByteType> inputCursor = input.getImg().cursor();
+        final RandomAccess<UnsignedByteType> outputRandomAccess = output.getImg().randomAccess();
+
+        while (inputCursor.hasNext())
+        {
+            inputCursor.fwd();
+            outputRandomAccess.setPosition(input.max(0) - inputCursor.getLongPosition(0), 0);
+            outputRandomAccess.setPosition(inputCursor.getLongPosition(1), 1);
+            outputRandomAccess.setPosition(inputCursor.getLongPosition(2), 2);
+
+            outputRandomAccess.get().set(inputCursor.get().get());
+        }
+    }
+
+    public static void verticalMirror(final SCIFIOImgPlus<UnsignedByteType> input, final SCIFIOImgPlus<UnsignedByteType> output)
+    {
+        System.out.printf("Mirroring vertically...\n");
+
+        final Cursor<UnsignedByteType> inputCursor = input.getImg().cursor();
+        final RandomAccess<UnsignedByteType> outputRandomAccess = output.getImg().randomAccess();
+
+        while (inputCursor.hasNext())
+        {
+            inputCursor.fwd();
+            outputRandomAccess.setPosition(inputCursor.getLongPosition(0), 0);
+            outputRandomAccess.setPosition(input.max(1) - inputCursor.getLongPosition(1), 1);
+            outputRandomAccess.setPosition(inputCursor.getLongPosition(2), 2);
+
+            outputRandomAccess.get().set(inputCursor.get().get());
+        }
+    }
+
+    public static void completeMirror(final SCIFIOImgPlus<UnsignedByteType> input, final SCIFIOImgPlus<UnsignedByteType> output)
+    {
+        System.out.printf("Mirroring completely...\n");
+
+        final Cursor<UnsignedByteType> inputCursor = input.getImg().cursor();
+        final RandomAccess<UnsignedByteType> outputRandomAccess = output.getImg().randomAccess();
+
+        while (inputCursor.hasNext())
+        {
+            inputCursor.fwd();
+            outputRandomAccess.setPosition(input.max(0) - inputCursor.getLongPosition(0), 0);
+            outputRandomAccess.setPosition(input.max(1) - inputCursor.getLongPosition(1), 1);
+            outputRandomAccess.setPosition(inputCursor.getLongPosition(2), 2);
+
+            outputRandomAccess.get().set(inputCursor.get().get());
         }
     }
 }
