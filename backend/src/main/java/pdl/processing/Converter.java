@@ -20,6 +20,7 @@ import io.scif.formats.JPEGFormat;
 import io.scif.img.ImgOpener;
 import io.scif.img.ImgSaver;
 import io.scif.img.SCIFIOImgPlus;
+import net.imglib2.img.Img;
 import net.imglib2.img.array.ArrayImgFactory;
 import net.imglib2.type.numeric.integer.UnsignedByteType;
 import pdl.backend.AcceptedMediaTypes;
@@ -80,5 +81,10 @@ public class Converter
         final Image image = new Image(output.getName(), Files.readAllBytes(output.toPath()), Utils.typeOfFile(output), Utils.sizeOfImage(output));
         output.delete();
         return image;
+    }
+
+    public static SCIFIOImgPlus<UnsignedByteType> imgToSCIFIOImgPlus(final Img<UnsignedByteType> img)
+    {
+        return new SCIFIOImgPlus<UnsignedByteType>(img);
     }
 }
