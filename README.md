@@ -4,7 +4,58 @@ Projet hébergé sur [GitHub](https://github.com/bastiensoucasse/gallery),
 avec un miroir sur le [GitLab](https://gitlab.emi.u-bordeaux.fr/bsoucasse/gallery)
 de l'Université de Bordeaux (CREMI).
 
-## Installation
+## Installation et lancement
+
+### Installation de la base de données
+
+Le projet nécessite une base de donnée MySQL. Veuillez donc installer MySQL avant
+de poursuivre si ce n'est pas déjà le cas. Si vous ne savez pas vous pouvez vérifier
+en entrant la commande suivante.
+
+```
+mysql -V
+```
+
+Si une version de mysql est affichée, vous pouvez vous rendre à
+[la partie suivante](#initialisation-de-la-base-de-données). Sinon il faut procéder
+à l'installation. Pour un système Debian ou basé sur Debian (par exemple Ubuntu), les
+paquets requis sont présents sur les dépôts système. Il suffit d'entrer la commande
+suivante pour lancer l'installation.
+
+```
+sudo apt install mysql-server mysql-client
+```
+
+Si vous êtes sous un autre système, référez-vous à la documentation de votre système.
+
+### Initialisation de la base de données
+
+Assurez-vous que votre serveur de base de donées MySQL est bien démarré. Si
+ce n'est pas le cas, entrez la commande suivante pour le démarrer.
+
+```
+sudo /etc/init.d/mysql start
+```
+
+Rendez vous dans le client de MySQL depuis le répertoire racine du projet.
+
+```
+sudo mysql
+```
+
+Exécutez le script d'initialisation de la base de données.
+
+```
+source init_db.sql;
+```
+
+Vous pouvez quitter le client MySQL.
+
+```
+quit;
+```
+
+### Installation du projet
 
 Dans le répertoire racine du projet, executer les commandes suivantes.
 
@@ -26,7 +77,10 @@ mvn --projects backend spring-boot:run
 cd frontend && npm run serve
 ```
 
-Se connecter à http://localhost:8089.
+### Lancement de la galerie
+
+Connectez-vous à [http://localhost:8089](http://localhost:8089) via
+votre navigateur afin d'accéder à votre galerie.
 
 ## Tests
 
