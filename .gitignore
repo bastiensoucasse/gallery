@@ -183,3 +183,5 @@ yarn-error.log
 .project
 .settings/
 backend/src/main/resources/public/
+run.sh
+

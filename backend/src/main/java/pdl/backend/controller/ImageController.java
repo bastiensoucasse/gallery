@@ -198,7 +198,7 @@ public class ImageController {
 
         Image proccessedImage;
         try {
-            proccessedImage = AlgorithmManager.Instance().applyAlgorithm(name, algorithm.keySet(), image);
+            proccessedImage = AlgorithmManager.Instance().applyAlgorithm(name, algorithm.values(), image);
             // imageDAO.create(proccessedImage);
             imageRepository.save(proccessedImage);
         } catch (final NoSuchMethodException e) {
