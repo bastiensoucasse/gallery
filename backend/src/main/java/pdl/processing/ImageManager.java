@@ -20,7 +20,6 @@ import io.scif.formats.JPEGFormat;
 import io.scif.img.ImgOpener;
 import io.scif.img.ImgSaver;
 import io.scif.img.SCIFIOImgPlus;
-import net.imglib2.Cursor;
 import net.imglib2.img.Img;
 import net.imglib2.img.ImgFactory;
 import net.imglib2.img.array.ArrayImgFactory;
@@ -36,20 +35,12 @@ public class ImageManager
         return img.copy();
     }
 
-    public static SCIFIOImgPlus<UnsignedByteType> createImage(final long width, final Long height)
+    public static SCIFIOImgPlus<UnsignedByteType> createImage(final long width, final long height)
     {
         System.err.printf("ImageManager.createImage is still in progress!\n");
 
         final ImgFactory<UnsignedByteType> factory = new ArrayImgFactory<>(new UnsignedByteType());
         final Img<UnsignedByteType> output = factory.create(new long[] { width, height, 3 });
-
-        final Cursor<UnsignedByteType> cursor = output.cursor();
-
-        while (cursor.hasNext())
-        {
-            cursor.fwd();
-            cursor.get().set(0);
-        }
 
         return new SCIFIOImgPlus<UnsignedByteType>(output);
     }
