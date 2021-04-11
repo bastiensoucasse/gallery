@@ -82,7 +82,7 @@ public class Image {
     }
 
     public String getNameWithoutExtension() {
-        return name.split(".")[0];
+        return name.split("\\.")[0];
     }
 
     /**

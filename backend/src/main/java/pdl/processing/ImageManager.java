@@ -80,7 +80,7 @@ public class ImageManager
 
 
     public static Image convertImage(final Image input, final MediaType type)
-    throws IOException
+    throws IOException, IllegalArgumentException
     {
         if (input.getType().equals(type))
             throw new IllegalArgumentException("Input image already has type " + type.toString());
@@ -94,7 +94,7 @@ public class ImageManager
         if (!ImageIO.write(bufferedImageInput, type.getSubtype(), output))
             throw new IOException("Could not convert TIFF to JPG");
 
-        final Image image = new Image(output.getName(), Files.readAllBytes(output.toPath()), Utils.typeOfFile(output), Utils.sizeOfImage(output));
+        final Image image = new Image(output.getName(), Files.readAllBytes(output.toPath()), type, Utils.sizeOfImage(output));
         output.delete();
         return image;
     }

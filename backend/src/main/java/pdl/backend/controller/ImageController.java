@@ -12,6 +12,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collector;
 import java.util.stream.Collectors;
@@ -44,6 +45,7 @@ import pdl.backend.AlgorithmManager;
 import pdl.backend.Utils;
 import pdl.backend.mysqldb.Image;
 import pdl.backend.mysqldb.ImageRepository;
+import pdl.processing.Converter;
 
 @RestController
 public class ImageController {
@@ -220,6 +222,26 @@ public class ImageController {
                 .body("<script>location.href = '/" + proccessedImage.getId() + "';</script>");
     }
 
+    @RequestMapping(value = "/images/{id}", params = "format", method = RequestMethod.GET)
+    @ResponseBody
+    public ResponseEntity<?> convertImageFormat(@PathVariable("id") final int id, @RequestParam final String format) {
+        if(!AcceptedMediaTypes.contains(format))
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("format not supported by the server");
+        
+        Optional<Image> input = imageRepository.findById(id);
+        if(input.isEmpty())
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        try {
+            Image output = Converter.convertImage(input.get(), MediaType.valueOf(format));
+            return ResponseEntity.ok().contentType(output.getType()).body(output.getData());
+        }catch (IllegalArgumentException e){
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("image :" +  input.get().getName() + " already has type" + format);
+        } catch (IOException e) {
+            e.printStackTrace();
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
     /**
      * Upload all images (jpeg, tif) in the images folder on the server.
      *
