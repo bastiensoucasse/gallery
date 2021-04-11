@@ -7,8 +7,10 @@ import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collector;
@@ -16,6 +18,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import javax.annotation.PostConstruct;
+import javax.swing.plaf.ListUI;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -226,12 +229,20 @@ public class ImageController {
         final Path path = path_of_resource;
         Set<String> listImages = new HashSet<>();
         listImages = listFiles(path);
+        List<String> found = new ArrayList<>();
         Iterator<Image> image_it = imageRepository.findAll().iterator();
         // Filter images that have the same name in the db and the images in the
         // resource folder.
         while (image_it.hasNext()) {
-            listImages.removeIf(path_i -> image_it.next().getName().equals(Paths.get(path_i).getFileName().toString()));
+            Image next_i = image_it.next();
+            Iterator<String> list_it = listImages.iterator();
+            while (list_it.hasNext()) {
+                String next_s = list_it.next();
+                if (next_i.getName().equals(Paths.get(next_s).getFileName().toString()))
+                    found.add(next_s);
+            }
         }
+        listImages.removeAll(found);
         System.out.println(listImages);
         listImages.forEach(i -> {
             try {

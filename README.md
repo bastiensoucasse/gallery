@@ -37,6 +37,12 @@ ce n'est pas le cas, entrez la commande suivante pour le démarrer.
 sudo /etc/init.d/mysql start
 ```
 
+ou bien cette commande.
+
+```
+sudo service mysql start
+```
+
 Rendez vous dans le client de MySQL depuis le répertoire racine du projet.
 
 ```
@@ -90,6 +96,7 @@ Le serveur a été testé sur les configurations suivantes.
 **Navigateurs :** Google Chrome, Microsoft Edge et Mozilla Firefox.
 
 ## Base de données
+
 Ci dessous un diagramme explicatif de l'implémentation de la base de données.
 
 <iframe width="100%" height="500px" style="box-shadow: 0 2px 8px 0 rgba(63,69,81,0.16); border-radius:15px;" allowtransparency="true" allowfullscreen="true" scrolling="no" title="Embedded DrawSQL IFrame" frameborder="0" src="https://drawsql.app/pdl/diagrams/pdl/embed"></iframe>
