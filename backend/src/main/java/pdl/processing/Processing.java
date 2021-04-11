@@ -7,11 +7,23 @@ import net.imglib2.type.numeric.integer.UnsignedByteType;
 
 public class Processing
 {
-    public static void toGrayscale(final SCIFIOImgPlus<UnsignedByteType> input, final SCIFIOImgPlus<UnsignedByteType> output)
+    public static SCIFIOImgPlus<UnsignedByteType> resize(final SCIFIOImgPlus<UnsignedByteType> input)
+    {
+        final long width = 400, height = 200;
+        System.out.printf("Resizing to %dx%d...\n", width, height);
+
+        final SCIFIOImgPlus<UnsignedByteType> output = ImageManager.createImage(width, height);
+
+        return output;
+    }
+
+    public static SCIFIOImgPlus<UnsignedByteType> toGrayscale(final SCIFIOImgPlus<UnsignedByteType> input)
     {
         System.out.printf("Converting to grayscale...\n");
-        final RandomAccess<UnsignedByteType> inputRandomAccess = input.getImg().randomAccess();
-        final RandomAccess<UnsignedByteType> outputRandomAccess = output.getImg().randomAccess();
+
+        final SCIFIOImgPlus<UnsignedByteType> output = ImageManager.createImage(input);
+        final RandomAccess<UnsignedByteType> inputRandomAccess = input.randomAccess();
+        final RandomAccess<UnsignedByteType> outputRandomAccess = output.randomAccess();
 
         for (long x = input.min(0); x <= input.max(0); x++)
         {
@@ -38,14 +50,17 @@ public class Processing
                 }
             }
         }
+
+        return output;
     }
 
-    public static void toNegative(final SCIFIOImgPlus<UnsignedByteType> input, final SCIFIOImgPlus<UnsignedByteType> output)
+    public static SCIFIOImgPlus<UnsignedByteType> toNegative(final SCIFIOImgPlus<UnsignedByteType> input)
     {
         System.out.printf("Converting to negative...\n");
 
-        final Cursor<UnsignedByteType> inputCursor = input.getImg().cursor();
-        final Cursor<UnsignedByteType> outputCursor = output.getImg().cursor();
+        final SCIFIOImgPlus<UnsignedByteType> output = ImageManager.createImage(input);
+        final Cursor<UnsignedByteType> inputCursor = input.cursor();
+        final Cursor<UnsignedByteType> outputCursor = output.cursor();
 
         while (inputCursor.hasNext())
         {
@@ -54,17 +69,21 @@ public class Processing
 
             outputCursor.get().set(255 - inputCursor.get().get());
         }
+
+        return output;
     }
 
-    public static void changeBrightness(final SCIFIOImgPlus<UnsignedByteType> input, final SCIFIOImgPlus<UnsignedByteType> output, final int gain)
+    public static SCIFIOImgPlus<UnsignedByteType> changeBrightness(final SCIFIOImgPlus<UnsignedByteType> input, final int gain)
     {
         if (gain < -255 || gain > 255)
         {
             System.err.printf("Could not apply a gain of %d to the brightness!\n", gain);
-            return;
+            return null;
         }
 
         System.out.printf("Applying a gain of %d to the brightness...\n", gain);
+
+        final SCIFIOImgPlus<UnsignedByteType> output = ImageManager.createImage(input);
         final Cursor<UnsignedByteType> inputCursor = input.cursor();
         final Cursor<UnsignedByteType> outputCursor = output.cursor();
 
@@ -82,17 +101,21 @@ public class Processing
 
             outputCursor.get().set(value);
         }
+
+        return output;
     }
 
-    public static void colorize(final SCIFIOImgPlus<UnsignedByteType> input, final SCIFIOImgPlus<UnsignedByteType> output, final float hue)
+    public static SCIFIOImgPlus<UnsignedByteType> colorize(final SCIFIOImgPlus<UnsignedByteType> input, final float hue)
     {
         if (hue < 0f || hue > 360f)
         {
             System.err.printf("Could not colorize using hue %f!\n", hue);
-            return;
+            return null;
         }
 
         System.out.printf("Colorizing using hue %f...\n", hue);
+
+        final SCIFIOImgPlus<UnsignedByteType> output = ImageManager.createImage(input);
         final RandomAccess<UnsignedByteType> inputRandomAccess = input.randomAccess();
         final RandomAccess<UnsignedByteType> outputRandomAccess = output.randomAccess();
 
@@ -124,15 +147,17 @@ public class Processing
                 }
             }
         }
+
+        return output;
     }
 
-    public static void extendDynamics(final SCIFIOImgPlus<UnsignedByteType> input, final SCIFIOImgPlus<UnsignedByteType> output)
+    public static SCIFIOImgPlus<UnsignedByteType> extendDynamics(final SCIFIOImgPlus<UnsignedByteType> input)
     {
-        final SCIFIOImgPlus<UnsignedByteType> inputGrayscale = input.copy();
-        toGrayscale(input, inputGrayscale);
+        final SCIFIOImgPlus<UnsignedByteType> inputGrayscale = toGrayscale(input);
 
         System.out.printf("Extending dynamics...\n");
 
+        final SCIFIOImgPlus<UnsignedByteType> output = ImageManager.createImage(input);
         final RandomAccess<UnsignedByteType> tempRandomAccess = inputGrayscale.randomAccess();
 
         final int LUT[] = new int[256];
@@ -187,19 +212,23 @@ public class Processing
                 }
             }
         }
+
+        return output;
     }
 
-    public static void equalizeHistogram(final SCIFIOImgPlus<UnsignedByteType> input, final SCIFIOImgPlus<UnsignedByteType> output, final int channel)
+    public static SCIFIOImgPlus<UnsignedByteType> equalizeHistogram(final SCIFIOImgPlus<UnsignedByteType> input, final int channel)
     {
         final int bits = 1000;
 
         if (channel != 1 && channel != 2)
         {
             System.err.printf("Could not equalize histogram using channel %d!", channel);
-            return;
+            return null;
         }
 
         System.out.printf("Equalizing histogram on channel %d...\n", channel);
+
+        final SCIFIOImgPlus<UnsignedByteType> output = ImageManager.createImage(input);
         final RandomAccess<UnsignedByteType> inputRandomAccess = input.randomAccess(), outputRandomAccess = output.randomAccess();
         final int[] histogram = new int[bits + 1];
         int total = 0;
@@ -256,14 +285,17 @@ public class Processing
                 }
             }
         }
+
+        return output;
     }
 
-    public static void horizontalMirror(final SCIFIOImgPlus<UnsignedByteType> input, final SCIFIOImgPlus<UnsignedByteType> output)
+    public static SCIFIOImgPlus<UnsignedByteType> horizontalMirror(final SCIFIOImgPlus<UnsignedByteType> input)
     {
         System.out.printf("Mirroring horizontally...\n");
 
-        final Cursor<UnsignedByteType> inputCursor = input.getImg().cursor();
-        final RandomAccess<UnsignedByteType> outputRandomAccess = output.getImg().randomAccess();
+        final SCIFIOImgPlus<UnsignedByteType> output = ImageManager.createImage(input);
+        final Cursor<UnsignedByteType> inputCursor = input.cursor();
+        final RandomAccess<UnsignedByteType> outputRandomAccess = output.randomAccess();
 
         while (inputCursor.hasNext())
         {
@@ -274,14 +306,17 @@ public class Processing
 
             outputRandomAccess.get().set(inputCursor.get().get());
         }
+
+        return output;
     }
 
-    public static void verticalMirror(final SCIFIOImgPlus<UnsignedByteType> input, final SCIFIOImgPlus<UnsignedByteType> output)
+    public static SCIFIOImgPlus<UnsignedByteType> verticalMirror(final SCIFIOImgPlus<UnsignedByteType> input)
     {
         System.out.printf("Mirroring vertically...\n");
 
-        final Cursor<UnsignedByteType> inputCursor = input.getImg().cursor();
-        final RandomAccess<UnsignedByteType> outputRandomAccess = output.getImg().randomAccess();
+        final SCIFIOImgPlus<UnsignedByteType> output = ImageManager.createImage(input);
+        final Cursor<UnsignedByteType> inputCursor = input.cursor();
+        final RandomAccess<UnsignedByteType> outputRandomAccess = output.randomAccess();
 
         while (inputCursor.hasNext())
         {
@@ -292,14 +327,17 @@ public class Processing
 
             outputRandomAccess.get().set(inputCursor.get().get());
         }
+
+        return output;
     }
 
-    public static void completeMirror(final SCIFIOImgPlus<UnsignedByteType> input, final SCIFIOImgPlus<UnsignedByteType> output)
+    public static SCIFIOImgPlus<UnsignedByteType> completeMirror(final SCIFIOImgPlus<UnsignedByteType> input)
     {
         System.out.printf("Mirroring completely...\n");
 
-        final Cursor<UnsignedByteType> inputCursor = input.getImg().cursor();
-        final RandomAccess<UnsignedByteType> outputRandomAccess = output.getImg().randomAccess();
+        final SCIFIOImgPlus<UnsignedByteType> output = ImageManager.createImage(input);
+        final Cursor<UnsignedByteType> inputCursor = input.cursor();
+        final RandomAccess<UnsignedByteType> outputRandomAccess = output.randomAccess();
 
         while (inputCursor.hasNext())
         {
@@ -310,5 +348,7 @@ public class Processing
 
             outputRandomAccess.get().set(inputCursor.get().get());
         }
+
+        return output;
     }
 }

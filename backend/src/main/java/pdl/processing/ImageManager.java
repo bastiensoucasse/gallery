@@ -21,14 +21,30 @@ import io.scif.img.ImgOpener;
 import io.scif.img.ImgSaver;
 import io.scif.img.SCIFIOImgPlus;
 import net.imglib2.img.Img;
+import net.imglib2.img.ImgFactory;
 import net.imglib2.img.array.ArrayImgFactory;
 import net.imglib2.type.numeric.integer.UnsignedByteType;
 import pdl.backend.AcceptedMediaTypes;
 import pdl.backend.Utils;
 import pdl.backend.mysqldb.Image;
 
-public class Converter
+public class ImageManager
 {
+    public static SCIFIOImgPlus<UnsignedByteType> createImage(final SCIFIOImgPlus<UnsignedByteType> img)
+    {
+        return img.copy();
+    }
+
+    public static SCIFIOImgPlus<UnsignedByteType> createImage(final long width, final long height)
+    {
+        System.err.printf("ImageManager.createImage is still in progress!\n");
+
+        final ImgFactory<UnsignedByteType> factory = new ArrayImgFactory<>(new UnsignedByteType());
+        final Img<UnsignedByteType> output = factory.create(new long[] { width, height, 3 });
+
+        return new SCIFIOImgPlus<UnsignedByteType>(output);
+    }
+
     public static SCIFIOImgPlus<UnsignedByteType> imageFromJPEGBytes(final byte[] data)
     throws FormatException, IOException
     {
@@ -81,10 +97,5 @@ public class Converter
         final Image image = new Image(output.getName(), Files.readAllBytes(output.toPath()), Utils.typeOfFile(output), Utils.sizeOfImage(output));
         output.delete();
         return image;
-    }
-
-    public static SCIFIOImgPlus<UnsignedByteType> imgToSCIFIOImgPlus(final Img<UnsignedByteType> img)
-    {
-        return new SCIFIOImgPlus<UnsignedByteType>(img);
     }
 }
