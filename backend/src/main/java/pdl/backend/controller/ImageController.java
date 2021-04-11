@@ -27,6 +27,7 @@ import com.fasterxml.jackson.databind.node.ArrayNode;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ClassPathResource;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -233,15 +234,31 @@ public class ImageController {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         try {
             Image output = Converter.convertImage(input.get(), MediaType.valueOf(format));
-            return ResponseEntity.ok().contentType(output.getType()).body(output.getData());
+            return ResponseEntity.ok().header("name", output.getName()).contentType(output.getType()).body(output.getData());
         }catch (IllegalArgumentException e){
-            e.printStackTrace();
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("image :" +  input.get().getName() + " already has type" + format);
+            return ResponseEntity.ok().header("name", input.get().getName()).contentType(input.get().getType()).body(input.get().getData());
         } catch (IOException e) {
             e.printStackTrace();
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
+    
+    
+    @GetMapping(path = "/images/supportedMedia", produces = "application/json; charset=UTF-8")
+    public @ResponseBody ArrayNode listOfSupportedMedia(){
+        final ArrayNode nodes = mapper.createArrayNode();
+        
+        for (String jsonString : AcceptedMediaTypes.toJson()) {
+            try{
+                nodes.add(mapper.readTree(jsonString));
+            }catch (final JsonProcessingException e) {
+                e.printStackTrace();
+            }
+        } 
+        return nodes;
+        
+    }
+
     /**
      * Upload all images (jpeg, tif) in the images folder on the server.
      *

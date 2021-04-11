@@ -50,12 +50,7 @@ public class Image {
         this.size = size;
     }
 
-    public Image(final Integer id, final String name, final String type, final String size) {
-        this.id = id;
-        this.name = name;
-        this.type = type;
-        this.size = size;
-    }
+    
 
     public Integer getId() {
         return id;

@@ -89,7 +89,7 @@ public class ImageManager
             throw new IllegalArgumentException(type.toString() + " is not supported");
 
         final BufferedImage bufferedImageInput = ImageIO.read(new ByteArrayInputStream(input.getData()));
-        final File output = new File(input.getNameWithoutExtension() + type.getSubtype());
+        final File output = new File(input.getNameWithoutExtension() + "." + type.getSubtype());
 
         if (!ImageIO.write(bufferedImageInput, type.getSubtype(), output))
             throw new IOException("Could not convert TIFF to JPG");

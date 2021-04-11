@@ -9,7 +9,7 @@
                 <span class="material-icons">delete</span>
             </button>
 
-            <button class="feature-link" @click="download">
+            <button class="feature-link" @click="showExport = true">
                 <span class="material-icons">download</span>
             </button>
 
@@ -335,13 +335,24 @@
                 </form>
             </div>
         </div>
+
+        <div class="export-window" v-if="showExport">
+            <Export @closeExport ="showExport = false" :id="id" :name="name"></Export>
+        </div>
+
+
     </div>
 </template>
 
 <script>
 import axios from "axios";
+import Export from "@/components/Export.vue"
 
 export default {
+    components: { 
+        Export,
+        
+    },
     name: "Preview",
 
     props: {
@@ -349,6 +360,12 @@ export default {
         name: String,
         type: String,
         dimensions: String,
+    },
+
+    data(){
+        return {
+            showExport: false,
+        };
     },
 
     emits: {
@@ -431,6 +448,11 @@ export default {
         0 3px 14px 2px rgba(0, 0, 0, 0.12), 0 5px 5px -3px rgba(0, 0, 0, 0.2);
     background-color: #323539;
     overflow: hidden;
+}
+
+.export-window{
+    display: grid;
+    place-items: center;
 }
 
 .preview-features {
