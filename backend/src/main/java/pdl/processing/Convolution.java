@@ -35,9 +35,11 @@ public class Convolution
         return kernel;
     }
 
-    private static void convolution(final SCIFIOImgPlus<UnsignedByteType> input, final SCIFIOImgPlus<UnsignedByteType> output, final double[][] kernel)
+    private static SCIFIOImgPlus<UnsignedByteType> convolution(final SCIFIOImgPlus<UnsignedByteType> input, final double[][] kernel)
     {
         final int radius = kernel.length / 2;
+
+        final SCIFIOImgPlus<UnsignedByteType> output = ImageManager.createImage(input);
         final Cursor<UnsignedByteType> outputCursor = output.cursor();
 
         for (int c = 0; c < 3; c++) {
@@ -66,49 +68,48 @@ public class Convolution
                 outputCursor.get().set((int) value);
             }
         }
+
+        return output;
     }
 
-    public static void meanFilter(final SCIFIOImgPlus<UnsignedByteType> input, final SCIFIOImgPlus<UnsignedByteType> output, final int radius)
+    public static SCIFIOImgPlus<UnsignedByteType> meanFilter(final SCIFIOImgPlus<UnsignedByteType> input, final int radius)
     {
         if (radius <= 0)
         {
             System.err.printf("Could not apply mean filter with radius %d!\n", radius);
-            return;
+            return null;
         }
 
         System.out.printf("Applying mean filter with radius %d...\n", radius);
-        convolution(input, output, generateMeanFilter(radius));
+        return convolution(input, generateMeanFilter(radius));
     }
 
-    public static void gaussianFilter(final SCIFIOImgPlus<UnsignedByteType> input, final SCIFIOImgPlus<UnsignedByteType> output, final int radius)
+    public static SCIFIOImgPlus<UnsignedByteType> gaussianFilter(final SCIFIOImgPlus<UnsignedByteType> input, final int radius)
     {
         final double sigma = 4. / 3.;
 
         if (radius <= 0)
         {
             System.err.printf("Could not apply gaussian filter with radius %d and sigma %f!\n", radius, sigma);
-            return;
+            return null;
         }
 
         System.out.printf("Applying gaussian filter with radius %d and sigma %f...\n", radius, sigma);
-        convolution(input, output, generateGaussianFilter(radius, sigma));
+        return convolution(input, generateGaussianFilter(radius, sigma));
     }
 
-    public static void sobelOperator(final SCIFIOImgPlus<UnsignedByteType> input, final SCIFIOImgPlus<UnsignedByteType> output)
+    public static SCIFIOImgPlus<UnsignedByteType> sobelOperator(final SCIFIOImgPlus<UnsignedByteType> input)
     {
         final double[][] sobelX = { { -1., 0., 1. }, { -2., 0., 2. }, { -1., 0., 1. } };
         final double[][] sobelY = { { -1., -2., -1. }, { 0., 0., 0. }, { 1., 2., 1. } };
 
-        final SCIFIOImgPlus<UnsignedByteType> inputGrayscale = input.copy();
-        Processing.toGrayscale(input, inputGrayscale);
+        final SCIFIOImgPlus<UnsignedByteType> inputGrayscale = Processing.toGrayscale(input);
 
         System.out.printf("Applying sobel operator...\n");
 
-        final SCIFIOImgPlus<UnsignedByteType> inputX = inputGrayscale.copy();
-        final SCIFIOImgPlus<UnsignedByteType> inputY = inputGrayscale.copy();
-
-        convolution(inputGrayscale, inputX, sobelX);
-        convolution(inputGrayscale, inputY, sobelY);
+        final SCIFIOImgPlus<UnsignedByteType> output = ImageManager.createImage(input);
+        final SCIFIOImgPlus<UnsignedByteType> inputX = convolution(inputGrayscale, sobelX);
+        final SCIFIOImgPlus<UnsignedByteType> inputY = convolution(inputGrayscale, sobelY);
 
         final Cursor<UnsignedByteType> inputXCursor = inputX.cursor();
         final Cursor<UnsignedByteType> inputYCursor = inputY.cursor();
@@ -129,5 +130,7 @@ public class Convolution
 
             outputCursor.get().set((int) value);
         }
+
+        return output;
     }
 }
