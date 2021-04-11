@@ -65,6 +65,22 @@
                     method="get"
                     :action="'/images/' + id"
                 >
+                    <h3 class="category">Resize [WIP]</h3>
+
+                    <input type="hidden" name="algorithm" value="resize" />
+
+                    <input
+                        class="theme-button"
+                        type="submit"
+                        value="Resize"
+                    />
+                </form>
+
+                <form
+                    class="preview-feature"
+                    method="get"
+                    :action="'/images/' + id"
+                >
                     <h3 class="category">Convert to grayscale</h3>
 
                     <input type="hidden" name="algorithm" value="toGrayscale" />
