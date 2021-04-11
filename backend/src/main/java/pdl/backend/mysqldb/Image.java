@@ -2,6 +2,8 @@ package pdl.backend.mysqldb;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Lob;
 import javax.persistence.Table;
@@ -14,6 +16,7 @@ public class Image {
     private static int count = 0;
 
     @Id
+    @GeneratedValue(strategy = GenerationType.AUTO)
     private Integer id;
 
     @Column(name = "name")
@@ -34,13 +37,13 @@ public class Image {
     }
 
     public Image(final String name, final byte[] data) {
-        this.id = count++;
+        // this.id = count++;
         this.name = name;
         this.data = data;
     }
 
     public Image(final String name, final byte[] data, final MediaType type, final String size) {
-        this.id = count++;
+        // this.id = count++;
         this.name = name;
         this.data = data;
         this.type = type.toString();
