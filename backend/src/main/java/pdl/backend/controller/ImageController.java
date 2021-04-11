@@ -8,8 +8,10 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collector;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -62,7 +64,7 @@ public class ImageController {
      * @param imageDAO the image data access object (database)
      */
     // public ImageController(ImageDAO imageDAO) {
-    //     this.imageDAO = imageDAO;
+    // this.imageDAO = imageDAO;
     // }
 
     /**
@@ -103,7 +105,7 @@ public class ImageController {
      */
     @RequestMapping(value = "/images/{id}", method = RequestMethod.DELETE)
     public ResponseEntity<?> deleteImage(@PathVariable("id") final int id) {
-        if(imageRepository.findById(id).isEmpty())
+        if (imageRepository.findById(id).isEmpty())
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
 
         imageRepository.deleteById(id);
@@ -188,7 +190,6 @@ public class ImageController {
     @ResponseBody
     public ResponseEntity<?> executeAlgorithm(@PathVariable("id") final int id,
             @RequestParam final Map<String, String> algorithm) {
-        // final Image image = imageDAO.retrieve(id).orElse(null);
         final Image image = imageRepository.findById(id).orElse(null);
         if (image == null)
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
@@ -199,7 +200,6 @@ public class ImageController {
         Image proccessedImage;
         try {
             proccessedImage = AlgorithmManager.Instance().applyAlgorithm(name, algorithm.values(), image);
-            // imageDAO.create(proccessedImage);
             imageRepository.save(proccessedImage);
         } catch (final NoSuchMethodException e) {
             new ResponseEntity<>(HttpStatus.BAD_REQUEST);
@@ -223,15 +223,21 @@ public class ImageController {
      * @throws IOException
      */
     public void saveImagesFolder(final Path path_of_resource) throws IOException {
-        imageRepository.deleteAll();
         final Path path = path_of_resource;
         Set<String> listImages = new HashSet<>();
         listImages = listFiles(path);
+        Iterator<Image> image_it = imageRepository.findAll().iterator();
+        // Filter images that have the same name in the db and the images in the
+        // resource folder.
+        while (image_it.hasNext()) {
+            listImages.removeIf(path_i -> image_it.next().getName().equals(Paths.get(path_i).getFileName().toString()));
+        }
         System.out.println(listImages);
         listImages.forEach(i -> {
             try {
                 final byte[] fileContent = Files.readAllBytes(Paths.get(i));
-                imageRepository.save(new Image(Paths.get(i).getFileName().toString(), fileContent, Utils.typeOfFile(Paths.get(i)), Utils.sizeOfImage(Paths.get(i))));
+                imageRepository.save(new Image(Paths.get(i).getFileName().toString(), fileContent,
+                        Utils.typeOfFile(Paths.get(i)), Utils.sizeOfImage(Paths.get(i))));
             } catch (final IOException e) {
                 e.printStackTrace();
             }
