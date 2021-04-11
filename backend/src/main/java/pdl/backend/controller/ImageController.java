@@ -46,7 +46,7 @@ import pdl.backend.AlgorithmManager;
 import pdl.backend.Utils;
 import pdl.backend.mysqldb.Image;
 import pdl.backend.mysqldb.ImageRepository;
-import pdl.processing.Converter;
+import pdl.processing.ImageManager;
 
 @RestController
 public class ImageController {
@@ -88,7 +88,15 @@ public class ImageController {
 
         if (image == null)
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-
+        if(image.getType().equals(MediaType.valueOf("image/tiff"))){ // check if the type is tiff
+            try { // try to convert the bytes to jpeg
+                byte[] jpegContent = ImageManager.convertImageBytes(image.getData(), MediaType.IMAGE_PNG);
+                return ResponseEntity.ok().contentType(image.getType()).body(jpegContent);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            
+        }
         return ResponseEntity.ok().contentType(image.getType()).body(image.getData());
     }
 
@@ -233,7 +241,7 @@ public class ImageController {
         if(input.isEmpty())
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         try {
-            Image output = Converter.convertImage(input.get(), MediaType.valueOf(format));
+            Image output = ImageManager.convertImage(input.get(), MediaType.valueOf(format));
             return ResponseEntity.ok().header("name", output.getName()).contentType(output.getType()).body(output.getData());
         }catch (IllegalArgumentException e){
             return ResponseEntity.ok().header("name", input.get().getName()).contentType(input.get().getType()).body(input.get().getData());
