@@ -5,18 +5,18 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
 import javax.persistence.Lob;
+import javax.persistence.ManyToOne;
 import javax.persistence.Table;
-
 import org.springframework.http.MediaType;
 
 @Entity
 @Table(name = "image")
 public class Image {
-    private static int count = 0;
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
     @Column(name = "name")
@@ -32,25 +32,25 @@ public class Image {
     @Column(name = "data")
     private byte[] data;
 
+    @ManyToOne
+    @JoinColumn(name = "FK_UserId")
+    private User user;
+
     public Image() {
         super();
     }
 
     public Image(final String name, final byte[] data) {
-        // this.id = count++;
         this.name = name;
         this.data = data;
     }
 
     public Image(final String name, final byte[] data, final MediaType type, final String size) {
-        // this.id = count++;
         this.name = name;
         this.data = data;
         this.type = type.toString();
         this.size = size;
     }
-
-    
 
     public Integer getId() {
         return id;
@@ -78,6 +78,10 @@ public class Image {
 
     public String getNameWithoutExtension() {
         return name.split("\\.")[0];
+    }
+
+    public void setUser(User user) {
+        this.user = user;
     }
 
     /**
