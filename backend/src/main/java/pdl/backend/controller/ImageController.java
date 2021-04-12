@@ -45,6 +45,8 @@ import pdl.backend.AcceptedMediaTypes;
 import pdl.backend.AlgorithmManager;
 import pdl.backend.Utils;
 import pdl.backend.mysqldb.Image;
+import pdl.backend.mysqldb.User;
+import pdl.backend.mysqldb.UserRepository;
 import pdl.backend.mysqldb.ImageRepository;
 import pdl.processing.ImageManager;
 
@@ -57,7 +59,8 @@ public class ImageController {
 
     @Autowired
     private ImageRepository imageRepository;
-
+    @Autowired
+    private UserRepository userRepository;
     /**
      * JSON mapper.
      */
@@ -88,14 +91,14 @@ public class ImageController {
 
         if (image == null)
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        if(image.getType().equals(MediaType.valueOf("image/tiff"))){ // check if the type is tiff
+        if (image.getType().equals(MediaType.valueOf("image/tiff"))) { // check if the type is tiff
             try { // try to convert the bytes to jpeg
                 byte[] jpegContent = ImageManager.convertImageBytes(image.getData(), MediaType.IMAGE_PNG);
                 return ResponseEntity.ok().contentType(image.getType()).body(jpegContent);
             } catch (IOException e) {
                 e.printStackTrace();
             }
-            
+
         }
         return ResponseEntity.ok().contentType(image.getType()).body(image.getData());
     }
@@ -234,37 +237,38 @@ public class ImageController {
     @RequestMapping(value = "/images/{id}", params = "format", method = RequestMethod.GET)
     @ResponseBody
     public ResponseEntity<?> convertImageFormat(@PathVariable("id") final int id, @RequestParam final String format) {
-        if(!AcceptedMediaTypes.contains(format))
+        if (!AcceptedMediaTypes.contains(format))
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("format not supported by the server");
-        
+
         Optional<Image> input = imageRepository.findById(id);
-        if(input.isEmpty())
+        if (input.isEmpty())
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         try {
             Image output = ImageManager.convertImage(input.get(), MediaType.valueOf(format));
-            return ResponseEntity.ok().header("name", output.getName()).contentType(output.getType()).body(output.getData());
-        }catch (IllegalArgumentException e){
-            return ResponseEntity.ok().header("name", input.get().getName()).contentType(input.get().getType()).body(input.get().getData());
+            return ResponseEntity.ok().header("name", output.getName()).contentType(output.getType())
+                    .body(output.getData());
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.ok().header("name", input.get().getName()).contentType(input.get().getType())
+                    .body(input.get().getData());
         } catch (IOException e) {
             e.printStackTrace();
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
-    
-    
+
     @GetMapping(path = "/images/supportedMedia", produces = "application/json; charset=UTF-8")
-    public @ResponseBody ArrayNode listOfSupportedMedia(){
+    public @ResponseBody ArrayNode listOfSupportedMedia() {
         final ArrayNode nodes = mapper.createArrayNode();
-        
+
         for (String jsonString : AcceptedMediaTypes.toJson()) {
-            try{
+            try {
                 nodes.add(mapper.readTree(jsonString));
-            }catch (final JsonProcessingException e) {
+            } catch (final JsonProcessingException e) {
                 e.printStackTrace();
             }
-        } 
+        }
         return nodes;
-        
+
     }
 
     /**
@@ -294,8 +298,10 @@ public class ImageController {
         listImages.forEach(i -> {
             try {
                 final byte[] fileContent = Files.readAllBytes(Paths.get(i));
-                imageRepository.save(new Image(Paths.get(i).getFileName().toString(), fileContent,
-                        Utils.typeOfFile(Paths.get(i)), Utils.sizeOfImage(Paths.get(i))));
+                Image image = new Image(Paths.get(i).getFileName().toString(), fileContent,
+                        Utils.typeOfFile(Paths.get(i)), Utils.sizeOfImage(Paths.get(i)));
+                imageRepository.save(image);
+
             } catch (final IOException e) {
                 e.printStackTrace();
             }
