@@ -6,7 +6,7 @@
 
 usage_print()
 {
-    printf "Gallery: %s [-b]\n" "$0"
+    printf "Gallery: %s [-b | --build] [-r | --reset]\n" "$0"
 }
 
 help_print()
@@ -16,38 +16,52 @@ help_print()
     printf "\n"
     printf "    Options:\n"
     printf "      -b    build the whole project from scratch\n"
-}
-
-
-# Logs
-
-logs_check()
-{
-    if [ ! -d logs ]; then
-        mkdir logs
-    fi
+    printf "      -r    reset the database to its defaults\n"
 }
 
 
 # Options
 
 if [ $# -gt 0 ]; then
-    if [ $# -ne 1 ]; then
-        usage_print
-        exit 1
+    if [ $# -eq 1 ]; then
+        if [ "$1" = "--help" ]; then
+            help_print
+            exit 1
+        fi
     fi
 
-    if [ "$1" = "-b" ] || [ "$1" = "--build" ]; then
-        printf "Building project...\n"
-        logs_check
-        mvn clean install &> logs/build.log
-    elif [ "$1" = "-h" ] || [ "$1" = "--help" ]; then
-        help_print
-        exit 1
-    else
-        usage_print
-        exit 1
+    for i; do
+        if [ "$i" = "-b" ] || [ "$i" = "--build" ]; then
+            build=true
+        elif [ "$i" = "-r" ] || [ "$i" = "--reset" ]; then
+            reset=true
+        elif [ "$i" = "-f" ] || [ "$i" = "--force" ]; then
+            force=true
+        else
+            usage_print
+            printf "%s: invalid argument\n" "$i"
+            exit 1
+        fi
+    done
+fi
+
+
+# Logs
+
+if [ ! -d logs ]; then
+    mkdir logs
+fi
+
+
+# Build
+
+if [ "$build" ] || [ ! -f .hush ]; then
+    printf "Building project...\n"
+    if ! mvn clean install &> logs/build.log; then
+        printf "Fatal error: 'mvn clean install &> logs/build.log' failed.\n"
+        if [ ! "$force" ]; then exit 1; else skip_hush=true; fi
     fi
+    if [ ! "$skip_hush" ]; then touch .hush; fi
 fi
 
 
@@ -55,24 +69,37 @@ fi
 
 if [ "$(pgrep mysql | wc -l)" -eq 0 ]; then
     printf "Launching MySQL service...\n"
-    sudo service mysql start &> /dev/null
+    if ! sudo service mysql start &> /dev/null; then
+        printf "Fatal error: 'sudo service mysql start &> /dev/null' failed.\n"
+        if [ ! "$force" ]; then exit 1; fi
+    fi
 fi
 
 if [ "$(pgrep mysql | wc -l)" -eq 0 ]; then
     printf "Fatal error: MySQL could not launch.\n"
     printf "Please make sure MySQL is installed and functional.\n"
-    exit 1
+    if [ ! "$force" ]; then exit 1; fi
+fi
+
+if [ "$reset" ]; then
+    printf "Reseting database...\n"
+    if ! sudo mysql < database/db_reset.sql; then
+        printf "Fatal error: 'sudo mysql < database/db_reset.sql' failed.\n"
+        if [ ! "$force" ]; then exit 1; fi
+    fi
 fi
 
 printf "Initializing database...\n"
-cat db.sql | sudo mysql
+if ! sudo mysql < database/db_init.sql; then
+    printf "Fatal error: 'sudo mysql < database/db_init.sql' failed.\n"
+    if [ ! "$force" ]; then exit 1; fi
+fi
 
 
 # Backend
 
 printf "Launching backend...\n"
 cd backend || exit 1
-logs_check
 mvn spring-boot:run &> ../logs/backend.log &
 pids[0]=$!
 cd ..
@@ -82,7 +109,6 @@ cd ..
 
 printf "Launching frontend...\n"
 cd frontend || exit 1
-logs_check
 npm run serve &> ../logs/frontend.log &
 pids[1]=$!
 cd ..

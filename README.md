@@ -8,11 +8,11 @@ l'Université de Bordeaux (CREMI).
 
 ### MySQL
 
-Le projet nécessite une base de donnée MySQL. Veuillez donc installer MySQL
-avant de poursuivre si ce n'est pas déjà le cas. Si vous ne savez pas vous
+Le projet nécessite une base de données MySQL. Veuillez donc installer MySQL
+avant de poursuivre si ce n'est pas déjà le cas. Si vous ne savez pas, vous
 pouvez vérifier en entrant la commande suivante.
 
-```
+```bash
 mysql -V
 ```
 
@@ -22,7 +22,7 @@ système Debian ou basé sur Debian (par exemple Ubuntu), les paquets requis son
 présents sur les dépôts système. Il suffit d'entrer la commande suivante pour
 lancer l'installation.
 
-```
+```bash
 sudo apt install mysql-server mysql-client
 ```
 
@@ -33,12 +33,25 @@ Si vous êtes sous un autre système, référez-vous à la documentation de celu
 Pour installer et lancer la galerie, il suffit d'utiliser le script bash dédié,
 depuis la racine du projet.
 
-```
+```bash
 ./run.sh
 ```
 
 Ce script va procéder aux vérifications de votre système afin d'installer et de
-lancer le projet comme il le faut pour votre machine.
+lancer le projet comme il le faut pour votre machine. Pour clore le serveur,
+il suffira d'appuyer sur la touche q.
+
+Si vous relancez le projet, vous pourrez également choisir de réaliser une
+nouvelle installation complète (en réinstallant les dépendances) en utilisant
+l'option `--build`, également abrégée en `-b`, ou encore de réinitialiser la
+base de données à ses valeurs par défaut grâce à l'option `--reset` ou `-r`. Il
+est aussi possible de combiner les options.
+
+Vous pouvez avoir accès à la liste des options en tapant la commande d'aide.
+
+```bash
+./run.sh --help
+```
 
 ## Installation manuelle
 
@@ -51,32 +64,41 @@ paramètres de votre machine.
 Assurez-vous que votre serveur de base de donées MySQL est bien démarré. Si ce
 n'est pas le cas, entrez la commande suivante pour le démarrer.
 
-```
+```bash
 sudo service mysql start
 ```
 
 Vous pouvez également utiliser cette commande si la précédente venait à ne pas
 fonctionner.
 
-```
+```bash
+# Si la commande précédente n'a pas fonctionné
 sudo /etc/init.d/mysql start
 ```
 
 Rendez vous dans le client de MySQL depuis le répertoire racine du projet.
 
-```
+``` bash
 sudo mysql
+```
+
+Si vous souhaitez réinitialiser la base de données, entrez cette commande.
+Sinon vous pouvez directement passer à la commande suivante.
+
+```sql
+-- Si vous souhaitez réinitialiser la base de données
+source database/db_reset.sql;
 ```
 
 Exécutez le script d'initialisation de la base de données.
 
-```
-source init_db.sql;
+```sql
+source database/db_init.sql;
 ```
 
 Vous pouvez quitter le client MySQL.
 
-```
+```sql
 quit;
 ```
 
@@ -84,21 +106,24 @@ quit;
 
 Dans le répertoire racine du projet, executer les commandes suivantes.
 
-- Installation des dépendances
+- Installation des dépendances s'il s'agit du premier lancement ou d'une
+réinstallation.
 
-```
+```bash
+# S'il s'agit de la première installation ou d'une réinstallation
 mvn clean install
 ```
 
-- Installation du backend
+- Installation du backend.
 
-```
+```bash
 mvn --projects backend spring-boot:run
 ```
 
-- Installation du client
+- Installation du frontend (le backend ayant pris le contrôle du terminal, il
+faudra en ouvrir un nouveau toujours à la racine du projet).
 
-```
+```bash
 cd frontend && npm run serve
 ```
 
@@ -119,8 +144,5 @@ Le serveur a été testé sur les configurations suivantes.
 
 ### Base de données
 
-Ci dessous un diagramme explicatif de l'implémentation de la base de données.
-
-<iframe width="100%" height="500px" style="box-shadow: 0 2px 8px 0 rgba(63,69,81,0.16); border-radius:15px;" allowtransparency="true" allowfullscreen="true" scrolling="no" title="Embedded DrawSQL IFrame" frameborder="0" src="https://drawsql.app/pdl/diagrams/pdl/embed"></iframe>
-
+Voici un diagramme explicatif de l'implémentation de la base de données.\
 [Visualiser dans un navigateur](https://drawsql.app/pdl/diagrams/pdl/embed)
