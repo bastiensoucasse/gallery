@@ -132,5 +132,5 @@ pkill -INT -P ${pids[0]}
 pkill -INT -P $$
 
 if [ "$(pgrep -f gallery | wc -l)" -gt 0 ]; then
-    pkill -KILL -f gallery
+    pkill -KILL -f pdl/gallery
 fi
