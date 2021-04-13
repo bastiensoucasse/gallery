@@ -82,7 +82,7 @@ public class ImageController {
      *         image was found)
      */
     @RequestMapping(value = "/images/{id}", method = RequestMethod.GET, produces = { MediaType.IMAGE_JPEG_VALUE,
-            "image/tiff" })
+            "image/tiff", MediaType.IMAGE_PNG_VALUE })
     public ResponseEntity<?> getImage(@PathVariable("id") final int id) {
         // final Image image = imageDAO.retrieve(id).orElse(null);
         final Image image = imageRepository.findById(id).orElse(null);
