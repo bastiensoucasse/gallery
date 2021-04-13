@@ -3,13 +3,10 @@ package pdl.processing;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
-import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
-import java.nio.file.Files;
 
 import javax.imageio.ImageIO;
-import javax.imageio.stream.ImageOutputStream;
 
 import org.scijava.Context;
 import org.scijava.io.location.BytesLocation;
@@ -23,12 +20,11 @@ import io.scif.formats.JPEGFormat;
 import io.scif.img.ImgOpener;
 import io.scif.img.ImgSaver;
 import io.scif.img.SCIFIOImgPlus;
-import net.imglib2.img.Img;
+import net.imagej.ImgPlus;
 import net.imglib2.img.ImgFactory;
 import net.imglib2.img.array.ArrayImgFactory;
 import net.imglib2.type.numeric.integer.UnsignedByteType;
 import pdl.backend.AcceptedMediaTypes;
-import pdl.backend.Utils;
 import pdl.backend.mysqldb.Image;
 
 public class ImageManager
@@ -38,13 +34,10 @@ public class ImageManager
         return img.copy();
     }
 
-    public static SCIFIOImgPlus<UnsignedByteType> createImage(final long width, final long height)
+    public static SCIFIOImgPlus<UnsignedByteType> createImage(final SCIFIOImgPlus<UnsignedByteType> img, final long width, final long height)
     {
-        System.err.printf("ImageManager.createImage is still in progress!\n");
-
         final ImgFactory<UnsignedByteType> factory = new ArrayImgFactory<>(new UnsignedByteType());
-        final Img<UnsignedByteType> output = factory.create(new long[] { width, height, 3 });
-
+        final ImgPlus<UnsignedByteType> output = SCIFIOImgPlus.wrap(factory.create(new long[] {width, height, Long.valueOf(3)}), img);
         return new SCIFIOImgPlus<UnsignedByteType>(output);
     }
 
@@ -85,7 +78,7 @@ public class ImageManager
     /**
      * Change the format of an image, for example from png -> jpeg
      * Note this function doesn't take in consideration any compression, the conversion is done with java.io API and javax.imageio
-     * 
+     *
      * @param input Image to convert
      * @param type MediaType type to convert to
      * @return Image a new image converted to the right format
@@ -102,16 +95,17 @@ public class ImageManager
             throw new IllegalArgumentException(type.toString() + " is not supported");
 
         final BufferedImage bufferedImageInput = ImageIO.read(new ByteArrayInputStream(input.getData()));
-       
-        ByteArrayOutputStream output = new ByteArrayOutputStream();
-        OutputStream outputStream = output;
+
+        final ByteArrayOutputStream output = new ByteArrayOutputStream();
+        final OutputStream outputStream = output;
+
         if (!ImageIO.write(bufferedImageInput, type.getSubtype(), outputStream))
             throw new IOException("Could not convert: " + input.getType() + " to: " + type.toString());
 
         return new Image(input.getNameWithoutExtension() + "." + type.getSubtype(), output.toByteArray(), type, input.getSize());
-        
+
     }
-    
+
     /**
      * Convert bytes to a desired format
      * !!! This function does not have any idea of the format of the bytes given, it is to the caller of the function to know in which format the given bytes are
@@ -120,14 +114,16 @@ public class ImageManager
      * @return byte[]
      * @throws IOException If conversion fails
      */
-    public static byte[] convertImageBytes(final byte[] bytes, MediaType type) throws IOException{
+    public static byte[] convertImageBytes(final byte[] bytes, final MediaType type)
+    throws IOException
+    {
         final BufferedImage bufferedImage = ImageIO.read(new ByteArrayInputStream(bytes)); // convert byte to bufferedImage
-        ByteArrayOutputStream output = new ByteArrayOutputStream(); // create a output stream byte[]
-        OutputStream outputStream = output;
-        if(!ImageIO.write(bufferedImage, type.getSubtype(), outputStream)) // write to the outputstream here byte array
+        final ByteArrayOutputStream output = new ByteArrayOutputStream();                  // create a output stream byte[]
+        final OutputStream outputStream = output;
+
+        if (!ImageIO.write(bufferedImage, type.getSubtype(), outputStream)) // write to the outputstream here byte array
             throw new IOException("Could not do conversion to: " + type.toString());
-        
+
         return output.toByteArray();
     }
-    
 }
