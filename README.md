@@ -41,6 +41,12 @@ Ce script va procéder aux vérifications de votre système afin d'installer et 
 lancer le projet comme il le faut pour votre machine. Pour clore le serveur,
 il suffira d'appuyer sur la touche q.
 
+**NB :** Lorsque le message `Gallery project launched. Check logs in the logs
+folder.` apparaît, il se peut que vous deviez patienter encore quelques secondes
+avant de pouvoir accéder à l'application. Le serveur a été mis en route, mais
+il peut prendre quelques secondes avant d'être effectif. Vous pouvez vérifier
+cela dans les logs du backend, dans le fichier `logs/backend.log`.
+
 Si vous relancez le projet, vous pourrez également choisir de réaliser une
 nouvelle installation complète (en réinstallant les dépendances) en utilisant
 l'option `--build`, également abrégée en `-b`, ou encore de réinitialiser la
