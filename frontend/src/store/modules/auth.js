@@ -47,7 +47,7 @@ const actions = {
 const mutations = {
     loginSuccess(state, user){
         state.status.loggedIn = true,
-        state.user = user;
+        this.state.user = user;
     },
     loginFailure(state){
         state.status.loggedIn = false;

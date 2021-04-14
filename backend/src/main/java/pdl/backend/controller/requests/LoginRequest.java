@@ -1,4 +1,4 @@
-package pdl.backend.requests;
+package pdl.backend.controller.requests;
 
 public class LoginRequest {
 

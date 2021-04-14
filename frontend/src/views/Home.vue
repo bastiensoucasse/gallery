@@ -20,5 +20,8 @@ export default {
         Gallery,
         
     },
+    updated(){
+        alert("update");
+    }
 };
 </script>
