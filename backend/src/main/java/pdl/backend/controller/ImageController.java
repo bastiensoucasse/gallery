@@ -14,12 +14,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
-import java.util.stream.Collector;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import javax.annotation.PostConstruct;
-import javax.swing.plaf.ListUI;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -27,7 +25,6 @@ import com.fasterxml.jackson.databind.node.ArrayNode;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ClassPathResource;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -45,9 +42,8 @@ import pdl.backend.AcceptedMediaTypes;
 import pdl.backend.AlgorithmManager;
 import pdl.backend.Utils;
 import pdl.backend.mysqldb.Image;
-import pdl.backend.mysqldb.User;
-import pdl.backend.mysqldb.UserRepository;
 import pdl.backend.mysqldb.ImageRepository;
+import pdl.backend.mysqldb.UserRepository;
 import pdl.processing.ImageManager;
 
 @RestController
