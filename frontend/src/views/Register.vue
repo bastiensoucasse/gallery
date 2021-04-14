@@ -28,13 +28,11 @@
             <label for="firstName">Firstname</label>
             <input
               v-model="this.user.firstName"
-              
               type="text"
               class="form-control"
               name="firstName"
             />
-            
-          </div>
+           </div>
 
            <div id="lastName" class="form-group">
             <label for="lastName">LastName</label>
@@ -59,11 +57,11 @@
           </div>
 
           <div id="roles" class="form-group">
-            <input type="radio" id="user" value="user" v-model="role" />
+            <input type="radio" id="user" value="user" v-model="user.roles[0]" />
             <label for="user">User</label>
-            <input type="radio" id="premium" value="premium" v-model="role" />
+            <input type="radio" id="premium" value="premium" v-model="user.roles[0]" />
             <label for="premium">Premium</label>
-            <input type="radio" id="root" value="root" v-model="role" />
+            <input type="radio" id="root" value="root" v-model="user.roles[0]" />
             <label for="root">Root</label>
            </div>
 
@@ -86,10 +84,9 @@ export default {
   name: 'Register',
   data() {
     return {
-      user: new User('', '', '', '', '', []),
+      user: new User('', '', '', '', '', ['']),
       submitted: false,
       successful: false,
-      role: null,
       message: ''
     };
   },
@@ -107,7 +104,6 @@ export default {
     handleRegister(){
       this.message = '';
       this.submitted = true;
-      this.user.roles = [this.role.toString()];
       this.$store.dispatch('auth/register', this.user).then(
         data => {
           this.message = data.message;
