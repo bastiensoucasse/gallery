@@ -12,10 +12,13 @@ const state = user
 
 const actions = {
     login({commit}, user){
+        console.log("user before calling server authservice: "+ user);
         return AuthService.login(user).then(
-            user => {
-                commit('loginSuccess', user);
-                return Promise.resolve(user);
+            response => {
+                if(response.data.jwt)
+                    localStorage.setItem('user', JSON.stringify(response.data));
+                commit('loginSuccess', response.data);
+                return Promise.resolve(response);
             },
             error => {
                 commit('loginFailure');
@@ -47,7 +50,9 @@ const actions = {
 const mutations = {
     loginSuccess(state, user){
         state.status.loggedIn = true,
-        this.state.user = user;
+        console.log("user in mutation: " + user);
+        state.user = user;
+        
     },
     loginFailure(state){
         state.status.loggedIn = false;
@@ -65,6 +70,11 @@ const mutations = {
     }
 }
 
+const getters = {
+    isLoggedIn: state => state.status.loggedIn,
+    currentUser: state => state.user
+}
+
     
 
 export default{
@@ -72,6 +82,7 @@ export default{
     state,
     actions,
     mutations,
+    getters,
     
 
 }

@@ -8,7 +8,12 @@ const routes = [
     {
         path: '/',
         name: 'Home',
-        component: Home
+        component: Home,
+        beforeEnter: (from) => {
+            if(from.name === 'Login' && this.$store.state.auth.loggedIn){
+                location.reload();
+            }
+        }
     },
 
     {
@@ -19,7 +24,7 @@ const routes = [
     {
         path: "/login",
         name: 'Login',
-        component: Login
+        component: Login,
     },
     {
         path: '/register',

@@ -3,16 +3,10 @@ import axios from 'axios'
 const URL = "auth/"
 
 class AuthService{
-    async login(user){
-        axios.post('auth/signin', {
+    async login(user){ // block execution to get log in 
+        return await axios.post('auth/signin', {
             username: user.username,
             password: user.password,
-        })
-        .then(response => {
-            if(response.data.jwt){
-                localStorage.setItem('user', JSON.stringify(response.data))
-            }
-            return response.data
         });
     }
 

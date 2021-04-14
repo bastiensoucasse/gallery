@@ -2,7 +2,7 @@
   <div class="container">
     
       <h3>
-        <strong>{{Hi}}</strong> Profile
+        <strong>{{currentUser}}</strong> Profile
       </h3>
     <!--
     <p>

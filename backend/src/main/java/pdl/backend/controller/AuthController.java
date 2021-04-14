@@ -7,6 +7,9 @@ import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.authentication.DisabledException;
+import org.springframework.security.authentication.LockedException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -56,7 +59,8 @@ public class AuthController {
 
 	@PostMapping("/signin")
 	public ResponseEntity<?> authenticateUser(@Valid @RequestBody LoginRequest loginRequest) {
-
+		
+		try{
 		Authentication authentication = authenticationManager.authenticate(
 				new UsernamePasswordAuthenticationToken(loginRequest.getUsername(), loginRequest.getPassword()));
 
@@ -70,6 +74,14 @@ public class AuthController {
 			
 		
 		return ResponseEntity.ok(new JwtResponse(jwt, userDetails.getId(), userDetails.getUsername(), userDetails.getEmail(), roles));
+		}catch(DisabledException e){
+			return ResponseEntity.badRequest().body(new MessageResponse("Account has been disabled"));
+		}catch(LockedException e){
+			return ResponseEntity.badRequest().body(new MessageResponse("Account has been locked"));
+		}catch(BadCredentialsException e){
+			return ResponseEntity.badRequest().body(new MessageResponse("Wrong username or password"));
+		}
+
 	}
 
 	@PostMapping("/signup")
