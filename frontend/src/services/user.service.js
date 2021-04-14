@@ -1,7 +1,7 @@
 import axios from 'axios';
 import authHeader from './auth-header';
 
-const test_URL = "/api/test";
+const test_URL = "api/test/";
 
 class UserService{
     getPublicContent(){
@@ -17,7 +17,7 @@ class UserService{
     }
 
     getRootBoard(){
-        return axios.get(test_URL + 'root', {headers: authHeader});
+        return axios.get(test_URL + 'root', {headers: authHeader()});
     }
 
 }
