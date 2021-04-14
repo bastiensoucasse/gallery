@@ -12,7 +12,17 @@ public class Processing
         final long width = 400, height = 200;
         System.out.printf("Resizing to %dx%d...\n", width, height);
 
-        final SCIFIOImgPlus<UnsignedByteType> output = ImageManager.createImage(width, height);
+        final SCIFIOImgPlus<UnsignedByteType> output = ImageManager.createImage(input, width, height);
+        final RandomAccess<UnsignedByteType> inputRandomAccess = input.randomAccess();
+        final Cursor<UnsignedByteType> outputCursor = output.localizingCursor();
+
+        // fill in to test (should result resize not centered)
+        while (outputCursor.hasNext())
+        {
+            outputCursor.fwd();
+            inputRandomAccess.setPosition(outputCursor);
+            outputCursor.get().set(inputRandomAccess.get().get());
+        }
 
         return output;
     }

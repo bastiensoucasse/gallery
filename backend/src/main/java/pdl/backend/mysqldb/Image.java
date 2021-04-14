@@ -52,6 +52,16 @@ public class Image {
         this.size = size;
     }
 
+    public Image(final String name, final byte[] data, final MediaType type, final long[] size) {
+        this.name = name;
+        this.data = data;
+        this.type = type.toString();
+        this.size = "";
+        for (long i : size)
+            this.size += Long.toString(i) + "*";
+        this.size = this.size.substring(0, this.size.length() - 1);
+    }
+
     public Integer getId() {
         return id;
     }
