@@ -32,6 +32,9 @@ public class Image {
     @Column(name = "data")
     private byte[] data;
 
+    @Column(name = "new", columnDefinition = "TINYINT(1)")
+    private boolean newI;
+
     @ManyToOne
     @JoinColumn(name = "FK_UserId")
     private User user;
@@ -43,6 +46,7 @@ public class Image {
     public Image(final String name, final byte[] data) {
         this.name = name;
         this.data = data;
+        this.newI = true;
     }
 
     public Image(final String name, final byte[] data, final MediaType type, final String size) {
@@ -50,6 +54,7 @@ public class Image {
         this.data = data;
         this.type = type.toString();
         this.size = size;
+        this.newI = true;
     }
 
     public Image(final String name, final byte[] data, final MediaType type, final long[] size) {
@@ -57,6 +62,7 @@ public class Image {
         this.data = data;
         this.type = type.toString();
         this.size = "";
+        this.newI = true;
         for (long i : size)
             this.size += Long.toString(i) + "*";
         this.size = this.size.substring(0, this.size.length() - 1);
@@ -90,6 +96,14 @@ public class Image {
         return name.split("\\.")[0];
     }
 
+    public boolean isNew() {
+        return this.newI;
+    }
+
+    public void setIsNew(boolean n) {
+        this.newI = n;
+    }
+
     public void setUser(User user) {
         this.user = user;
     }
@@ -100,7 +114,7 @@ public class Image {
     @Override
     public String toString() {
         return "{\"id\":\"" + getId() + "\", \"name\": \"" + name + "\", \"type\": \"" + type + "\", \"size\": \""
-                + size + "\"" + "}";
+                + size + "\"," + "\"newI\": \"" + newI + "\"}";
     }
 
     @Override

@@ -261,7 +261,6 @@
 <script>
 import axios from "axios";
 import Export from "@/components/Export.vue";
-var saved = true;
 export default {
   components: {
     Export,
@@ -322,16 +321,26 @@ export default {
     },
 
     save() {
-      saved = true;
+      axios.get("images/" + this.id + "/saving").catch(function (error) {
+        if (error.response) {
+          console.log(error.response.data);
+          console.log(error.response.status);
+          console.log(error.response.headers);
+        }
+      });
     },
 
     close() {
-      if (!saved) {
-        axios.delete("images/" + this.id).then(() => {
-          location.href = "/";
-        });
-      }
-      this.$emit("close");
+      axios.get("/images/" + this.id + "/properties").then((r) => {
+        var img = r.data;
+        console.log(img["new"]);
+        if (img["new"]) {
+          axios.delete("images/" + this.id).then(() => {
+            location.href = "/";
+          });
+        }
+        this.$emit("close");
+      });
     },
   },
 };

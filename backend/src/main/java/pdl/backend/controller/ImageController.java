@@ -20,6 +20,8 @@ import java.util.stream.Stream;
 import javax.annotation.PostConstruct;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 
@@ -252,6 +254,29 @@ public class ImageController {
         }
     }
 
+    @GetMapping(path = "/images/{id}/saving")
+    @ResponseBody
+    public ResponseEntity<?> saveImage(@PathVariable("id") final int id) {
+        Image i = imageRepository.findById(id).orElse(null);
+        if (i.equals(null))
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        i.setIsNew(false);
+        imageRepository.save(i);
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
+
+    @GetMapping(path = "/images/{id}/properties")
+    @ResponseBody
+    public JsonNode getImageProperties(@PathVariable("id") final int id) {
+        Image i = imageRepository.findById(id).orElse(null);
+        if (i.equals(null))
+            return null;
+        ObjectMapper mapper = new ObjectMapper();
+        JsonNode node = mapper.valueToTree(i);
+        // ((ObjectNode) node).put("new", i.isNew());
+        return node;
+    }
+
     @GetMapping(path = "/images/supportedMedia", produces = "application/json; charset=UTF-8")
     public @ResponseBody ArrayNode listOfSupportedMedia() {
         final ArrayNode nodes = mapper.createArrayNode();
@@ -296,6 +321,7 @@ public class ImageController {
                 final byte[] fileContent = Files.readAllBytes(Paths.get(i));
                 Image image = new Image(Paths.get(i).getFileName().toString(), fileContent,
                         Utils.typeOfFile(Paths.get(i)), Utils.sizeOfImage(Paths.get(i)));
+                image.setIsNew(false);
                 imageRepository.save(image);
 
             } catch (final IOException e) {
