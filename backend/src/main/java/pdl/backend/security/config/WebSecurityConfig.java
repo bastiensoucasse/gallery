@@ -1,4 +1,4 @@
-package pdl.backend.security;
+package pdl.backend.security.config;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -75,9 +75,6 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 .and()
             .csrf()
                 .disable()
-            .exceptionHandling()
-                .authenticationEntryPoint(unauthorizedHandler) // use JwtAuthentificationEntryPoint for handler
-                .and()
             .sessionManagement()
                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 .and()

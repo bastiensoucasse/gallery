@@ -5,7 +5,7 @@ import javax.persistence.*;
 
 @Entity
 @Table(name = "roles")
-public class Role {
+public class Roles {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Integer id;
@@ -14,11 +14,11 @@ public class Role {
 	@Column(name = "name",length = 20, unique = true)
 	private EnumRoles name;
 
-	public Role() {
+	public Roles() {
 
 	}
 
-	public Role(EnumRoles name) {
+	public Roles(EnumRoles name) {
 		this.name = name;
 	}
 

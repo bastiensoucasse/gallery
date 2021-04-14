@@ -22,7 +22,7 @@ import io.jsonwebtoken.Jwt;
 import javax.validation.Valid;
 
 import pdl.backend.mysqldb.EnumRoles;
-import pdl.backend.mysqldb.Role;
+import pdl.backend.mysqldb.Roles;
 import pdl.backend.mysqldb.User;
 import pdl.backend.mysqldb.UserRepository;
 import pdl.backend.requests.LoginRequest;
@@ -93,31 +93,31 @@ public class AuthController {
 							 encoder.encode(signUpRequest.getPassword()));
 
 		Set<String> strRoles = signUpRequest.getRole();
-		Set<Role> roles = new HashSet<>();
+		Set<Roles> roles = new HashSet<>();
 
 		if (strRoles == null) {
-			Role userRole = roleRepository.findByName(EnumRoles.ROLE_USER.toString())
+			Roles userRole = roleRepository.findByName(EnumRoles.ROLE_USER.toString())
 					.orElseThrow(() -> new RuntimeException("Error: Role is not found."));
 			roles.add(userRole);
 		} else {
 			strRoles.forEach(role -> {
-				
+				System.out.println(role);
 				switch (role) {
 				case "root":
 					System.out.println(EnumRoles.ROLE_ROOT.toString());
-					Role adminRole = roleRepository.findByName(EnumRoles.ROLE_ROOT.toString())
+					Roles adminRole = roleRepository.findByName(EnumRoles.ROLE_ROOT.toString())
 							.orElseThrow(() -> new RuntimeException("Error: Role is not found."));
 					roles.add(adminRole);
 
 					break;
-				case "mod":
-					Role modRole = roleRepository.findByName(EnumRoles.ROLE_USER_PREMIUM.toString())
+				case "premium":
+					Roles modRole = roleRepository.findByName(EnumRoles.ROLE_USER_PREMIUM.toString())
 							.orElseThrow(() -> new RuntimeException("Error: Role is not found."));
 					roles.add(modRole);
 
 					break;
 				default:
-					Role userRole = roleRepository.findByName(EnumRoles.ROLE_USER.toString())
+					Roles userRole = roleRepository.findByName(EnumRoles.ROLE_USER.toString())
 							.orElseThrow(() -> new RuntimeException("Error: Role is not found."));
 					roles.add(userRole);
 				}

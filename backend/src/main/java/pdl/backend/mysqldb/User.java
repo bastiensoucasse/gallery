@@ -49,7 +49,7 @@ public class User {
 
     @ManyToMany(fetch = FetchType.LAZY)
 	@JoinTable(	name = "user_roles", joinColumns = @JoinColumn(name = "user_id"), inverseJoinColumns = @JoinColumn(name = "role_id"))
-	private Set<Role> roles = new HashSet<>();
+	private Set<Roles> roles = new HashSet<>();
 
     public User(String firstName, String lastName, String email, String username, String password) {
         this.firstName = firstName;
@@ -115,11 +115,11 @@ public class User {
         return username;
     }
 
-    public Set<Role> getRoles() {
+    public Set<Roles> getRoles() {
 		return roles;
 	}
 
-	public void setRoles(Set<Role> roles) {
+	public void setRoles(Set<Roles> roles) {
 		this.roles = roles;
 	}
 }
