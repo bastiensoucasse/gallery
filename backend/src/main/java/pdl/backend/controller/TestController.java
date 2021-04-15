@@ -17,13 +17,13 @@ public class TestController {
     }
 
     @GetMapping("/user")
-    @PreAuthorize("hasRole('ROLE_USER') or hasRole('ROLE_PREMIUM') or hasRole('ROOT')")
+    @PreAuthorize("hasRole('ROLE_USER') or hasRole('ROLE_USER_PREMIUM') or hasRole('ROOT')")
     public String userAcess(){
         return "User Content";
     }
 
     @GetMapping("/premium")
-    @PreAuthorize("hasRole('ROLE_PREMIUM') or hasRole('ROOT')")
+    @PreAuthorize("hasRole('ROLE_USER_PREMIUM') or hasRole('ROOT')")
     public String premiumAcess(){
         return "Premium Content";
     }
