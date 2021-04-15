@@ -14,4 +14,6 @@ public interface ImageRepository extends CrudRepository<Image, Integer> {
 
     @Query(value = "SELECT * FROM image i WHERE i.fk_user_id is null", nativeQuery = true)
     List<Image> findAllPublic();
+    @Query(value = "SELECT * FROM image i where i.name = :nameImage", nativeQuery = true)
+    List<Image> findByName(@Param("nameImage") String nameImage);
 }

@@ -96,7 +96,6 @@
             <artifactId>scifio</artifactId>
             <version>0.41.0</version>
         </dependency>
-        
     </dependencies>
 
     <build>
