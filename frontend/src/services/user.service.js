@@ -3,6 +3,8 @@ import authHeader from './auth-header';
 
 const test_URL = "api/test/";
 
+
+
 class UserService{
     getPublicContent(){
         return axios.get(test_URL + 'all');
@@ -19,6 +21,7 @@ class UserService{
     getRootBoard(){
         return axios.get(test_URL + 'root', {headers: authHeader()});
     }
+
 
 }
 

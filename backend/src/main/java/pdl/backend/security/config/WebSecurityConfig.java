@@ -55,7 +55,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     }
 
     @Bean
-    public PasswordEncoder passwordEncoder() { 
+    public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();// encoder to be sure to not use plain text
     }
 
@@ -64,9 +64,9 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
      * when we want to require all user to be authentifacted or not
      * Also which filter to use and when to use it
      * And which exception handler is use
-     * 
+     *
      * CORS: https://developer.mozilla.org/fr/docs/Web/HTTP/CORS
-     * 
+     *
      */
 	@Override
 	protected void configure(HttpSecurity http) throws Exception {
@@ -79,7 +79,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 .and()
             .authorizeRequests()
-                .antMatchers("/", "/images/**", "/auth/**", "/static/**", "/api/test/**")
+                .antMatchers("/", "/images/**", "/auth/**", "/static/**", "/api/test/**", "/user/**")
                     .permitAll()
                 .anyRequest()
                     .authenticated();
@@ -99,5 +99,5 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 				.permitAll();*/
 	}
 
-	
+
 }

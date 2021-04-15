@@ -57,8 +57,8 @@ public class ImageController {
 
     @Autowired
     private ImageRepository imageRepository;
-    @Autowired
-    private UserRepository userRepository;
+
+
     /**
      * JSON mapper.
      */
@@ -81,22 +81,28 @@ public class ImageController {
      * @return the HTTP response (status 200 with image if success, status 404 if no
      *         image was found)
      */
-    @RequestMapping(value = "/images/{id}", method = RequestMethod.GET, produces = { MediaType.IMAGE_JPEG_VALUE,
-            "image/tiff", MediaType.IMAGE_PNG_VALUE })
-    public ResponseEntity<?> getImage(@PathVariable("id") final int id) {
-        // final Image image = imageDAO.retrieve(id).orElse(null);
-        final Image image = imageRepository.findById(id).orElse(null);
+    @RequestMapping(path = "/images/{imageID}", produces = { MediaType.IMAGE_JPEG_VALUE, MediaType.IMAGE_PNG_VALUE,
+            "image/tiff" })
+    public ResponseEntity<?> getImage(@PathVariable("imageID") final int imageID) {
+        // Image
+        final Image image = imageRepository.findById(imageID).orElse(null);
 
+        // Not found if no image
         if (image == null)
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        if (image.getType().equals(MediaType.valueOf("image/tiff"))) { // check if the type is tiff
-            try { // try to convert the bytes to jpeg
+
+        // Forbidden if private
+        if (image.getUser() != null)
+            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+
+        // Otherwise
+        if (image.getType().equals(MediaType.valueOf("image/tiff"))) { // Check if the type is tiff
+            try { // Try to convert the bytes to jpeg
                 byte[] jpegContent = ImageManager.convertImageBytes(image.getData(), MediaType.IMAGE_PNG);
                 return ResponseEntity.ok().contentType(image.getType()).body(jpegContent);
             } catch (IOException e) {
                 e.printStackTrace();
             }
-
         }
         return ResponseEntity.ok().contentType(image.getType()).body(image.getData());
     }
@@ -159,14 +165,14 @@ public class ImageController {
     }
 
     /**
-     * Gets the image list from the DAO.
+     * Gets the image list from the database.
      *
      * @return the raw JSON nodes
      */
     @GetMapping(path = "/images", produces = "application/json; charset=UTF-8")
     public @ResponseBody ArrayNode getImageList() {
         final ArrayNode nodes = mapper.createArrayNode();
-        for (final Image image : imageRepository.findAll())
+        for (final Image image : imageRepository.findAllPublic())
             try {
                 nodes.add(mapper.readTree(image.toString()));
             } catch (final JsonProcessingException e) {

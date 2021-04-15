@@ -68,6 +68,16 @@ public class Image {
         this.size = this.size.substring(0, this.size.length() - 1);
     }
 
+    public Image(final String name, final byte[] data, final MediaType type, String size, User user, boolean isNew) {
+        this.name = name;
+        this.data = data;
+        this.type = type.toString();
+
+        this.newI = isNew;
+        this.size = size;
+        this.user = user;
+    }
+
     public Integer getId() {
         return id;
     }
@@ -90,6 +100,11 @@ public class Image {
 
     public byte[] getData() {
         return data;
+    }
+
+    public User getUser()
+    {
+        return this.user;
     }
 
     public String getNameWithoutExtension() {

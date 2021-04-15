@@ -28,10 +28,12 @@ import pdl.backend.controller.requests.LoginRequest;
 import pdl.backend.controller.requests.SignupRequest;
 import pdl.backend.controller.responses.MessageResponse;
 import pdl.backend.mysqldb.EnumRoles;
+import pdl.backend.mysqldb.Image;
 import pdl.backend.mysqldb.Roles;
 import pdl.backend.mysqldb.User;
 import pdl.backend.mysqldb.UserRepository;
 import pdl.backend.mysqldb.RoleRepository;
+import pdl.backend.mysqldb.ImageRepository;
 import pdl.backend.security.jwt.JwtResponse;
 import pdl.backend.security.jwt.JwtUtils;
 import pdl.backend.security.services.CustomUserDetails;
@@ -57,22 +59,25 @@ public class AuthController {
 	@Autowired
 	JwtUtils jwtUtils;
 
+	@Autowired
+	ImageRepository imageRepository;
+
 	@PostMapping("/signin")
 	public ResponseEntity<?> authenticateUser(@Valid @RequestBody LoginRequest loginRequest) {
-		
+
 		try{
 		Authentication authentication = authenticationManager.authenticate(
 				new UsernamePasswordAuthenticationToken(loginRequest.getUsername(), loginRequest.getPassword()));
 
 		SecurityContextHolder.getContext().setAuthentication(authentication);
 		String jwt = jwtUtils.generateJwtToken(authentication);
-		
-		CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();		
+
+		CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
 		List<String> roles = userDetails.getAuthorities().stream()
 				.map(item -> item.getAuthority())
 				.collect(Collectors.toList());
-			
-		
+
+
 		return ResponseEntity.ok(new JwtResponse(jwt, userDetails.getId(), userDetails.getUsername(), userDetails.getEmail(), roles));
 		}catch(DisabledException e){
 			return ResponseEntity.badRequest().body(new MessageResponse("Account has been disabled"));
@@ -99,14 +104,16 @@ public class AuthController {
 		}
 
 		// Create new user's account
-		User user = new User(signUpRequest.getFirstName(), 
-							 signUpRequest.getLastName(), 
-							 signUpRequest.getEmail(), 
-							 signUpRequest.getUsername(), 
+		User user = new User(signUpRequest.getFirstName(),
+							 signUpRequest.getLastName(),
+							 signUpRequest.getEmail(),
+							 signUpRequest.getUsername(),
 							 encoder.encode(signUpRequest.getPassword()));
 
 		Set<String> strRoles = signUpRequest.getRole();
 		Set<Roles> roles = new HashSet<>();
+
+
 
 		if (strRoles == null) {
 			Roles userRole = roleRepository.findByName(EnumRoles.ROLE_USER.toString())
@@ -138,6 +145,12 @@ public class AuthController {
 
 		user.setRoles(roles);
 		userRepository.save(user);
+
+		List<Image> givenImages = imageRepository.findAllPublic();
+
+		for(Image img : givenImages){
+			imageRepository.save(new Image(img.getName(), img.getData(), img.getType(), img.getSize(), user, false));
+		}
 
 		return ResponseEntity.ok(new MessageResponse("User registered successfully!"));
 	}

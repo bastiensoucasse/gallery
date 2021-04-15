@@ -6,7 +6,7 @@
 					<router-link class="nav-link" to="/">Home</router-link>
 				</li>
 
-				
+
 					<li v-if="!currentUser" class="nav-item">
 						<router-link to="/register" class="nav-link"
 							>Sign Up</router-link
@@ -18,7 +18,7 @@
 							>Login</router-link
 						>
 					</li>
-				
+
 
 				<li id="home" class="nav-link">
 					<a
@@ -61,7 +61,7 @@ export default {
 			this.$router.push("/login");
 		}
 	},
-    
+
 };
 </script>
 
@@ -169,7 +169,7 @@ header {
 }
 
 li {
-	
+
 	display: inline;
 	margin: 30px;
 	color: #ffffff;

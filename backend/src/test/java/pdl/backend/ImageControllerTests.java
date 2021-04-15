@@ -1,5 +1,6 @@
 package pdl.backend;
 
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
@@ -8,10 +9,11 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import java.io.FileInputStream;
+import java.io.IOException;
 import java.util.Iterator;
 import java.util.Set;
+import java.nio.file.Files;
 
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.MethodOrderer.OrderAnnotation;
 import org.junit.jupiter.api.Order;
@@ -27,12 +29,13 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import pdl.backend.mysqldb.Image;
 import pdl.backend.mysqldb.ImageRepository;
+import pdl.backend.controller.ImageController;
 
 @SpringBootTest
 @AutoConfigureMockMvc
 @TestMethodOrder(OrderAnnotation.class)
 public class ImageControllerTests {
-    @Autowired
+    /*@Autowired
     private MockMvc mockMvc;
 
     // @Autowired
@@ -41,7 +44,7 @@ public class ImageControllerTests {
     @Autowired
     private ImageRepository imageRepository;
 
-    
+
 
     @Test
     @Order(1)
@@ -102,8 +105,7 @@ public class ImageControllerTests {
     // @Test
     // @Order(9)
     // public void testGetPathOfResource() throws IOException {
-    // ImageDAO i = new ImageDAO();
-    // ImageController c = new ImageController(i);
+    // ImageController c = new ImageController();
     // String path_1 = "/images/";
     // String path_2 = "/image_test/another_one/jam.jpg";
     // String path_3 = "/image_test/osabat.jpg";
@@ -325,5 +327,5 @@ public class ImageControllerTests {
             mockMvc.perform(get("/images/0?algorithm=" + parameters));
         }
         System.out.println(System.currentTimeMillis() - start);
-    }
+    }*/
 }
