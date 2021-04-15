@@ -15,7 +15,7 @@
 				"
 				class="gallery-image"
 			>
-				<img v-if="currentUser == null" :src="'/images' + image.id" />
+				<img v-if="currentUser == null" :src="'/images/' + image.id" />
 				<img v-if="currentUser != null" :src="'/user/' + currentUser.id + '/images/' + image.id" />
 			</div>
 		</div>
