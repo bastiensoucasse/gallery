@@ -53,16 +53,6 @@ if [ ! -d logs ]; then
 fi
 
 
-# Build
-
-if [ "$build" ] || [ ! -f .hush ]; then
-    printf "Building project...\n"
-    if ! mvn clean install &> logs/build.log; then
-        printf "Fatal error: 'mvn clean install &> logs/build.log' failed.\n"
-        if [ ! "$force" ]; then exit 1; else skip_hush=true; fi
-    fi
-    if [ ! "$skip_hush" ]; then touch .hush; fi
-fi
 
 
 # Database
@@ -83,17 +73,30 @@ fi
 
 if [ "$reset" ]; then
     printf "Reseting database...\n"
-    if ! sudo mysql -p < database/db_reset.sql; then
+    if ! sudo mysql  < database/db_reset.sql; then
         printf "Fatal error: 'sudo mysql < database/db_reset.sql' failed.\n"
         if [ ! "$force" ]; then exit 1; fi
     fi
 fi
 
 printf "Initializing database...\n"
-if ! sudo mysql -p < database/db_init.sql; then
+if ! sudo mysql < database/db_init.sql; then
     printf "Fatal error: 'sudo mysql < database/db_init.sql' failed.\n"
     if [ ! "$force" ]; then exit 1; fi
 fi
+
+
+# Build
+
+if [ "$build" ] || [ ! -f .hush ]; then
+    printf "Building project...\n"
+    if ! mvn clean install &> logs/build.log; then
+        printf "Fatal error: 'mvn clean install &> logs/build.log' failed.\n"
+        if [ ! "$force" ]; then exit 1; else skip_hush=true; fi
+    fi
+    if [ ! "$skip_hush" ]; then touch .hush; fi
+fi
+
 
 
 # Backend

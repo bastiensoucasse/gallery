@@ -28,6 +28,8 @@ sudo apt install mysql-server mysql-client
 
 Si vous êtes sous un autre système, référez-vous à la documentation de celui-ci.
 
+Vous pouvez vous aider de la [documentation de MySQL](https://dev.mysql.com/doc/refman/8.0/en/installing.html).
+
 ## Installation automatique
 
 Pour installer et lancer la galerie, il suffit d'utiliser le script bash dédié,
@@ -39,7 +41,7 @@ depuis la racine du projet.
 
 Ce script va procéder aux vérifications de votre système afin d'installer et de
 lancer le projet comme il le faut pour votre machine. Pour clore le serveur,
-il suffira d'appuyer sur la touche q.
+il suffira d'appuyer sur la touche q. NE PAS UTILISEZ ctrl+C
 
 **NB :** Lorsque le message `Gallery project launched. Check logs in the logs
 folder.` apparaît, il se peut que vous deviez patienter encore quelques secondes
