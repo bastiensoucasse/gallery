@@ -64,54 +64,41 @@
       <h2 class="title">Edit</h2>
 
       <div class="preview-details">
-        <form class="preview-feature" method="get" :action="'/images/' + id">
+        <form class="preview-feature" @submit.prevent="onSubmit('resize')" >
           <h3 class="category">Resize [WIP]</h3>
-
-          <input type="hidden" name="algorithm" value="resize" />
-
-          <input class="theme-button" type="submit" value="Resize" />
+          <button class=theme-button type="submit" > Resize</button>
         </form>
 
-        <form class="preview-feature" method="get" :action="'/images/' + id">
+        <form class="preview-feature"  @submit.prevent="onSubmit('toGrayscale')">
           <h3 class="category">Convert to grayscale</h3>
-
-          <input type="hidden" name="algorithm" value="toGrayscale" />
-
-          <input class="theme-button" type="submit" value="To grayscale" />
+          <button class="theme-button" type="submit" >to Gray Scale </button>
         </form>
 
-        <form class="preview-feature" method="get" :action="'/images/' + id">
+        <form class="preview-feature" @submit.prevent="onSubmit('toNegative')">
           <h3 class="category">Convert to negative</h3>
-
-          <input type="hidden" name="algorithm" value="toNegative" />
-
-          <input class="theme-button" type="submit" value="To negative" />
+          <button class="theme-button"  type="submit">Apply Negative Filter </button>
         </form>
 
-        <form class="preview-feature" method="get" :action="'/images/' + id">
+        <form class="preview-feature" @submit.prevent="onSubmit('changeBrightness' + args)" >
           <h3 class="category">Apply a gain to the brightness</h3>
-
-          <input type="hidden" name="algorithm" value="changeBrightness" />
-
           <input
             class="preview-input"
+            v-model="x1"
             type="number"
             name="gain"
             min="-255"
             max="255"
             required
           />
-
-          <input class="theme-button" type="submit" value="Change brightness" />
+          <button class="theme-button" type="submit">Change Brightness </button>
         </form>
 
-        <form class="preview-feature" method="get" :action="'/images/' + id">
+        <form class="preview-feature" @submit.prevent="onSubmit('colorize' + args)">
           <h3 class="category">Colorize by setting the hue</h3>
-
-          <input type="hidden" name="algorithm" value="colorize" />
 
           <input
             class="preview-input"
+            v-model="x1"
             type="number"
             name="hue"
             min="0"
@@ -119,28 +106,26 @@
             required
           />
 
-          <input class="theme-button" type="submit" value="Colorize" />
+          <button class=theme-button type="submit">Colorize</button>
         </form>
 
-        <form class="preview-feature" method="get" :action="'/images/' + id">
+        <form class="preview-feature" @submit.prevent="onSubmit('extendDynamics' + args)">
           <h3 class="category">Extend the dynamics</h3>
-
-          <input type="hidden" name="algorithm" value="extendDynamics" />
-
-          <input class="theme-button" type="submit" value="Extend dynamics" />
+          <button class=theme-button type="submit"> Extend Dynamic </button>
         </form>
 
-        <form class="preview-feature" method="get" :action="'/images/' + id">
+        <form class="preview-feature" @submit.prevent="onSubmit('equalizeHistogram' + args)" >
           <h3 class="category">
             Equalize the saturation or brightness histogram
           </h3>
 
-          <input type="hidden" name="algorithm" value="equalizeHistogram" />
+          
 
           <div class="choice">
             <input
               class="preview-radio"
               type="radio"
+              v-model="x1"
               name="channel"
               value="1"
               checked
@@ -151,6 +136,7 @@
             <input
               class="preview-radio"
               type="radio"
+              v-model="x1"
               name="channel"
               value="2"
               id="c2"
@@ -158,20 +144,17 @@
             <label for="c2">Brightness</label>
           </div>
 
-          <input
-            class="theme-button"
-            type="submit"
-            value="Equalize histogram"
-          />
+          <button class="theme-button"> Equalize </button>
         </form>
 
-        <form class="preview-feature" method="get" :action="'/images/' + id">
+        <form class="preview-feature" @submit.prevent="onSubmit(algorithm + args)" >
           <h3 class="category">Blur filter</h3>
 
           <input
             class="preview-input"
             type="number"
             name="radius"
+            v-model="x1"
             min="1"
             max="10"
             required
@@ -182,6 +165,7 @@
               class="preview-radio"
               type="radio"
               name="algorithm"
+              v-model="algorithm"
               value="meanFilter"
               id="mf"
               checked
@@ -192,28 +176,25 @@
               class="preview-radio"
               type="radio"
               name="algorithm"
+              v-model="algorithm"
               value="gaussianFilter"
               id="gf"
             />
             <label for="gf">Gaussian</label>
           </div>
 
-          <input class="theme-button" type="submit" value="Apply filter" />
+          <button class=theme-button type="submit">Apply filter"</button>
         </form>
 
-        <form class="preview-feature" method="get" :action="'/images/' + id">
+        <form class="preview-feature" @submit.prevent="onSubmit('sobelOperator')"  >
           <h3 class="category">Sobel operator</h3>
-
-          <input type="hidden" name="algorithm" value="sobelOperator" />
-
-          <input class="theme-button" type="submit" value="Apply operator" />
+          <button class=theme-button type="submit"> Apply Sobel operator" </button>
         </form>
 
         <form
           class="preview-feature"
           style="padding-bottom: 60px"
-          method="get"
-          :action="'/images/' + id"
+          @submit.prevent="onSubmit(algorithm)"
         >
           <h3 class="category">Mirror</h3>
 
@@ -223,6 +204,7 @@
               type="radio"
               name="algorithm"
               value="horizontalMirror"
+              v-model="algorithm"
               id="hm"
               checked
             />
@@ -232,6 +214,7 @@
               class="preview-radio"
               type="radio"
               name="algorithm"
+              v-model="algorithm"
               value="verticalMirror"
               id="vm"
             />
@@ -239,15 +222,16 @@
 
             <input
               class="preview-radio"
+              v-model="algorithm"
               type="radio"
               name="algorithm"
               value="completeMirror"
               id="cm"
             />
-            <label for="cm" style="grid-column: span 2">Complete</label>
+            <label for="cm" style="grid-column: span 2" >Complete</label>
           </div>
 
-          <input class="theme-button" type="submit" value="Apply filter" />
+          <button class=theme-button type="submit"> Apply Filter </button>
         </form>
       </div>
     </div>
@@ -275,11 +259,17 @@ export default {
     type: String,
     dimensions: String,
     image: String,
+   
   },
+  
 
   data() {
     return {
       showExport: false,
+      parameters: "",
+      x1: "",
+      algorithm: "",
+      loading: false,
     };
   },
 
@@ -292,9 +282,21 @@ export default {
     currentUser() {
 			return this.$store.state.auth.user;
 		},
+    args(){
+      return "&x1="+this.x1;
+    },
   },
 
   methods: {
+    onSubmit(parameters){
+      ImageService.applyAlgorithm(this.id +"?algorithm=" + parameters).then(
+        response => {
+
+          this.id = response.data;
+        }).catch(error =>{
+          alert(error);
+        });
+    },
     remove() {
       if (confirm("Dou you really want to delete this image"))
         /*axios.delete("images/" + this.id).then(() => {

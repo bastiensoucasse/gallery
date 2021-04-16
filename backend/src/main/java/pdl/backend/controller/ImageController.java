@@ -243,6 +243,12 @@ public class ImageController {
         Image proccessedImage;
         try {
             proccessedImage = AlgorithmManager.Instance().applyAlgorithm(name, algorithm.values(), image);
+            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+            if(authentication.isAuthenticated()){
+                User user = userRepository.findByUsername(authentication.getName()).orElse(null);
+                if(user != null)
+                    proccessedImage.setUser(user);
+            }
             imageRepository.save(proccessedImage);
         } catch (final NoSuchMethodException e) {
             new ResponseEntity<>(HttpStatus.BAD_REQUEST);
@@ -256,9 +262,12 @@ public class ImageController {
         } catch (final Exception e) {
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
-        return ResponseEntity.ok().contentType(MediaType.TEXT_HTML)
-                .body("<script>location.href = '/" + proccessedImage.getId() + "';</script>");
+        //return ResponseEntity.ok().contentType(MediaType.TEXT_HTML)
+         //     .body("<script>location.href = '/" + proccessedImage.getId() + "';</script>");
+        return ResponseEntity.ok()
+             .body( "" + proccessedImage.getId() );
     }
+
 
     @RequestMapping(value = "/images/{id}", params = "format", method = RequestMethod.GET)
     @ResponseBody

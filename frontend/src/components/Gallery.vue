@@ -4,12 +4,19 @@
 			<div
 				:key="image.id"
 				v-for="image in response"
-				v-on:click="loadPreview(image.id, image.name, images[image.id], image.type, image.size, image.newI)"
+				v-on:click="
+					loadPreview(
+						image.id,
+						image.name,
+						images[image.id],
+						image.type,
+						image.size,
+						image.newI
+					)
+				"
 				class="gallery-image"
 			>
-
-				<img :src="images[image.id]"/>
-				
+				<img :src="images[image.id]" />
 			</div>
 		</div>
 
@@ -25,7 +32,6 @@
 			:newI="newI"
 			:image="selectedImage"
 			@close="closePreview"
-			
 			v-if="id != -1"
 		></preview>
 
@@ -118,13 +124,35 @@ export default {
 			this.newI = newI;
 		},
 
+		checkPathPreview(){
+			if (this.$route.params.preview) {
+				console.log(this.response);
+
+				for (let i in this.response) {
+					console.log("Checking ", i);
+
+					let img = this.response[i];
+					if (Number(img.id) === Number(this.$route.params.preview)) {
+						this.loadPreview(
+							Number(img.id),
+							img.name,
+							img.type,
+							img.size,
+							img.newI
+						);
+						break;
+					}
+				}
+			}
+		},
+
 		closePreview() {
 			this.id = -1;
 			this.name = "";
 			this.type = "";
 			this.dimensions = "";
 		},
-		
+
 		deleteImage(image_id){
 			delete this.images[image_id];
 			var index;
@@ -145,15 +173,15 @@ export default {
 
 		getImageList(user){
 			ImageService.getImageList(user).then(
-				response => { 
+				response => {
 					this.response = response.data;
-					
+
 				}).catch(e => {
 					this.errors.push(e);
 				});
-			
+
 		},
-		
+
 		downloadImage(user, image_id){
 			ImageService.getData(user, image_id).then(
 				response => {
@@ -161,6 +189,7 @@ export default {
 					reader.readAsDataURL(response.data);
 					reader.onload =  () => {
 						this.images[image_id] = reader.result;
+						
 					}
 				},
 				error =>{
@@ -171,12 +200,13 @@ export default {
 
 		cacheImages(user){
 			ImageService.getImageList(user).then(
-				response => { 
+				response => {
 					this.response = response.data;
 					let img;
 					for(img in this.response){
+						this.checkPathPreview()
 						this.downloadImage(user,this.response[img].id);
-					}	
+					}
 				}).catch(e => {
 					this.errors.push(e);
 				});
@@ -187,7 +217,7 @@ export default {
 
 	mounted: async function (){
 		this.cacheImages(this.currentUser);
-		
+
 	}
 };
 </script>

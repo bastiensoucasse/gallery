@@ -30,6 +30,10 @@ class ImageService{
             return axios.delete(public_URL + id + "/" + user.username + "/" + user.id, {headers: authHeader()});
     }
 
+    applyAlgorithm(parameters){
+        return axios.get(public_URL + parameters, {headers: authHeader()});
+    }
+
 
 }
 
