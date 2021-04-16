@@ -11,7 +11,7 @@
 			</div>
 		</div>
 
-		<div class="gallery-import" @click="loadImporter">
+		<div class="gallery-import" title="Import a new image" @click="loadImporter">
 			<span class="material-icons">add</span>
 		</div>
 
@@ -24,7 +24,7 @@
 			@close="closePreview"
 			@updatePreview="updatePreview"
 			@saveImage="savePreview"
-			
+
 			v-if="isImageSelected"
 		></preview>
 
@@ -36,7 +36,7 @@
 import Preview from "@/components/Preview.vue";
 import Importer from "@/components/Importer.vue";
 import ImageService from '@/services/image.service'
-import axios from "axios";
+
 
 export default {
 	name: "Gallery",
@@ -52,12 +52,12 @@ export default {
 			images: {},
 			errors: [],
 			selectedImage: null,
-			id: -1,
+			id: NaN,
 			name: "",
 			type: "",
 			dimensions: "",
 			importing: false,
-			
+
 		};
 	},
 
@@ -81,82 +81,20 @@ export default {
 	},
 
 	methods: {
-		callRestService() {
-			axios
-				.get(this.loggedIn)
-				.then(r => {
-					this.response = r.data;
-
-					if (this.$route.params.preview) {
-						console.log(this.response);
-
-						for (let i in this.response) {
-							console.log("Checking ", i);
-
-							let img = this.response[i];
-							if (
-								Number(img.id) ==
-								Number(this.$route.params.preview)
-							) {
-								this.loadPreview(
-									Number(img.id),
-									img.name,
-									img.type,
-									img.size,
-									img.newI
-								);
-								break;
-							}
-						}
-					}
-				})
-				.catch(e => {
-					this.errors.push(e);
-				});
-		},
-
 		loadPreview(id, name, data, type, dimensions) {
 			this.id = Number(id);
 			this.name = name;
 			this.selectedImage = data;
 			this.type = type;
 			this.dimensions = dimensions.replaceAll("*", " × ");
-			
+
 		},
 		updatePreview(name, id, type, size, data){
-			console.log("Update preview");
-			console.log(name);
-			console.log(id);
-			console.log(type)
-			console.log(size);
-			console.log(data);
 			this.loadPreview(id, name, data, type, size, true);
 		},
 		savePreview(id){
 			this.cacheImages(this.currentUser);
 			this.id = id;
-		},
-
-		checkPathPreview(){
-			if (this.$route.params.preview) {
-				console.log(this.response);
-
-				for (let i in this.response) {
-					console.log("Checking ", i);
-
-					let img = this.response[i];
-					if (Number(img.id) === Number(this.$route.params.preview)) {
-						this.loadPreview(
-							Number(img.id),
-							img.name,
-							img.type,
-							img.size,
-							img.newI
-						);
-						break;
-					}
-				}
-			}
 		},
 
 		closePreview() {
@@ -203,7 +141,7 @@ export default {
 					reader.readAsDataURL(response.data);
 					reader.onload =  () => {
 						this.images[image_id] = reader.result;
-						
+
 					}
 				},
 				error =>{

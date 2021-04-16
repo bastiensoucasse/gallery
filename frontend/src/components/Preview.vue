@@ -1,28 +1,28 @@
 <template>
 	<div class="preview-window">
 		<div class="feature-box">
-			<button class="feature-link" @click="close">
+			<button class="feature-link" title="Close" @click="close">
 				<span class="material-icons">close</span>
 			</button>
 
-			<button class="feature-link" @click="remove">
+			<button v-if="isImageSaved" class="feature-link" title="Delete" @click="remove">
 				<span class="material-icons">delete</span>
 			</button>
 
-			<button class="feature-link" @click="showExport = true">
+			<button v-if="!isImageSaved" class="feature-link" title="Save" @click="save">
+				<span class="material-icons-outlined">save</span>
+			</button>
+
+			<button v-if="isImageSaved" class="feature-link" title="Download" @click="showExport = true">
 				<span class="material-icons">download</span>
 			</button>
 
-			<button class="feature-link" @click="edit">
+			<button class="feature-link" title="Edit" @click="edit">
 				<span class="material-icons">edit</span>
 			</button>
 
-			<button class="feature-link" @click="details">
+			<button class="feature-link" title="Details" @click="details">
 				<span class="material-icons-outlined">info</span>
-			</button>
-
-			<button class="feature-link" @click="save">
-				<span class="material-icons-outlined">save</span>
 			</button>
 		</div>
 
@@ -36,7 +36,7 @@
 			<div class="preview-details">
 				<div>
 					<h3 class="category">ID</h3>
-					<p class="paragraph">{{ id }}</p>
+					<p v-if="isImageSaved" class="paragraph">{{ id }}</p>
 				</div>
 
 				<div>
@@ -90,7 +90,7 @@
 
 				<form
 					class="preview-feature"
-					@submit.prevent="onSubmit('changeBrightness' + args)"
+					@submit.prevent="onSubmit('changeBrightness' + args(x1))"
 				>
 					<h3 class="category">Apply a gain to the brightness</h3>
 					<input
@@ -109,13 +109,13 @@
 
 				<form
 					class="preview-feature"
-					@submit.prevent="onSubmit('colorize' + args)"
+					@submit.prevent="onSubmit('colorize' + args(x2))"
 				>
 					<h3 class="category">Colorize by setting the hue</h3>
 
 					<input
 						class="preview-input"
-						v-model="x1"
+						v-model="x2"
 						type="number"
 						name="hue"
 						min="0"
@@ -128,7 +128,7 @@
 
 				<form
 					class="preview-feature"
-					@submit.prevent="onSubmit('extendDynamics' + args)"
+					@submit.prevent="onSubmit('extendDynamics')"
 				>
 					<h3 class="category">Extend the dynamics</h3>
 					<button class="theme-button" type="submit">
@@ -138,7 +138,7 @@
 
 				<form
 					class="preview-feature"
-					@submit.prevent="onSubmit('equalizeHistogram' + args)"
+					@submit.prevent="onSubmit('equalizeHistogram' + args(x3))"
 				>
 					<h3 class="category">
 						Equalize the saturation or brightness histogram
@@ -148,18 +148,19 @@
 						<input
 							class="preview-radio"
 							type="radio"
-							v-model="x1"
+							v-model="x3"
 							name="channel"
 							value="1"
-							checked
 							id="c1"
+							required
+							checked
 						/>
 						<label for="c1">Saturation</label>
 
 						<input
 							class="preview-radio"
 							type="radio"
-							v-model="x1"
+							v-model="x3"
 							name="channel"
 							value="2"
 							id="c2"
@@ -167,12 +168,12 @@
 						<label for="c2">Brightness</label>
 					</div>
 
-					<button class="theme-button">Equalize</button>
+					<input type="submit" class="theme-button" value="Equalize" />
 				</form>
 
 				<form
 					class="preview-feature"
-					@submit.prevent="onSubmit(algorithm + args)"
+					@submit.prevent="onSubmit(n1 + args(x4))"
 				>
 					<h3 class="category">Blur filter</h3>
 
@@ -180,7 +181,7 @@
 						class="preview-input"
 						type="number"
 						name="radius"
-						v-model="x1"
+						v-model="x4"
 						min="1"
 						max="10"
 						required
@@ -191,7 +192,7 @@
 							class="preview-radio"
 							type="radio"
 							name="algorithm"
-							v-model="algorithm"
+							v-model="n1"
 							value="meanFilter"
 							id="mf"
 							checked
@@ -202,7 +203,7 @@
 							class="preview-radio"
 							type="radio"
 							name="algorithm"
-							v-model="algorithm"
+							v-model="n1"
 							value="gaussianFilter"
 							id="gf"
 						/>
@@ -227,7 +228,7 @@
 				<form
 					class="preview-feature"
 					style="padding-bottom: 60px"
-					@submit.prevent="onSubmit(algorithm)"
+					@submit.prevent="onSubmit(n2)"
 				>
 					<h3 class="category">Mirror</h3>
 
@@ -237,7 +238,7 @@
 							type="radio"
 							name="algorithm"
 							value="horizontalMirror"
-							v-model="algorithm"
+							v-model="n2"
 							id="hm"
 							checked
 						/>
@@ -247,7 +248,7 @@
 							class="preview-radio"
 							type="radio"
 							name="algorithm"
-							v-model="algorithm"
+							v-model="n2"
 							value="verticalMirror"
 							id="vm"
 						/>
@@ -255,7 +256,7 @@
 
 						<input
 							class="preview-radio"
-							v-model="algorithm"
+							v-model="n2"
 							type="radio"
 							name="algorithm"
 							value="completeMirror"
@@ -308,7 +309,11 @@ export default {
 			showExport: false,
 			parameters: "",
 			x1: "",
-			algorithm: "",
+      x2: "",
+      x3: "1",
+      x4: "",
+			n1: "meanFilter",
+      n2: "horizontalMirror",
 			loading: false
 		};
 	},
@@ -323,15 +328,16 @@ export default {
 		currentUser() {
 			return this.$store.state.auth.user;
 		},
-		args() {
-			return "&x1=" + this.x1;
-		},
+
 		isImageSaved() {
 			return !isNaN(this.id);
 		}
 	},
 
 	methods: {
+    args(x) {
+			return "&x=" + x;
+		},
 		onSubmit(parameters) {
 			if (!this.isImageSaved) {
 				alert(
@@ -342,10 +348,6 @@ export default {
 					this.id + "?algorithm=" + parameters
 				)
 					.then(response => {
-						console.log(response.headers.name);
-						console.log(response.headers.id);
-						console.log(response.headers.type);
-						console.log(response.headers.size);
 						let reader = ImageService.readBlob(response);
 						reader.onload = () => {
 							this.$emit(
@@ -365,9 +367,6 @@ export default {
 		},
 		remove() {
 			if (confirm("Dou you really want to delete this image"))
-				/*axios.delete("images/" + this.id).then(() => {
-          location.href = "/";
-        });*/
 				ImageService.deleteImage(this.id, this.currentUser).then(
 					response => {
 						this.$emit("deleteImage", this.id);
@@ -403,7 +402,7 @@ export default {
 						ImageService.save(this.currentUser, formData).then(
 							response => {
 								alert(response.data);
-								console.log(response.headers.id);
+
 								this.$emit(
 									"saveImage",
 									Number(response.headers.id)
