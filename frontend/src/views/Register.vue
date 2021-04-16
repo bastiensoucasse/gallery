@@ -64,24 +64,30 @@
 
 				<div id="roles" class="form-group">
 					<input
+						name="role"
 						type="radio"
 						id="user"
 						value="user"
 						v-model="user.roles[0]"
+						required
 					/>
 					<label for="user">User</label>
 					<input
+						name="role"
 						type="radio"
 						id="premium"
 						value="premium"
 						v-model="user.roles[0]"
+						required
 					/>
 					<label for="premium">Premium</label>
 					<input
+						name="role"
 						type="radio"
 						id="root"
 						value="root"
 						v-model="user.roles[0]"
+						required
 					/>
 					<label for="root">Root</label>
 				</div>
@@ -142,7 +148,7 @@ export default {
 				}
 			);
 		}
-		
+
 	}
 };
 </script>

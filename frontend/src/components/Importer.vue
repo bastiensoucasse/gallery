@@ -29,7 +29,7 @@
 </template>
 
 <script>
-import axios from "axios";
+import ImageService from "@/services/image.service";
 
 export default {
     name: "Importer",
@@ -38,12 +38,33 @@ export default {
         close: null,
     },
 
+    computed:{
+    currentUser() {
+			return this.$store.state.auth.user;
+		},
+    },
+
     methods: {
         upload() {
             this.file = this.$refs.file.files[0];
+            if (this.file.size > 1048576) {
+                //database allowing up to 1048576 bytes for an image
+                alert("File too big (> 1MB)");
+                return;
+            }
             let formData = new FormData();
+
             formData.append("file", this.file);
-            axios
+            ImageService.save(this.currentUser, formData).then(
+                response =>{
+                    console.log("upload successful !");
+                    location.href = "/" + response.data;
+                },
+                error =>{
+                    alert(error);
+                }
+            );
+            /*axios
                 .post("/images", formData, {
                     headers: {
                         "Content-Type": "multipart/form-data",
@@ -52,6 +73,7 @@ export default {
                 .then((r) => {
                     location.href = "/" + r.data;
                 });
+            */
         },
     },
 

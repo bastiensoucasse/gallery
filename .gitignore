@@ -184,3 +184,5 @@ yarn-error.log
 .settings/
 backend/src/main/resources/public/
 .hush
+format.jar
+format.sh

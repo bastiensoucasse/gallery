@@ -4,23 +4,14 @@
 			<div
 				:key="image.id"
 				v-for="image in response"
-				v-on:click="
-					loadPreview(
-						image.id,
-						image.name,
-						image.type,
-						image.size,
-						image.newI
-					)
-				"
+				v-on:click="loadPreview(image.id, image.name, images[image.id], image.type, image.size)"
 				class="gallery-image"
 			>
-				<img v-if="currentUser == null" :src="'/images/' + image.id" />
-				<img v-if="currentUser != null" :src="'/user/' + currentUser.id + '/images/' + image.id" />
+				<img :src="images[image.id]" />
 			</div>
 		</div>
 
-		<div class="gallery-import" @click="loadImporter">
+		<div class="gallery-import" title="Import a new image" @click="loadImporter">
 			<span class="material-icons">add</span>
 		</div>
 
@@ -29,9 +20,12 @@
 			:name="name"
 			:type="type"
 			:dimensions="dimensions"
-			:newI="newI"
+			:image="selectedImage"
 			@close="closePreview"
-			v-if="id != -1"
+			@updatePreview="updatePreview"
+			@saveImage="savePreview"
+
+			v-if="isImageSelected"
 		></preview>
 
 		<importer @close="closeImporter" v-if="importing"></importer>
@@ -41,7 +35,8 @@
 <script>
 import Preview from "@/components/Preview.vue";
 import Importer from "@/components/Importer.vue";
-import axios from "axios";
+import ImageService from '@/services/image.service'
+
 
 export default {
 	name: "Gallery",
@@ -49,6 +44,21 @@ export default {
 	components: {
 		Preview,
 		Importer
+	},
+
+	data() {
+		return {
+			response: [],
+			images: {},
+			errors: [],
+			selectedImage: null,
+			id: NaN,
+			name: "",
+			type: "",
+			dimensions: "",
+			importing: false,
+
+		};
 	},
 
 	computed: {
@@ -61,50 +71,30 @@ export default {
 			} else {
 				return "/images";
 			}
+		},
+		isImageSelected(){
+			if(this.selectedImage != null){
+				return true;
+			}
+			return false;
 		}
 	},
 
 	methods: {
-		callRestService() {
-			axios
-				.get(this.loggedIn)
-				.then(r => {
-					this.response = r.data;
-
-					if (this.$route.params.preview) {
-						console.log(this.response);
-
-						for (let i in this.response) {
-							console.log("Checking ", i);
-
-							let img = this.response[i];
-							if (
-								Number(img.id) ==
-								Number(this.$route.params.preview)
-							) {
-								this.loadPreview(
-									Number(img.id),
-									img.name,
-									img.type,
-									img.size,
-									img.newI
-								);
-								break;
-							}
-						}
-					}
-				})
-				.catch(e => {
-					this.errors.push(e);
-				});
-		},
-
-		loadPreview(id, name, type, dimensions, newI) {
+		loadPreview(id, name, data, type, dimensions) {
 			this.id = Number(id);
 			this.name = name;
+			this.selectedImage = data;
 			this.type = type;
 			this.dimensions = dimensions.replaceAll("*", " × ");
-			this.newI = newI;
+
+		},
+		updatePreview(name, id, type, size, data){
+			this.loadPreview(id, name, data, type, size, true);
+		},
+		savePreview(id){
+			this.cacheImages(this.currentUser);
+			this.id = id;
 		},
 
 		closePreview() {
@@ -112,6 +102,17 @@ export default {
 			this.name = "";
 			this.type = "";
 			this.dimensions = "";
+			this.selectedImage = null;
+		},
+
+		deleteImage(image_id){
+			delete this.images[image_id];
+			var index;
+			for(index in this.response){
+				if(this.response[index].id === image_id){
+					this.response.splice(index, 1);
+				}
+			}
 		},
 
 		loadImporter() {
@@ -120,24 +121,54 @@ export default {
 
 		closeImporter() {
 			this.importing = false;
+		},
+
+		getImageList(user){
+			ImageService.getImageList(user).then(
+				response => {
+					this.response = response.data;
+
+				}).catch(e => {
+					this.errors.push(e);
+				});
+
+		},
+
+		downloadImage(user, image_id){
+			ImageService.getData(user, image_id).then(
+				response => {
+					let reader = new window.FileReader();
+					reader.readAsDataURL(response.data);
+					reader.onload =  () => {
+						this.images[image_id] = reader.result;
+
+					}
+				},
+				error =>{
+					this.errors.push(error);
+				}
+			);
+		},
+
+		cacheImages(user){
+			ImageService.getImageList(user).then(
+				response => {
+					this.response = response.data;
+					let img;
+					for(img in this.response){
+						this.downloadImage(user,this.response[img].id);
+					}
+				}).catch(e => {
+					this.errors.push(e);
+				});
 		}
+
+
 	},
 
-	data() {
-		return {
-			response: [],
-			errors: [],
-			id: -1,
-			name: "",
-			type: "",
-			dimensions: "",
-			importing: false,
-      url: "",
-		};
-	},
+	mounted: async function (){
+		this.cacheImages(this.currentUser);
 
-	mounted() {
-		this.callRestService();
 	}
 };
 </script>
