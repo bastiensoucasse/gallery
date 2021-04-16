@@ -398,7 +398,7 @@ export default {
 
 		save() {
       let formData = FileParser.parseURLDataAsFormFile(
-							this.image
+							this.image, this.name
 						);
 						ImageService.save(this.currentUser, formData).then(
 							response => {

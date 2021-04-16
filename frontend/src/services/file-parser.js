@@ -24,7 +24,7 @@ class FileParser{
       return blob;
     }
 
-    parseURLDataAsFormFile(ImageURL){
+    parseURLDataAsFormFile(ImageURL, filename){
             
         // Split the base64 string in data and contentType
         let block = ImageURL.split(";");
@@ -38,7 +38,7 @@ class FileParser{
 
         // Create a FormData and append the file with "image" as parameter name
         let formDataToUpload = new FormData();
-        formDataToUpload.append("file", blob);
+        formDataToUpload.append("file", blob, filename);
 
         return formDataToUpload;
     
