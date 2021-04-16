@@ -83,14 +83,14 @@ fi
 
 if [ "$reset" ]; then
     printf "Reseting database...\n"
-    if ! sudo mysql < database/db_reset.sql; then
+    if ! sudo mysql -p < database/db_reset.sql; then
         printf "Fatal error: 'sudo mysql < database/db_reset.sql' failed.\n"
         if [ ! "$force" ]; then exit 1; fi
     fi
 fi
 
 printf "Initializing database...\n"
-if ! sudo mysql < database/db_init.sql; then
+if ! sudo mysql -p < database/db_init.sql; then
     printf "Fatal error: 'sudo mysql < database/db_init.sql' failed.\n"
     if [ ! "$force" ]; then exit 1; fi
 fi
