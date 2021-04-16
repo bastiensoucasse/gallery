@@ -21,7 +21,7 @@
         <span class="material-icons-outlined">info</span>
       </button>
 
-      <button class="feature-link" @click="save">
+      <button class="feature-link" id="save_btn" @click="save">
         <span class="material-icons-outlined">save</span>
       </button>
     </div>
@@ -284,6 +284,10 @@ export default {
     close: null,
   },
 
+  mounted: function () {
+    this.hideOrShow();
+  },
+
   methods: {
     remove() {
       if (confirm("Dou you really want to delete this image"))
@@ -340,6 +344,14 @@ export default {
           });
         }
         this.$emit("close");
+      });
+    },
+    hideOrShow() {
+      axios.get("/images/" + this.id + "/properties").then((r) => {
+        var img = r.data;
+        if (img["new"]) {
+          document.getElementById("save_btn").style.visibility = "visible";
+        }
       });
     },
   },
@@ -456,5 +468,9 @@ input[type="number"] {
 
 .choice input {
   display: none;
+}
+
+#save_btn {
+  visibility: hidden;
 }
 </style>
