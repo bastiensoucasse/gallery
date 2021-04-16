@@ -1,5 +1,8 @@
 package pdl.backend.mysqldb;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -10,6 +13,8 @@ import javax.persistence.Lob;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import org.springframework.http.MediaType;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
 
 @Entity
 @Table(name = "image")
@@ -84,6 +89,16 @@ public class Image {
 
     public String getName() {
         return name;
+    }
+
+    public MultiValueMap<String, String> getProperties(){
+        MultiValueMap<String, String> map = new LinkedMultiValueMap<String, String>();
+        map.add("name", name);
+        map.add("id", "" +id);
+        map.add("type", type);
+        map.add("size", size);
+        System.out.println(map);
+        return map;
     }
 
     public MediaType getType() {

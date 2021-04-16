@@ -9,14 +9,18 @@ import io.jsonwebtoken.MalformedJwtException;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.SignatureException;
 import io.jsonwebtoken.UnsupportedJwtException;
+import pdl.backend.mysqldb.UserRepository;
 import pdl.backend.security.services.CustomUserDetails;
 
 import java.util.Date;
 
+import org.apache.catalina.User;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -31,6 +35,8 @@ public class JwtUtils {
 
 	//@Value("${bezkoder.app.jwtExpirationMs}")
 	private int jwtExpirationMs = 86400000;
+
+	
 
 
     public String generateJwtToken(Authentication authentication) {
@@ -69,6 +75,15 @@ public class JwtUtils {
         return Jwts.parser().setSigningKey(jwtSecret).parseClaimsJws(token).getBody().getSubject();
 
     }
+
+	public static boolean checkUserAuthentification(pdl.backend.mysqldb.User user){
+		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+		System.out.println(user + " " + authentication.isAuthenticated() + " " + user.getUsername() + " " + authentication.getName());
+		return (user != null && authentication.isAuthenticated() && authentication.getName().equals(user.getUsername()));
+		
+	}
+
+
 
 
     

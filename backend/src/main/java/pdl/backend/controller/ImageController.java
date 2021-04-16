@@ -27,6 +27,7 @@ import com.fasterxml.jackson.databind.node.ArrayNode;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ClassPathResource;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -51,6 +52,7 @@ import pdl.backend.mysqldb.Image;
 import pdl.backend.mysqldb.ImageRepository;
 import pdl.backend.mysqldb.User;
 import pdl.backend.mysqldb.UserRepository;
+import pdl.backend.security.jwt.JwtUtils;
 import pdl.processing.ImageManager;
 
 @RestController
@@ -162,16 +164,21 @@ public class ImageController {
      * @return the HTTP response (status 201 if success, status 415 if the image
      *         isn't in the JPEG format, status 400 if the request is incorrect)
      */
-    @PreAuthorize("hasRole('ROLE_USER') or hasRole('ROLE_USER_PREMIUM') or hasRole('ROOT')")
-    @RequestMapping(value = "/images", method = RequestMethod.POST)
-    public ResponseEntity<?> addImage(@RequestParam("file") final MultipartFile file,
+    @PreAuthorize("hasRole('ROLE_USER') or hasRole('ROLE_USER_PREMIUM') or hasRole('ROLE_ROOT')")
+    @RequestMapping(value = "/images/{user_id}", method = RequestMethod.POST)
+    public ResponseEntity<?> addImage(@PathVariable("user_id") final Integer user_id, @RequestParam("file") final MultipartFile file,
             final RedirectAttributes redirectAttributes) {
         Image image;
         if (!AcceptedMediaTypes.contains(file.getContentType()))
             return new ResponseEntity<>(HttpStatus.UNSUPPORTED_MEDIA_TYPE);
         try {
-            image = new Image(file.getOriginalFilename(), file.getBytes(), Utils.typeOfFile(file),
-                    Utils.sizeOfImage(file));
+            image = new Image(file.getOriginalFilename(), file.getBytes(), Utils.typeOfFile(file),Utils.sizeOfImage(file));
+
+            User user = userRepository.findById(user_id).orElse(null);
+            if(!JwtUtils.checkUserAuthentification(user))
+                return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+            image.setUser(user);
+            
             imageRepository.save(image);
         } catch (final IOException e) {
             e.printStackTrace();
@@ -179,7 +186,8 @@ public class ImageController {
         }
 
         try {
-            return ResponseEntity.created(new URI("/" + image.getId())).body("" + image.getId());
+            System.out.println("New id for image saved: " + image.getId());
+            return ResponseEntity.created(new URI("/")).header("id", String.valueOf(image.getId())).body("Image successfully saved");
         } catch (final URISyntaxException e) {
             e.printStackTrace();
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
@@ -249,7 +257,7 @@ public class ImageController {
                 if(user != null)
                     proccessedImage.setUser(user);
             }
-            imageRepository.save(proccessedImage);
+            //imageRepository.save(proccessedImage);
         } catch (final NoSuchMethodException e) {
             new ResponseEntity<>(HttpStatus.BAD_REQUEST);
             return ResponseEntity.badRequest().body("Algorithm doesn't exists");
@@ -260,12 +268,14 @@ public class ImageController {
             new ResponseEntity<>(HttpStatus.BAD_REQUEST);
             return ResponseEntity.badRequest().body("Invalid Arguments");
         } catch (final Exception e) {
+            e.printStackTrace();
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
         //return ResponseEntity.ok().contentType(MediaType.TEXT_HTML)
          //     .body("<script>location.href = '/" + proccessedImage.getId() + "';</script>");
-        return ResponseEntity.ok()
-             .body( "" + proccessedImage.getId() );
+         HttpHeaders headers = new HttpHeaders(proccessedImage.getProperties());
+        return ResponseEntity.ok().headers(headers)
+             .body(proccessedImage.getData());
     }
 
 

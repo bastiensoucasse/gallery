@@ -4,16 +4,7 @@
 			<div
 				:key="image.id"
 				v-for="image in response"
-				v-on:click="
-					loadPreview(
-						image.id,
-						image.name,
-						images[image.id],
-						image.type,
-						image.size,
-						image.newI
-					)
-				"
+				v-on:click="loadPreview(image.id, image.name, images[image.id], image.type, image.size)"
 				class="gallery-image"
 			>
 				<img :src="images[image.id]" />
@@ -29,10 +20,12 @@
 			:name="name"
 			:type="type"
 			:dimensions="dimensions"
-			:newI="newI"
 			:image="selectedImage"
 			@close="closePreview"
-			v-if="id != -1"
+			@updatePreview="updatePreview"
+			@saveImage="savePreview"
+			
+			v-if="isImageSelected"
 		></preview>
 
 		<importer @close="closeImporter" v-if="importing"></importer>
@@ -58,12 +51,13 @@ export default {
 			response: [],
 			images: {},
 			errors: [],
-			selectedImage:String,
+			selectedImage: null,
 			id: -1,
 			name: "",
 			type: "",
 			dimensions: "",
 			importing: false,
+			
 		};
 	},
 
@@ -77,6 +71,12 @@ export default {
 			} else {
 				return "/images";
 			}
+		},
+		isImageSelected(){
+			if(this.selectedImage != null){
+				return true;
+			}
+			return false;
 		}
 	},
 
@@ -115,13 +115,26 @@ export default {
 				});
 		},
 
-		loadPreview(id, name, data, type, dimensions, newI) {
+		loadPreview(id, name, data, type, dimensions) {
 			this.id = Number(id);
 			this.name = name;
 			this.selectedImage = data;
 			this.type = type;
 			this.dimensions = dimensions.replaceAll("*", " × ");
-			this.newI = newI;
+			
+		},
+		updatePreview(name, id, type, size, data){
+			console.log("Update preview");
+			console.log(name);
+			console.log(id);
+			console.log(type)
+			console.log(size);
+			console.log(data);
+			this.loadPreview(id, name, data, type, size, true);
+		},
+		savePreview(id){
+			this.cacheImages(this.currentUser);
+			this.id = id;
 		},
 
 		checkPathPreview(){
@@ -151,6 +164,7 @@ export default {
 			this.name = "";
 			this.type = "";
 			this.dimensions = "";
+			this.selectedImage = null;
 		},
 
 		deleteImage(image_id){
@@ -204,7 +218,6 @@ export default {
 					this.response = response.data;
 					let img;
 					for(img in this.response){
-						this.checkPathPreview()
 						this.downloadImage(user,this.response[img].id);
 					}
 				}).catch(e => {

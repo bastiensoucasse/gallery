@@ -184,6 +184,7 @@ public class AlgorithmManager {
         SCIFIOImgPlus<UnsignedByteType> output = (SCIFIOImgPlus<UnsignedByteType>) m.invoke(null, arguments);
         final String[] inputName = inputImage.getName().toString().split("\\.");
         String outputName = inputName[0] + "_" + algorithmName;
+        System.out.println(outputName);
         for (String arg : algorithmArgs)
             outputName += "_" + arg;
         outputName += "." + inputName[1];
