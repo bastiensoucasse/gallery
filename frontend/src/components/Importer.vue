@@ -47,7 +47,13 @@ export default {
     methods: {
         upload() {
             this.file = this.$refs.file.files[0];
+            if (this.file.size > 1048576) {
+                //database allowing up to 1048576 bytes for an image
+                alert("File too big (> 1MB)");
+                return;
+            }
             let formData = new FormData();
+
             formData.append("file", this.file);
             ImageService.save(this.currentUser, formData).then(
                 response =>{
