@@ -29,7 +29,7 @@
     <div class="preview-visual">
       <img
         class="preview-image"
-        :src="'/images/' + id"
+        :src="image"
         @error="$emit('close')"
       />
     </div>
@@ -261,6 +261,8 @@
 <script>
 import axios from "axios";
 import Export from "@/components/Export.vue";
+import ImageService from "@/services/image.service";
+
 export default {
   components: {
     Export,
@@ -272,6 +274,7 @@ export default {
     name: String,
     type: String,
     dimensions: String,
+    image: String,
   },
 
   data() {
@@ -282,28 +285,28 @@ export default {
 
   emits: {
     close: null,
+    
+  },
+
+  computed:{
+    currentUser() {
+			return this.$store.state.auth.user;
+		},
   },
 
   methods: {
     remove() {
       if (confirm("Dou you really want to delete this image"))
-        axios.delete("images/" + this.id).then(() => {
+        /*axios.delete("images/" + this.id).then(() => {
           location.href = "/";
+        });*/
+        ImageService.deleteImage(this.id, this.currentUser).then(() =>{
+          this.$emit('deleteImage', this.id);
+          location.href = "/";
+        },
+        error =>{
+          alert(error);
         });
-    },
-
-    download() {
-      axios.get("images/" + this.id, { responseType: "blob" }).then((r) => {
-        var reader = new window.FileReader();
-        reader.readAsDataURL(r.data);
-        reader.onload = () => {
-          const link = document.createElement("a");
-          link.href = reader.result;
-          link.setAttribute("download", this.name);
-          document.body.appendChild(link);
-          link.click();
-        };
-      });
     },
 
     edit() {
@@ -331,7 +334,7 @@ export default {
     },
 
     close() {
-      axios.get("/images/" + this.id + "/properties").then((r) => {
+      /*axios.get("/images/" + this.id + "/properties").then((r) => {
         var img = r.data;
         console.log(img["new"]);
         if (img["new"]) {
@@ -339,8 +342,9 @@ export default {
             location.href = "/";
           });
         }
-        this.$emit("close");
-      });
+        
+      });*/
+      this.$emit("close");
     },
   },
 };

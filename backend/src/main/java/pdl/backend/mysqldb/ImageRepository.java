@@ -16,4 +16,8 @@ public interface ImageRepository extends CrudRepository<Image, Integer> {
     List<Image> findAllPublic();
     @Query(value = "SELECT * FROM image i where i.name = :nameImage", nativeQuery = true)
     List<Image> findByName(@Param("nameImage") String nameImage);
+
+    @Query(value = "DELETE FROM image i WHERE i.id = :id", nativeQuery = true)
+    Boolean deleteImageBoolean(@Param("id") Integer id);
+
 }

@@ -30,6 +30,10 @@ import org.springframework.core.io.ClassPathResource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -45,10 +49,12 @@ import pdl.backend.AlgorithmManager;
 import pdl.backend.Utils;
 import pdl.backend.mysqldb.Image;
 import pdl.backend.mysqldb.ImageRepository;
+import pdl.backend.mysqldb.User;
 import pdl.backend.mysqldb.UserRepository;
 import pdl.processing.ImageManager;
 
 @RestController
+@CrossOrigin(origins = "*", maxAge = 3600)
 public class ImageController {
     /**
      * Image data access object (database).
@@ -57,6 +63,10 @@ public class ImageController {
 
     @Autowired
     private ImageRepository imageRepository;
+
+    @Autowired
+
+    private UserRepository userRepository;
 
 
     /**
@@ -124,12 +134,23 @@ public class ImageController {
      * @return the HTTP response (status 200 if success, status 404 if no image was
      *         found)
      */
-    @RequestMapping(value = "/images/{id}", method = RequestMethod.DELETE)
-    public ResponseEntity<?> deleteImage(@PathVariable("id") final int id) {
-        if (imageRepository.findById(id).isEmpty())
+    @PreAuthorize("hasRole('ROLE_USER') or hasRole('ROLE_USER_PREMIUM') or hasRole('ROOT')")
+    @RequestMapping(value = "/images/{id}/{user}/{user_id}", method = RequestMethod.DELETE)
+    public ResponseEntity<?> deleteImage(@PathVariable("id") final int id, @PathVariable("user") final String username, 
+    @PathVariable("user_id") final Integer user_id ) {
+        Image image = imageRepository.findById(id).orElse(null);
+        User user =  userRepository.findById(user_id).orElse(null);
+        if (image == null || user == null )
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
 
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        System.out.println("User : " + authentication.getName() + "; user id: " + user_id + "; image fk_id: " + image.getUser().getId());
+        if(!authentication.getName().equals(username) || !image.getUser().getId().equals(user_id))
+            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+        
+        user.dismissImage(image);
         imageRepository.deleteById(id);
+        
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
@@ -141,6 +162,7 @@ public class ImageController {
      * @return the HTTP response (status 201 if success, status 415 if the image
      *         isn't in the JPEG format, status 400 if the request is incorrect)
      */
+    @PreAuthorize("hasRole('ROLE_USER') or hasRole('ROLE_USER_PREMIUM') or hasRole('ROOT')")
     @RequestMapping(value = "/images", method = RequestMethod.POST)
     public ResponseEntity<?> addImage(@RequestParam("file") final MultipartFile file,
             final RedirectAttributes redirectAttributes) {
@@ -260,6 +282,7 @@ public class ImageController {
         }
     }
 
+    @PreAuthorize("hasRole('ROLE_USER') or hasRole('ROLE_USER_PREMIUM') or hasRole('ROOT')")
     @GetMapping(path = "/images/{id}/saving")
     @ResponseBody
     public ResponseEntity<?> saveImage(@PathVariable("id") final int id) {

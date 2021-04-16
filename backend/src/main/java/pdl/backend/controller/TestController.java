@@ -29,7 +29,7 @@ public class TestController {
     }
 
     @GetMapping("/root")
-    @PreAuthorize("hasRole('ROOT')")
+    @PreAuthorize("hasRole('ROLE_ROOT')")
     public String rootAccess(){
         return "Root Content";
     }

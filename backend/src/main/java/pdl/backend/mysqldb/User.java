@@ -122,4 +122,8 @@ public class User {
 	public void setRoles(Set<Roles> roles) {
 		this.roles = roles;
 	}
+
+    public void dismissImage(Image image){
+        images.remove(image);
+    }
 }

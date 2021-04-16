@@ -4,19 +4,12 @@
 			<div
 				:key="image.id"
 				v-for="image in response"
-				v-on:click="
-					loadPreview(
-						image.id,
-						image.name,
-						image.type,
-						image.size,
-						image.newI
-					)
-				"
+				v-on:click="loadPreview(image.id, image.name, images[image.id], image.type, image.size, image.newI)"
 				class="gallery-image"
 			>
-				<img v-if="currentUser == null" :src="'/images/' + image.id" />
-				<img v-if="currentUser != null" :src="'/user/' + currentUser.id + '/images/' + image.id" />
+
+				<img :src="images[image.id]"/>
+				
 			</div>
 		</div>
 
@@ -30,7 +23,9 @@
 			:type="type"
 			:dimensions="dimensions"
 			:newI="newI"
+			:image="selectedImage"
 			@close="closePreview"
+			
 			v-if="id != -1"
 		></preview>
 
@@ -41,6 +36,7 @@
 <script>
 import Preview from "@/components/Preview.vue";
 import Importer from "@/components/Importer.vue";
+import ImageService from '@/services/image.service'
 import axios from "axios";
 
 export default {
@@ -49,6 +45,20 @@ export default {
 	components: {
 		Preview,
 		Importer
+	},
+
+	data() {
+		return {
+			response: [],
+			images: {},
+			errors: [],
+			selectedImage:String,
+			id: -1,
+			name: "",
+			type: "",
+			dimensions: "",
+			importing: false,
+		};
 	},
 
 	computed: {
@@ -99,9 +109,10 @@ export default {
 				});
 		},
 
-		loadPreview(id, name, type, dimensions, newI) {
+		loadPreview(id, name, data, type, dimensions, newI) {
 			this.id = Number(id);
 			this.name = name;
+			this.selectedImage = data;
 			this.type = type;
 			this.dimensions = dimensions.replaceAll("*", " × ");
 			this.newI = newI;
@@ -113,6 +124,16 @@ export default {
 			this.type = "";
 			this.dimensions = "";
 		},
+		
+		deleteImage(image_id){
+			delete this.images[image_id];
+			var index;
+			for(index in this.response){
+				if(this.response[index].id === image_id){
+					this.response.splice(index, 1);
+				}
+			}
+		},
 
 		loadImporter() {
 			this.importing = true;
@@ -120,24 +141,53 @@ export default {
 
 		closeImporter() {
 			this.importing = false;
+		},
+
+		getImageList(user){
+			ImageService.getImageList(user).then(
+				response => { 
+					this.response = response.data;
+					
+				}).catch(e => {
+					this.errors.push(e);
+				});
+			
+		},
+		
+		downloadImage(user, image_id){
+			ImageService.getData(user, image_id).then(
+				response => {
+					let reader = new window.FileReader();
+					reader.readAsDataURL(response.data);
+					reader.onload =  () => {
+						this.images[image_id] = reader.result;
+					}
+				},
+				error =>{
+					this.errors.push(error);
+				}
+			);
+		},
+
+		cacheImages(user){
+			ImageService.getImageList(user).then(
+				response => { 
+					this.response = response.data;
+					let img;
+					for(img in this.response){
+						this.downloadImage(user,this.response[img].id);
+					}	
+				}).catch(e => {
+					this.errors.push(e);
+				});
 		}
+
+
 	},
 
-	data() {
-		return {
-			response: [],
-			errors: [],
-			id: -1,
-			name: "",
-			type: "",
-			dimensions: "",
-			importing: false,
-      url: "",
-		};
-	},
-
-	mounted() {
-		this.callRestService();
+	mounted: async function (){
+		this.cacheImages(this.currentUser);
+		
 	}
 };
 </script>

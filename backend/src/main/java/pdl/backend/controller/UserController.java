@@ -12,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -57,6 +58,7 @@ public class UserController {
         return userRepository.findAll();
     }
 
+    @PreAuthorize("hasRole('ROLE_USER') or hasRole('ROLE_USER_PREMIUM') or hasRole('ROLE_ROOT')")
     @GetMapping(path = "/{id}/images")
     @ResponseBody
     public ArrayNode getUserImages(@PathVariable("id") final int id) {
@@ -71,6 +73,7 @@ public class UserController {
         return nodes;
     }
 
+    @PreAuthorize("hasRole('ROLE_USER') or hasRole('ROLE_USER_PREMIUM') or hasRole('ROLE_ROOT')")
     @RequestMapping(path = "{userID}/images/{imageID}", produces = { MediaType.IMAGE_JPEG_VALUE,
             MediaType.IMAGE_PNG_VALUE, "image/tiff" })
     public ResponseEntity<?> getImage(@PathVariable("userID") final int userID,

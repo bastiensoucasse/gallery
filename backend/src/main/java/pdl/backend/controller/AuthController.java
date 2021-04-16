@@ -123,7 +123,7 @@ public class AuthController {
 			strRoles.forEach(role -> {
 				switch (role) {
 				case "root":
-					System.out.println(EnumRoles.ROLE_ROOT.toString());
+					
 					Roles adminRole = roleRepository.findByName(EnumRoles.ROLE_ROOT.toString())
 							.orElseThrow(() -> new RuntimeException("Error: Role is not found."));
 					roles.add(adminRole);
