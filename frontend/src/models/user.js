@@ -7,6 +7,7 @@ export default class User{
         this.password = password;
         this.roles = roles;
     }
+    
 
     
     

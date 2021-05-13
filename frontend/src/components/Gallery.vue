@@ -11,9 +11,17 @@
 			</div>
 		</div>
 
-		<div class="gallery-import" title="Import a new image" @click="loadImporter">
+		<div class="gallery-import" v-if="currentUser"  title="Import a new image" @click="loadImporter">
 			<span class="material-icons">add</span>
 		</div>
+		
+		<dialog-box
+			:dialog-title="dialog_title"
+			:dialog-msg="dialog_msg"
+			@closeDialog="closeDialog"
+			v-if="alertBox"
+		></dialog-box>
+		
 
 		<preview
 			:id="id"
@@ -36,6 +44,7 @@
 import Preview from "@/components/Preview.vue";
 import Importer from "@/components/Importer.vue";
 import ImageService from '@/services/image.service'
+import DialogBox from '@/components/DialogBox.vue';
 
 
 export default {
@@ -43,7 +52,8 @@ export default {
 
 	components: {
 		Preview,
-		Importer
+		Importer,
+		DialogBox
 	},
 
 	data() {
@@ -57,6 +67,9 @@ export default {
 			type: "",
 			dimensions: "",
 			importing: false,
+			alertBox: false,
+			dialog_title: String,
+			dialog_msg: String,
 
 		};
 	},
@@ -116,8 +129,13 @@ export default {
 		},
 
 		loadImporter() {
-			this.importing = true;
+			if(this.currentUser)
+				this.importing = true;
+			else
+				this.dialogBox("We're sorry", "To be able to import images you need to be logged in.");
 		},
+
+		
 
 		closeImporter() {
 			this.importing = false;
@@ -183,7 +201,10 @@ export default {
 	max-width: calc(100% - 48px);
 	margin: auto;
 	padding: 8px 0;
-	margin-top: 56px;
+}
+
+.gallery{
+	margin: auto;
 }
 
 .gallery-image {

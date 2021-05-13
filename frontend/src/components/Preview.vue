@@ -5,15 +5,30 @@
 				<span class="material-icons">close</span>
 			</button>
 
-			<button v-if="isImageSaved" class="feature-link" title="Delete" @click="remove">
+			<button
+				v-if="isImageSaved && currentUser"
+				class="feature-link"
+				title="Delete"
+				@click="remove"
+			>
 				<span class="material-icons">delete</span>
 			</button>
 
-			<button v-if="!isImageSaved" class="feature-link" title="Save" @click="save">
+			<button
+				v-if="!isImageSaved && currentUser"
+				class="feature-link"
+				title="Save"
+				@click="save"
+			>
 				<span class="material-icons-outlined">save</span>
 			</button>
 
-			<button v-if="isImageSaved" class="feature-link" title="Download" @click="showExport = true">
+			<button
+				v-if="isImageSaved"
+				class="feature-link"
+				title="Download"
+				@click="showExport = true"
+			>
 				<span class="material-icons">download</span>
 			</button>
 
@@ -27,6 +42,8 @@
 		</div>
 
 		<div class="preview-visual">
+			
+
 			<img class="preview-image" :src="image" @error="$emit('close')" />
 		</div>
 
@@ -57,6 +74,13 @@
 		</div>
 
 		<div id="edit-panel" class="preview-features">
+			<div v-if="!isImageSaved" class="warning">
+				<p class="warning-msg">
+					<span class="material-icons-outlined warning-span">
+						warning </span
+					>{{ warning }}
+				</p>
+			</div>
 			<h2 class="title">Edit</h2>
 
 			<div class="preview-details">
@@ -168,7 +192,11 @@
 						<label for="c2">Brightness</label>
 					</div>
 
-					<input type="submit" class="theme-button" value="Equalize" />
+					<input
+						type="submit"
+						class="theme-button"
+						value="Equalize"
+					/>
 				</form>
 
 				<form
@@ -285,7 +313,6 @@
 </template>
 
 <script>
-
 import Export from "@/components/Export.vue";
 import ImageService from "@/services/image.service";
 import FileParser from "@/services/file-parser";
@@ -309,11 +336,11 @@ export default {
 			showExport: false,
 			parameters: "",
 			x1: "",
-      x2: "",
-      x3: "1",
-      x4: "",
+			x2: "",
+			x3: "1",
+			x4: "",
 			n1: "meanFilter",
-      n2: "horizontalMirror",
+			n2: "horizontalMirror",
 			loading: false
 		};
 	},
@@ -331,11 +358,16 @@ export default {
 
 		isImageSaved() {
 			return !isNaN(this.id);
+		},
+		warning() {
+			if (this.currentUser) return "This image is not saved !";
+			else
+				return "This image is not saved ! \n (you can't save images if you're not logged in)";
 		}
 	},
 
 	methods: {
-    args(x) {
+		args(x) {
 			return "&x=" + x;
 		},
 		onSubmit(parameters) {
@@ -370,7 +402,7 @@ export default {
 				ImageService.deleteImage(this.id, this.currentUser).then(
 					response => {
 						this.$emit("deleteImage", this.id);
-            alert(response.data);
+						alert(response.data);
 						location.href = "/";
 					},
 					error => {
@@ -396,21 +428,20 @@ export default {
 		},
 
 		save() {
-      let formData = FileParser.parseURLDataAsFormFile(
-							this.image, this.name
-						);
-						ImageService.save(this.currentUser, formData).then(
-							response => {
-								alert(response.data);
+			let formData = FileParser.parseURLDataAsFormFile(
+				this.image,
+				this.name
+			);
+			ImageService.save(this.currentUser, formData).then(
+				response => {
+					alert(response.data);
 
-								this.$emit(
-									"saveImage",
-									Number(response.headers.id)
-								);
-							},
-							error => {
-								alert(error);
-							});
+					this.$emit("saveImage", Number(response.headers.id));
+				},
+				error => {
+					alert(error);
+				}
+			);
 			/*axios.get("images/" + this.id + "/saving").catch(function(error) {
 				if (error.response) {
 					console.log(error.response.data);
@@ -430,14 +461,14 @@ export default {
 					) {
 						this.$emit("close");
 					} else {
-            this.save();
+						this.save();
 					}
 				} else {
 					this.$emit("close");
 				}
-			}else{
-        this.$emit("close");
-      }
+			} else {
+				this.$emit("close");
+			}
 		}
 	}
 };
@@ -460,6 +491,7 @@ export default {
 	width: 100%;
 	height: 100%;
 	display: flex;
+	flex-wrap: wrap;
 	justify-content: center;
 	align-items: center;
 	background-color: rgba(32, 33, 36, 0.9);
@@ -555,7 +587,23 @@ input[type="number"] {
 	display: none;
 }
 
+.warning-span {
+	float: left;
+	margin-left: 5px;
+	margin-right: 5px;
+}
+
+.warning-msg{
+	display: inline-block;
+}
+
+.warning {
+
+	width: auto;
+	color: rgb(200, 49, 49);
+}
+
 #save_btn {
-  visibility: hidden;
+	visibility: hidden;
 }
 </style>

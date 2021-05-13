@@ -1,76 +1,132 @@
 <template>
-	<div class="navigation">
-		<nav class="navbar">
-			<ul>
-				<li class="full-width" id="home" >
-					<router-link class="nav-link" to="/">Home</router-link>
-				</li>
-
-
-					<li v-if="!currentUser" class="nav-item">
-						<router-link to="/register" class="nav-link"
-							>Sign Up</router-link
-						>
+	<div class="wrap">
+		<div id="navbar" style="position: relative;"  class="navigation">
+			<nav class="navbar">
+				<ul>
+					<li class="nav-item" style="float:left">
+						<router-link class="nav-link" to="/">
+							<div class="home-button">
+								<span class="material-icons-outlined">
+									home
+								</span>
+								Home
+							</div>
+						</router-link>
 					</li>
 
-					<li v-if="!currentUser" class="nav-item">
-						<router-link to="/login" class="nav-link"
-							>Login</router-link
-						>
-					</li>
-
-
-				<li id="home" class="nav-link">
-					<a
-						v-if="currentUser"
-						class="nav-link"
-						@click.prevent="logOut"
-						>Logout</a
+					<li
+						v-if="!currentUser"
+						class="nav-item"
+						style="float:right"
 					>
-				</li>
-
-				<li id="board" class="nav-item">
-					<router-link to="/board" class="nav-link"
-						>Test Board
-					</router-link>
-				</li>
-			</ul>
-		</nav>
+						<router-link
+							v-if="!registerPage"
+							to="/register"
+							class="nav-link"
+						>
+							<div class="register">
+								<span class="material-icons-outlined">
+									account_circle
+								</span>
+								Sign up
+							</div>
+						</router-link>
+					</li>
+					<li
+						v-if="!currentUser"
+						class="nav-item"
+						style="float:right"
+					>
+						<router-link
+							v-if="!loginPage"
+							to="/login"
+							class="nav-link"
+						>
+							<div class="login">
+								<span class="material-icons-outlined"
+									>login</span
+								>
+								Login
+							</div>
+						</router-link>
+					</li>
+					<li class="nav-item" style="float:right">
+						<a
+							v-if="currentUser"
+							class="nav-link"
+							@click.prevent="logOut"
+						>
+							<div class="logout">
+								<span class="material-icons-outlined">
+									logout
+								</span>
+								Logout
+							</div>
+						</a>
+					</li>
+				</ul>
+			</nav>
+		</div>
+		<div class="app-content">
+			<router-view />
+		</div>
 	</div>
-	<router-view />
 </template>
 
 <script>
-
-
-
 export default {
 	data() {
 		return {
-        };
-
+			navbar: null,
+			offset: null,
+		};
 	},
 	computed: {
 		currentUser() {
 			return this.$store.state.auth.user;
 		},
+		loginPage() {
+			return this.$route.path === "/login";
+		},
+		registerPage() {
+			return this.$route.path === "/register";
+		},
+		
 	},
 	methods: {
 		logOut() {
 			this.$store.dispatch("auth/logout");
 			this.$router.push("/login");
-		}
+		},
+		stickNavBar() {
+			if (window.pageYOffset > this.offset) {
+				this.navbar.style.position = 'fixed';
+			} else {
+				this.navbar.style.position = 'relative';
+			}
+		},
+		
 	},
-
+	mounted() {
+		this.navbar = document.getElementById("navbar");
+		this.offset = this.navbar.offsetTop;
+		window.addEventListener('scroll', this.stickNavBar);
+		
+	}
 };
 </script>
 
 <style>
+html {
+	height: 100%;
+}
 body {
 	font: 400 16px/20px "Open Sans", sans-serif;
 	color: #ffffff;
 	background-color: #202124;
 	margin: 0;
+	height: auto;
+	width: 100%;
 	-webkit-font-smoothing: antialiased;
 	-moz-osx-font-smoothing: grayscale;
 }
@@ -82,6 +138,7 @@ header {
 	display: flex;
 	padding: 0 24px;
 	width: auto;
+	height: auto;
 }
 
 .logo {
@@ -168,43 +225,94 @@ header {
 	background: rgba(255, 255, 255, 0.1);
 }
 
-li {
+.register {
+	display: flex;
+	justify-content: center;
+	background-color: #0059b3;
+	width: auto;
+	height: auto;
+	padding: 8px;
+	padding-left: 25px;
+	padding-right: 25px;
+	border-radius: 4px;
+}
+.home-button,
+.login {
+	padding: 8px;
+}
 
+.home,
+.login,
+.home-button,
+.logout {
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	width: auto;
+	height: 100%;
+	padding-left: 25px;
+	padding-right: 25px;
+}
+
+li {
 	display: inline;
-	margin: 30px;
+	margin: 10px;
 	color: #ffffff;
 }
 
 .navigation {
+	margin: auto;
+	top: 0;
 	width: 100%;
+	height: auto;
+	/*background: #15181b;*/
+	overflow: hidden;
+}
+
+.wrap {
+	width: 100%;
+	margin: 0 auto;
+
 	height: 100%;
 }
 
-nav{
-    padding: 10px;
-    list-style-type: none;
-    margin: 0px;
-    padding: 0px;
+.app-content {
+	height: unset;
+	width: auto;
 }
 
-ul{
-    display: grid;
-    grid-template-columns: 1fr repeat(7, 250px);
-    grid-gap: 10px;
-    justify-content: center;
-    justify-items: center;
-    justify-self: start;
-}
-.full-width{
-    grid-column: 1/4;
+nav {
+	padding: 10px;
+	list-style-type: none;
+	margin: 0px;
+	padding: 0px;
 }
 
+.nav-link {
+	font-size: 1.2em;
+}
 
+ul {
+	overflow: hidden;
+	padding-left: 20px;
+	padding-right: 20px;
+}
 
+#app {
+	width: 100%;
+	height: 100%;
+	display: inline-block;
+}
 </style>
 
 <style scoped>
 a {
 	color: #ffffff;
+	text-decoration: none;
+	font-size: 1em;
+	cursor: pointer;
+}
+.material-icons-outlined {
+	margin-right: 10px;
 }
 </style>

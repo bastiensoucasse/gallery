@@ -1,9 +1,9 @@
 <template>
     <div class="home">
-        <header>
+        <!--<header>
             <h1 class="logo">Gallery</h1>
         </header>
-        
+        -->
         <gallery></gallery>
         
     </div>
