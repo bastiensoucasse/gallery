@@ -18,6 +18,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import javax.annotation.PostConstruct;
+import javax.validation.Valid;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -37,6 +38,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -225,18 +227,7 @@ public class ImageController {
         }
     }
 
-    /**
-     * Apply an algorithm to an Image
-     *
-     * @param id        id of the image
-     * @param algorithm algorithm passed as parameters through URL
-     * @return ResponseEntity: (200): if the image was processed (400): -if the
-     *         algorithm doesn't exist -one of the paramter doesn't exist -the value
-     *         of the parameter are invalid
-     *
-     *         (404): if no images exist with the given id (500): if the algorithm
-     *         fail for internal reason
-     */
+    
     @RequestMapping(value = "/images/{id}", params = "algorithm", method = RequestMethod.GET, produces = MediaType.IMAGE_JPEG_VALUE)
     @ResponseBody
     public ResponseEntity<?> executeAlgorithm(@PathVariable("id") final int id,
@@ -277,6 +268,43 @@ public class ImageController {
         return ResponseEntity.ok().headers(headers)
              .body(proccessedImage.getData());
     }
+
+
+    @RequestMapping(value = "/images/{id}", params = "temp_algorithm", method = RequestMethod.GET, produces = MediaType.IMAGE_JPEG_VALUE)
+    @ResponseBody
+    public ResponseEntity<?> executeAlgorithmOnShallowImage(@PathVariable("id") final int id,
+            @RequestParam final Map<String, String> algorithm, @Valid @RequestBody Image image) {
+        
+                
+        if (image == null)
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+
+        final String name = algorithm.get("algorithm"); // get the name of the algorithm
+        algorithm.remove("algorithm"); // remove from the set
+
+        Image proccessedImage;
+        try {
+            proccessedImage = AlgorithmManager.Instance().applyAlgorithm(name, algorithm.values(), image);
+            //imageRepository.save(proccessedImage);
+        } catch (final NoSuchMethodException e) {
+            new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+            return ResponseEntity.badRequest().body("Algorithm doesn't exists");
+        } catch (final NumberFormatException e) {
+            new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+            return ResponseEntity.badRequest().body("Impossible to parse Parameters not a Number");
+        } catch (final IllegalArgumentException e) {
+            new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+            return ResponseEntity.badRequest().body("Invalid Arguments");
+        } catch (final Exception e) {
+            e.printStackTrace();
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+         HttpHeaders headers = new HttpHeaders(proccessedImage.getProperties());
+        return ResponseEntity.ok().headers(headers)
+             .body(proccessedImage.getData());
+    }
+
+    
 
 
     @RequestMapping(value = "/images/{id}", params = "format", method = RequestMethod.GET)

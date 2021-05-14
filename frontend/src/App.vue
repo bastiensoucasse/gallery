@@ -69,6 +69,7 @@
 		</div>
 		<div class="app-content">
 			<router-view />
+			
 		</div>
 	</div>
 </template>
@@ -79,6 +80,7 @@ export default {
 		return {
 			navbar: null,
 			offset: null,
+			
 		};
 	},
 	computed: {
@@ -105,6 +107,7 @@ export default {
 				this.navbar.style.position = 'relative';
 			}
 		},
+		
 		
 	},
 	mounted() {

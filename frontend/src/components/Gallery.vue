@@ -108,6 +108,11 @@ export default {
 		savePreview(id){
 			this.cacheImages(this.currentUser);
 			this.id = id;
+			//this.$emit("popUpImageSaved");
+
+		},
+		nextPreview(){
+
 		},
 
 		closePreview() {
@@ -184,7 +189,7 @@ export default {
 
 	},
 
-	mounted: async function (){
+	mounted(){
 		this.cacheImages(this.currentUser);
 
 	}

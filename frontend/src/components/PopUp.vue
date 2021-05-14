@@ -9,18 +9,21 @@
                 <span class="material-icons">close</span>
               </button>
             </div>
-            <h3>Export image</h3>
+            <h3>Export</h3>
           </slot>
         </div>
 
         <div class="modal-body">
           <slot name="body">
-            Choose an image format:
-            <div v-for="format in supportedFormat"
+            Choose a format
+            <select v-model="selected">
+              <option
+                v-for="format in supportedFormat"
                 :key="format"
-                :value="format.type">
-              <input class="radio-btn" type="radio" v-model="selected" name="format.subType" :value="format.subType"> {{format.subType}}
-            </div>
+                :value="format.type"
+                >{{ format.subType }}
+              </option>
+            </select>
           </slot>
         </div>
 
@@ -28,7 +31,7 @@
           <slot name="footer">
             <!--default footer -->
             <button class="modal-default-button" @click="downloadToFormat()">
-              Download
+              download
             </button>
           </slot>
         </div>
@@ -38,61 +41,31 @@
 </template>
 
 <script>
-import axios from "axios";
 
 export default {
   name: "Export",
 
   data() {
     return {
-      supportedFormat: [],
-      selected: "image/jpeg"
+      
     };
   },
 
   props: {
-    id: Number,
+    title: String,
+    msg: String,
+
   },
 
   emits: {
-    closeExport: null
+    closePopUp: null
   },
 
-  methods: {
-    downloadToFormat() {
-      console.log("images/" + this.id + "?format=image/" + this.selected, { responseType: "blob" });
-      axios.get("images/" + this.id + "?format=image/" + this.selected, { responseType: "blob" }).then(r => {
-        var reader = new window.FileReader();
-        reader.readAsDataURL(r.data);
-        reader.onload = () => {
-          const link = document.createElement("a");
-          link.href = reader.result;
-          
-          console.log(r.headers.name);
-
-          link.setAttribute("download", r.headers.name);
-          document.body.appendChild(link);
-          console.log(link);
-
-          link.click();
-        };
-      });
-    },
-
-    listSupportedMediaTypes() {
-      axios.get("images/supportedMedia").then(r => {
-        this.supportedFormat = r.data;
-      });
-    }
-  },
-  mounted() {
-    this.listSupportedMediaTypes();
-  }
+  
 };
 </script>
 
 <style>
-
 .modal-mask {
   position: fixed;
   z-index: 9998;
@@ -104,12 +77,6 @@ export default {
   display: table;
   transition: opacity 0.3s ease;
 }
-
-.radio-btn{
-  margin: 8px;
-}
-
-
 
 .modal-wrapper {
   display: table-cell;
@@ -130,6 +97,7 @@ export default {
 .modal-header h3 {
   margin-top: 0;
   padding: auto;
+  /*color: #42b983;*/
 }
 
 .close-button {
@@ -143,20 +111,7 @@ export default {
 .modal-default-button {
   display: block;
   margin-top: 1rem;
-  background-color:  rgb(0, 89, 179);
-	border: 1px;
-	color: white;
-	cursor: pointer;
-  padding: 10px 8px;
-	box-sizing: border-box;
-	border-radius: 2px;
-	width: 100%;
-	font-size: 1em;
-	box-shadow: none;
-	-webkit-box-shadow: none;
 }
-
-
 
 /*
  * The following styles are auto-applied to elements with
@@ -181,4 +136,3 @@ export default {
   transform: scale(1.1);
 }
 </style>
-

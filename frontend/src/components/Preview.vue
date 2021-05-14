@@ -42,8 +42,6 @@
 		</div>
 
 		<div class="preview-visual">
-			
-
 			<img class="preview-image" :src="image" @error="$emit('close')" />
 		</div>
 
@@ -315,6 +313,7 @@
 <script>
 import Export from "@/components/Export.vue";
 import ImageService from "@/services/image.service";
+//import Image from "/@/models/image.js";
 import FileParser from "@/services/file-parser";
 
 export default {
@@ -361,8 +360,7 @@ export default {
 		},
 		warning() {
 			if (this.currentUser) return "This image is not saved !";
-			else
-				return "This image is not saved ! \n (you can't save images if you're not logged in)";
+			else return "You can't save images if you're not logged in!";
 		}
 	},
 
@@ -372,6 +370,7 @@ export default {
 		},
 		onSubmit(parameters) {
 			if (!this.isImageSaved) {
+				//let Image = new Image(this.name, this.)
 				alert(
 					"If you want to apply an algorithm on this image you have to save it first !"
 				);
@@ -434,7 +433,7 @@ export default {
 			);
 			ImageService.save(this.currentUser, formData).then(
 				response => {
-					alert(response.data);
+					//alert(response.data);
 
 					this.$emit("saveImage", Number(response.headers.id));
 				},
@@ -442,33 +441,10 @@ export default {
 					alert(error);
 				}
 			);
-			/*axios.get("images/" + this.id + "/saving").catch(function(error) {
-				if (error.response) {
-					console.log(error.response.data);
-					console.log(error.response.status);
-					console.log(error.response.headers);
-				}
-			});*/
 		},
 
 		close() {
-			if (this.currentUser != null) {
-				if (isNaN(this.id)) {
-					if (
-						!confirm(
-							"Dou you want to save this image ? If not result will be lost"
-						)
-					) {
-						this.$emit("close");
-					} else {
-						this.save();
-					}
-				} else {
-					this.$emit("close");
-				}
-			} else {
-				this.$emit("close");
-			}
+			this.$emit("close");
 		}
 	}
 };
@@ -593,12 +569,11 @@ input[type="number"] {
 	margin-right: 5px;
 }
 
-.warning-msg{
+.warning-msg {
 	display: inline-block;
 }
 
 .warning {
-
 	width: auto;
 	color: rgb(200, 49, 49);
 }
