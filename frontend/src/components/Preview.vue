@@ -1,8 +1,17 @@
 <template>
 	<div class="preview-window">
 		<div class="feature-box">
-			<button class="feature-link" title="Close" @click="close">
-				<span class="material-icons">close</span>
+			<button
+				class="feature-link"
+				title="Close"
+				:disabled="loading"
+				@click="close"
+			>
+				<span
+					class="material-icons"
+					v-bind:class="{ 'disable-icons': loading }"
+					>close</span
+				>
 			</button>
 
 			<button
@@ -10,6 +19,8 @@
 				class="feature-link"
 				title="Delete"
 				@click="remove"
+				:disabled="loading"
+				v-bind:class="{ 'disable-icons': loading }"
 			>
 				<span class="material-icons">delete</span>
 			</button>
@@ -19,6 +30,8 @@
 				class="feature-link"
 				title="Save"
 				@click="save"
+				:disabled="loading"
+				v-bind:class="{ 'disable-icons': loading }"
 			>
 				<span class="material-icons-outlined">save</span>
 			</button>
@@ -28,21 +41,43 @@
 				class="feature-link"
 				title="Download"
 				@click="showExport = true"
+				:disabled="loading"
+				v-bind:class="{ 'disable-icons': loading }"
 			>
 				<span class="material-icons">download</span>
 			</button>
 
-			<button class="feature-link" title="Edit" @click="edit">
+			<button
+				class="feature-link"
+				title="Edit"
+				:disabled="loading"
+				v-bind:class="{ 'disable-icons': loading }"
+				@click="edit"
+			>
 				<span class="material-icons">edit</span>
 			</button>
 
-			<button class="feature-link" title="Details" @click="details">
+			<button
+				class="feature-link"
+				title="Details"
+				:disabled="loading"
+				v-bind:class="{ 'disable-icons': loading }"
+				@click="details"
+			>
 				<span class="material-icons-outlined">info</span>
 			</button>
 		</div>
 
 		<div class="preview-visual">
 			<img class="preview-image" :src="image" @error="$emit('close')" />
+			<div class="chevrons">
+				<span class="material-icons chevron" @click="$emit('loadPrevious')" @keydown.arrow-left="$emit('loadPrevious')">
+					chevron_left
+				</span>
+				<span class="material-icons chevron" @click="$emit('loadNext')">
+					chevron_right
+				</span>
+			</div>	
 		</div>
 
 		<div id="details-panel" class="preview-features">
@@ -87,7 +122,13 @@
 					@submit.prevent="onSubmit('resize')"
 				>
 					<h3 class="category">Resize [WIP]</h3>
-					<button class="theme-button" type="submit">Resize</button>
+					<button
+						class="theme-button"
+						type="submit"
+						:disabled="loading"
+					>
+						Resize
+					</button>
 				</form>
 
 				<form
@@ -95,7 +136,11 @@
 					@submit.prevent="onSubmit('toGrayscale')"
 				>
 					<h3 class="category">Convert to grayscale</h3>
-					<button class="theme-button" type="submit">
+					<button
+						class="theme-button"
+						type="submit"
+						:disabled="loading"
+					>
 						to Gray Scale
 					</button>
 				</form>
@@ -105,7 +150,11 @@
 					@submit.prevent="onSubmit('toNegative')"
 				>
 					<h3 class="category">Convert to negative</h3>
-					<button class="theme-button" type="submit">
+					<button
+						class="theme-button"
+						type="submit"
+						:disabled="loading"
+					>
 						Apply Negative Filter
 					</button>
 				</form>
@@ -124,7 +173,11 @@
 						max="255"
 						required
 					/>
-					<button class="theme-button" type="submit">
+					<button
+						class="theme-button"
+						type="submit"
+						:disabled="loading"
+					>
 						Change Brightness
 					</button>
 				</form>
@@ -145,7 +198,13 @@
 						required
 					/>
 
-					<button class="theme-button" type="submit">Colorize</button>
+					<button
+						class="theme-button"
+						type="submit"
+						:disabled="loading"
+					>
+						Colorize
+					</button>
 				</form>
 
 				<form
@@ -153,7 +212,11 @@
 					@submit.prevent="onSubmit('extendDynamics')"
 				>
 					<h3 class="category">Extend the dynamics</h3>
-					<button class="theme-button" type="submit">
+					<button
+						class="theme-button"
+						type="submit"
+						:disabled="loading"
+					>
 						Extend Dynamic
 					</button>
 				</form>
@@ -175,6 +238,7 @@
 							value="1"
 							id="c1"
 							required
+							:disabled="loading"
 							checked
 						/>
 						<label for="c1">Saturation</label>
@@ -185,6 +249,7 @@
 							v-model="x3"
 							name="channel"
 							value="2"
+							:disabled="loading"
 							id="c2"
 						/>
 						<label for="c2">Brightness</label>
@@ -194,6 +259,7 @@
 						type="submit"
 						class="theme-button"
 						value="Equalize"
+						:disabled="loading"
 					/>
 				</form>
 
@@ -209,6 +275,7 @@
 						name="radius"
 						v-model="x4"
 						min="1"
+						:disabled="loading"
 						max="10"
 						required
 					/>
@@ -221,6 +288,7 @@
 							v-model="n1"
 							value="meanFilter"
 							id="mf"
+							:disabled="loading"
 							checked
 						/>
 						<label for="mf">Mean</label>
@@ -231,12 +299,17 @@
 							name="algorithm"
 							v-model="n1"
 							value="gaussianFilter"
+							:disabled="loading"
 							id="gf"
 						/>
 						<label for="gf">Gaussian</label>
 					</div>
 
-					<button class="theme-button" type="submit">
+					<button
+						class="theme-button"
+						type="submit"
+						:disabled="loading"
+					>
 						Apply filter"
 					</button>
 				</form>
@@ -246,7 +319,11 @@
 					@submit.prevent="onSubmit('sobelOperator')"
 				>
 					<h3 class="category">Sobel operator</h3>
-					<button class="theme-button" type="submit">
+					<button
+						class="theme-button"
+						type="submit"
+						:disabled="loading"
+					>
 						Apply Sobel operator"
 					</button>
 				</form>
@@ -265,6 +342,7 @@
 							name="algorithm"
 							value="horizontalMirror"
 							v-model="n2"
+							:disabled="loading"
 							id="hm"
 							checked
 						/>
@@ -275,6 +353,7 @@
 							type="radio"
 							name="algorithm"
 							v-model="n2"
+							:disabled="loading"
 							value="verticalMirror"
 							id="vm"
 						/>
@@ -285,6 +364,7 @@
 							v-model="n2"
 							type="radio"
 							name="algorithm"
+							:disabled="loading"
 							value="completeMirror"
 							id="cm"
 						/>
@@ -293,7 +373,11 @@
 						>
 					</div>
 
-					<button class="theme-button" type="submit">
+					<button
+						class="theme-button"
+						type="submit"
+						:disabled="loading"
+					>
 						Apply Filter
 					</button>
 				</form>
@@ -318,7 +402,7 @@ import FileParser from "@/services/file-parser";
 
 export default {
 	components: {
-		Export
+		Export,
 	},
 	name: "Preview",
 
@@ -347,7 +431,9 @@ export default {
 	emits: {
 		close: null,
 		updatePreview: null,
-		saveImage: null
+		saveImage: null,
+		loadNext: null,
+		loadPrevious: null,
 	},
 
 	computed: {
@@ -369,11 +455,34 @@ export default {
 			return "&x=" + x;
 		},
 		onSubmit(parameters) {
+			this.loading = true;
 			if (!this.isImageSaved) {
-				//let Image = new Image(this.name, this.)
-				alert(
-					"If you want to apply an algorithm on this image you have to save it first !"
+				let formData = FileParser.parseURLDataAsFormFile(
+					this.image,
+					this.name
 				);
+				ImageService.applyAlgorithmOnFile(
+					"temp/?algorithm=" + parameters,
+					formData
+				)
+					.then(response => {
+						let reader = ImageService.readBlob(response);
+						reader.onload = () => {
+							this.$emit(
+								"updatePreview",
+								NaN,
+								response.headers.name,
+								reader.result,
+								response.headers.type,
+								response.headers.size
+							);
+							this.loading = false;
+						};
+					})
+					.catch(error => {
+						alert(error);
+						this.loading = false;
+					});
 			} else {
 				ImageService.applyAlgorithm(
 					this.id + "?algorithm=" + parameters
@@ -383,16 +492,18 @@ export default {
 						reader.onload = () => {
 							this.$emit(
 								"updatePreview",
-								response.headers.name,
 								Number(response.headers.id),
+								response.headers.name,
+								reader.result,
 								response.headers.type,
-								response.headers.size,
-								reader.result
+								response.headers.size
 							);
+							this.loading = false;
 						};
 					})
 					.catch(error => {
 						alert(error);
+						this.loading = false;
 					});
 			}
 		},
@@ -433,8 +544,6 @@ export default {
 			);
 			ImageService.save(this.currentUser, formData).then(
 				response => {
-					//alert(response.data);
-
 					this.$emit("saveImage", Number(response.headers.id));
 				},
 				error => {
@@ -445,7 +554,21 @@ export default {
 
 		close() {
 			this.$emit("close");
+		},
+		logKey(e){
+			//console.log(e);
+			if(e.key === "ArrowRight"){
+				this.$emit('loadNext');
+			}else if (e.key === "ArrowLeft"){
+				this.$emit('loadPrevious');
+			}
 		}
+
+	},
+	mounted(){
+		console.log("preview mounted !");
+		document.addEventListener('keydown', this.logKey);
+
 	}
 };
 </script>
@@ -464,14 +587,16 @@ export default {
 }
 
 .preview-visual {
-	width: 100%;
 	height: 100%;
+	width: 100%;
 	display: flex;
 	flex-wrap: wrap;
 	justify-content: center;
 	align-items: center;
 	background-color: rgba(32, 33, 36, 0.9);
 }
+
+
 
 .preview-image {
 	display: block;
@@ -494,8 +619,8 @@ export default {
 
 .preview-features {
 	width: calc(100% - 2 * 24px);
-	height: calc(100% - 2 * 12px);
-	padding: 56px 24px 0 24px;
+	/*height: calc(100% - 2 * 12px);*/
+	padding: 56px 24px 24px 24px;
 	text-align: left;
 	background-color: rgb(38, 40, 43);
 	box-shadow: 0 4px 5px 0 rgba(0, 0, 0, 0.14),
@@ -575,10 +700,45 @@ input[type="number"] {
 
 .warning {
 	width: auto;
-	color: rgb(200, 49, 49);
+	color: rgb(255, 196, 0);
 }
 
 #save_btn {
 	visibility: hidden;
+}
+
+.disable-icons {
+	color: #3c4855;
+}
+
+.chevrons{
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	flex-basis: 100%;
+}
+
+.chevron {
+	width: 90px;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	height: 90px;
+	margin-left: 20px;
+	margin-right: 20px;
+	/*background-color: crimson;*/
+	font-size: 48px;
+}
+
+.chevron:hover {
+	scale: 20px;
+	cursor: pointer;
+	transition: font-size 0.17s;
+	font-size: 200px;
+}
+
+.break {
+	flex-basis: 100%;
+	height: 0;
 }
 </style>

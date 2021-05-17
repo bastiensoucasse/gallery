@@ -1,5 +1,6 @@
 package pdl.backend;
 
+import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
@@ -9,6 +10,10 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
+
+import javax.print.attribute.standard.Media;
+
+import org.springframework.http.MediaType;
 
 import io.scif.img.SCIFIOImgPlus;
 import net.imglib2.type.numeric.integer.UnsignedByteType;
@@ -149,6 +154,21 @@ public class AlgorithmManager {
         throw new NumberFormatException();
     }
 
+    private Image checkImageType(Image input) throws IllegalArgumentException, IOException{
+        if(!input.getType().equals(MediaType.IMAGE_JPEG) && !input.getType().equals(MediaType.valueOf("image/tiff"))){
+            return ImageManager.convertImage(input, MediaType.IMAGE_JPEG);
+        }
+        return input;
+    }
+
+
+    private byte[] checkImageType(Image inputImage, Image output, byte[] outputBytes) throws IOException{
+        if(!output.getType().equals(inputImage.getType())){
+            return ImageManager.convertImageBytes(outputBytes, inputImage.getType());
+        }
+        return outputBytes;
+    }
+
     /**
      * Apply an algorithm to the image passed in parameters The name of the
      * algorithm can be passed as a string, and the arguments needed for the
@@ -168,6 +188,7 @@ public class AlgorithmManager {
     public Image applyAlgorithm(final String algorithmName, final Collection<String> algorithmArgs, final Image inputImage)
     throws Exception, NumberFormatException, NoSuchMethodException, IllegalArgumentException, InvocationTargetException
     {
+        Image input = checkImageType(inputImage);
         System.out.printf("Calling algorithm %s", algorithmName);
         for (String arg : algorithmArgs)
             System.out.printf(" %s", arg);
@@ -177,7 +198,7 @@ public class AlgorithmManager {
         if (methods == null)
             throw new NoSuchMethodException();
         final Object[] arguments = new Object[algorithmArgs.size() + 1];
-        arguments[0] = ImageManager.imageFromJPEGBytes(inputImage.getData());
+        arguments[0] = ImageManager.imageFromJPEGBytes(input.getData());
         final Class<?>[] parametersType = parseParameters(algorithmName, algorithmArgs, methods.keySet(), arguments, 1);
         final Method m = methods.get(parametersType);
 
@@ -188,7 +209,7 @@ public class AlgorithmManager {
         for (String arg : algorithmArgs)
             outputName += "_" + arg;
         outputName += "." + inputName[1];
-        final byte[] rawProcessedImage = ImageManager.imageToJPEGBytes(output);
+        final byte[] rawProcessedImage = checkImageType(inputImage, input, ImageManager.imageToJPEGBytes(output));
 
         return new Image(outputName, rawProcessedImage, inputImage.getType(), inputImage.getSize());
     }

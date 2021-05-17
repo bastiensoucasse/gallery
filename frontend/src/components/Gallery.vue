@@ -4,35 +4,48 @@
 			<div
 				:key="image.id"
 				v-for="image in response"
-				v-on:click="loadPreview(image.id, image.name, images[image.id], image.type, image.size)"
+				v-on:click="
+					loadPreview(
+						image.id,
+						image.name,
+						images[image.id],
+						image.type,
+						image.size
+					)
+				"
 				class="gallery-image"
 			>
 				<img :src="images[image.id]" />
 			</div>
 		</div>
 
-		<div class="gallery-import" v-if="currentUser"  title="Import a new image" @click="loadImporter">
+		<div
+			class="gallery-import"
+			v-if="currentUser"
+			title="Import a new image"
+			@click="loadImporter"
+		>
 			<span class="material-icons">add</span>
 		</div>
-		
+
 		<dialog-box
 			:dialog-title="dialog_title"
 			:dialog-msg="dialog_msg"
 			@closeDialog="closeDialog"
 			v-if="alertBox"
 		></dialog-box>
-		
 
 		<preview
 			:id="id"
 			:name="name"
 			:type="type"
 			:dimensions="dimensions"
-			:image="selectedImage"
+			:image="selectedImageData"
 			@close="closePreview"
-			@updatePreview="updatePreview"
+			@updatePreview="loadPreview"
 			@saveImage="savePreview"
-
+			@loadNext="loadNextImagePreview"
+			@loadPrevious="loadPreviousImagePreview"
 			v-if="isImageSelected"
 		></preview>
 
@@ -43,9 +56,8 @@
 <script>
 import Preview from "@/components/Preview.vue";
 import Importer from "@/components/Importer.vue";
-import ImageService from '@/services/image.service'
-import DialogBox from '@/components/DialogBox.vue';
-
+import ImageService from "@/services/image.service";
+import DialogBox from "@/components/DialogBox.vue";
 
 export default {
 	name: "Gallery",
@@ -61,7 +73,8 @@ export default {
 			response: [],
 			images: {},
 			errors: [],
-			selectedImage: null,
+			selectedImageData: null,
+			image_key: null,
 			id: NaN,
 			name: "",
 			type: "",
@@ -69,8 +82,7 @@ export default {
 			importing: false,
 			alertBox: false,
 			dialog_title: String,
-			dialog_msg: String,
-
+			dialog_msg: String
 		};
 	},
 
@@ -79,14 +91,14 @@ export default {
 			return this.$store.state.auth.user;
 		},
 		loggedIn() {
-			if(this.currentUser != null) {
+			if (this.currentUser != null) {
 				return "user/" + this.currentUser.id + "/images";
 			} else {
 				return "/images";
 			}
 		},
-		isImageSelected(){
-			if(this.selectedImage != null){
+		isImageSelected() {
+			if (this.selectedImageData != null) {
 				return true;
 			}
 			return false;
@@ -94,104 +106,130 @@ export default {
 	},
 
 	methods: {
-		loadPreview(id, name, data, type, dimensions) {
+		reloadPreview(id, name, data, type, size){
 			this.id = Number(id);
 			this.name = name;
-			this.selectedImage = data;
+			this.selectedImageData = data;
 			this.type = type;
-			this.dimensions = dimensions.replaceAll("*", " × ");
+			this.dimensions = size.replaceAll("*", " × ");
+		},
 
+		loadPreview(id, name, data, type, size) {
+			this.reloadPreview(id, name, data, type, size);
+			this.image_key = this.getImageKey();
 		},
-		updatePreview(name, id, type, size, data){
-			this.loadPreview(id, name, data, type, size, true);
+		
+		getImageKey(){
+			let index;
+			for(index = 0; index < this.response.length; index++){
+				if(this.response[index].id == this.id){
+					return index;
+				}
+			}
+			return index;
 		},
-		savePreview(id){
+		savePreview(id) {
 			this.cacheImages(this.currentUser);
 			this.id = id;
-			//this.$emit("popUpImageSaved");
-
 		},
-		nextPreview(){
-
-		},
+		
 
 		closePreview() {
 			this.id = -1;
 			this.name = "";
 			this.type = "";
 			this.dimensions = "";
-			this.selectedImage = null;
+			this.selectedImageData = null;
+			this.image_key = null;
+
+		},
+		loadNextImagePreview(){
+			this.image_key = this.nextImageKey();
+			console.log(this.image_key);
+			let img = this.response[this.image_key];
+			this.reloadPreview(img.id, img.name, this.images[img.id], img.type, img.size);
+		},
+		loadPreviousImagePreview(){
+			this.image_key = this.previousImageKey();
+			console.log(this.image_key);
+			let img = this.response[this.image_key];
+			this.reloadPreview(img.id, img.name, this.images[img.id], img.type, img.size);
+		}, 
+
+		nextImageKey(){
+			return (this.image_key+1) % this.response.length;
 		},
 
-		deleteImage(image_id){
+		previousImageKey(){
+			return (((this.image_key-1) % this.response.length) + this.response.length)% this.response.length;
+		},
+		deleteImage(image_id) {
 			delete this.images[image_id];
 			var index;
-			for(index in this.response){
-				if(this.response[index].id === image_id){
+			for (index in this.response) {
+				if (this.response[index].id === image_id) {
 					this.response.splice(index, 1);
 				}
 			}
 		},
 
 		loadImporter() {
-			if(this.currentUser)
-				this.importing = true;
+			if (this.currentUser) this.importing = true;
 			else
-				this.dialogBox("We're sorry", "To be able to import images you need to be logged in.");
+				this.dialogBox(
+					"We're sorry",
+					"To be able to import images you need to be logged in."
+				);
 		},
-
-		
 
 		closeImporter() {
 			this.importing = false;
 		},
 
-		getImageList(user){
-			ImageService.getImageList(user).then(
-				response => {
+		getImageList(user) {
+			ImageService.getImageList(user)
+				.then(response => {
 					this.response = response.data;
-
-				}).catch(e => {
+				})
+				.catch(e => {
 					this.errors.push(e);
 				});
-
 		},
 
-		downloadImage(user, image_id){
+		downloadImage(user, image_id) {
 			ImageService.getData(user, image_id).then(
 				response => {
 					let reader = new window.FileReader();
 					reader.readAsDataURL(response.data);
-					reader.onload =  () => {
-						this.images[image_id] = reader.result;
-
-					}
+					reader.onload = () => {
+						if (!(image_id in this.images)) {
+							this.images[image_id] = reader.result;
+						}
+					};
 				},
-				error =>{
+				error => {
 					this.errors.push(error);
 				}
 			);
 		},
 
-		cacheImages(user){
-			ImageService.getImageList(user).then(
-				response => {
+		cacheImages(user) {
+			ImageService.getImageList(user)
+				.then(response => {
 					this.response = response.data;
 					let img;
-					for(img in this.response){
-						this.downloadImage(user,this.response[img].id);
+					for (img in this.response) {
+						this.downloadImage(user, this.response[img].id);
 					}
-				}).catch(e => {
+				})
+				.catch(e => {
 					this.errors.push(e);
 				});
 		}
-
-
 	},
 
-	mounted(){
-		this.cacheImages(this.currentUser);
-
+	mounted: async function() {
+		await this.cacheImages(this.currentUser);
 	}
 };
 </script>
@@ -208,7 +246,7 @@ export default {
 	padding: 8px 0;
 }
 
-.gallery{
+.gallery {
 	margin: auto;
 }
 

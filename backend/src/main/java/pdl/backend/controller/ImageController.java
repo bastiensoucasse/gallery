@@ -72,7 +72,6 @@ public class ImageController {
 
     private UserRepository userRepository;
 
-
     /**
      * JSON mapper.
      */
@@ -140,21 +139,22 @@ public class ImageController {
      */
     @PreAuthorize("hasRole('ROLE_USER') or hasRole('ROLE_USER_PREMIUM') or hasRole('ROOT')")
     @RequestMapping(value = "/images/{id}/{user}/{user_id}", method = RequestMethod.DELETE)
-    public ResponseEntity<?> deleteImage(@PathVariable("id") final int id, @PathVariable("user") final String username, 
-    @PathVariable("user_id") final Integer user_id ) {
+    public ResponseEntity<?> deleteImage(@PathVariable("id") final int id, @PathVariable("user") final String username,
+            @PathVariable("user_id") final Integer user_id) {
         Image image = imageRepository.findById(id).orElse(null);
-        User user =  userRepository.findById(user_id).orElse(null);
-        if (image == null || user == null )
+        User user = userRepository.findById(user_id).orElse(null);
+        if (image == null || user == null)
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
 
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        System.out.println("User : " + authentication.getName() + "; user id: " + user_id + "; image fk_id: " + image.getUser().getId());
-        if(!authentication.getName().equals(username) || !image.getUser().getId().equals(user_id))
+        System.out.println("User : " + authentication.getName() + "; user id: " + user_id + "; image fk_id: "
+                + image.getUser().getId());
+        if (!authentication.getName().equals(username) || !image.getUser().getId().equals(user_id))
             return new ResponseEntity<>(HttpStatus.FORBIDDEN);
-        
+
         user.dismissImage(image);
         imageRepository.deleteById(id);
-        
+
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
@@ -168,19 +168,20 @@ public class ImageController {
      */
     @PreAuthorize("hasRole('ROLE_USER') or hasRole('ROLE_USER_PREMIUM') or hasRole('ROLE_ROOT')")
     @RequestMapping(value = "/images/{user_id}", method = RequestMethod.POST)
-    public ResponseEntity<?> addImage(@PathVariable("user_id") final Integer user_id, @RequestParam("file") final MultipartFile file,
-            final RedirectAttributes redirectAttributes) {
+    public ResponseEntity<?> addImage(@PathVariable("user_id") final Integer user_id,
+            @RequestParam("file") final MultipartFile file, final RedirectAttributes redirectAttributes) {
         Image image;
         if (!AcceptedMediaTypes.contains(file.getContentType()))
             return new ResponseEntity<>(HttpStatus.UNSUPPORTED_MEDIA_TYPE);
         try {
-            image = new Image(file.getOriginalFilename(), file.getBytes(), Utils.typeOfFile(file),Utils.sizeOfImage(file));
+            image = new Image(file.getOriginalFilename(), file.getBytes(), Utils.typeOfFile(file),
+                    Utils.sizeOfImage(file));
 
             User user = userRepository.findById(user_id).orElse(null);
-            if(!JwtUtils.checkUserAuthentification(user))
+            if (!JwtUtils.checkUserAuthentification(user))
                 return new ResponseEntity<>(HttpStatus.FORBIDDEN);
             image.setUser(user);
-            
+
             imageRepository.save(image);
         } catch (final IOException e) {
             e.printStackTrace();
@@ -189,7 +190,8 @@ public class ImageController {
 
         try {
             System.out.println("New id for image saved: " + image.getId());
-            return ResponseEntity.created(new URI("/")).header("id", String.valueOf(image.getId())).body("Image successfully saved");
+            return ResponseEntity.created(new URI("/")).header("id", String.valueOf(image.getId()))
+                    .body("Image successfully saved");
         } catch (final URISyntaxException e) {
             e.printStackTrace();
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
@@ -227,7 +229,6 @@ public class ImageController {
         }
     }
 
-    
     @RequestMapping(value = "/images/{id}", params = "algorithm", method = RequestMethod.GET, produces = MediaType.IMAGE_JPEG_VALUE)
     @ResponseBody
     public ResponseEntity<?> executeAlgorithm(@PathVariable("id") final int id,
@@ -241,14 +242,15 @@ public class ImageController {
 
         Image proccessedImage;
         try {
+
             proccessedImage = AlgorithmManager.Instance().applyAlgorithm(name, algorithm.values(), image);
             Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-            if(authentication.isAuthenticated()){
+            if (authentication.isAuthenticated()) {
                 User user = userRepository.findByUsername(authentication.getName()).orElse(null);
-                if(user != null)
+                if (user != null)
                     proccessedImage.setUser(user);
             }
-            //imageRepository.save(proccessedImage);
+            // imageRepository.save(proccessedImage);
         } catch (final NoSuchMethodException e) {
             new ResponseEntity<>(HttpStatus.BAD_REQUEST);
             return ResponseEntity.badRequest().body("Algorithm doesn't exists");
@@ -262,22 +264,29 @@ public class ImageController {
             e.printStackTrace();
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
-        //return ResponseEntity.ok().contentType(MediaType.TEXT_HTML)
-         //     .body("<script>location.href = '/" + proccessedImage.getId() + "';</script>");
-         HttpHeaders headers = new HttpHeaders(proccessedImage.getProperties());
-        return ResponseEntity.ok().headers(headers)
-             .body(proccessedImage.getData());
+        // return ResponseEntity.ok().contentType(MediaType.TEXT_HTML)
+        // .body("<script>location.href = '/" + proccessedImage.getId() +
+        // "';</script>");
+        HttpHeaders headers = new HttpHeaders(proccessedImage.getProperties());
+        return ResponseEntity.ok().headers(headers).body(proccessedImage.getData());
     }
 
-
-    @RequestMapping(value = "/images/{id}", params = "temp_algorithm", method = RequestMethod.GET, produces = MediaType.IMAGE_JPEG_VALUE)
+    @RequestMapping(value = "/images/temp/", params = "algorithm", method = RequestMethod.POST, produces = MediaType.IMAGE_JPEG_VALUE)
     @ResponseBody
-    public ResponseEntity<?> executeAlgorithmOnShallowImage(@PathVariable("id") final int id,
-            @RequestParam final Map<String, String> algorithm, @Valid @RequestBody Image image) {
-        
-                
-        if (image == null)
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+    public ResponseEntity<?> executeAlgorithmOnGivenFile(@RequestParam final Map<String, String> algorithm, @RequestParam("file") final MultipartFile file) {
+
+        System.out.println(file);
+        if (!AcceptedMediaTypes.contains(file.getContentType()))
+            return new ResponseEntity<>(HttpStatus.UNSUPPORTED_MEDIA_TYPE);
+
+        Image image;
+        try {
+            image = new Image(file.getOriginalFilename(), file.getBytes(), Utils.typeOfFile(file),
+                    Utils.sizeOfImage(file));
+        } catch (final IOException e) {
+            e.printStackTrace();
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
 
         final String name = algorithm.get("algorithm"); // get the name of the algorithm
         algorithm.remove("algorithm"); // remove from the set
@@ -285,7 +294,7 @@ public class ImageController {
         Image proccessedImage;
         try {
             proccessedImage = AlgorithmManager.Instance().applyAlgorithm(name, algorithm.values(), image);
-            //imageRepository.save(proccessedImage);
+            // imageRepository.save(proccessedImage);
         } catch (final NoSuchMethodException e) {
             new ResponseEntity<>(HttpStatus.BAD_REQUEST);
             return ResponseEntity.badRequest().body("Algorithm doesn't exists");
@@ -299,13 +308,9 @@ public class ImageController {
             e.printStackTrace();
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
-         HttpHeaders headers = new HttpHeaders(proccessedImage.getProperties());
-        return ResponseEntity.ok().headers(headers)
-             .body(proccessedImage.getData());
+        HttpHeaders headers = new HttpHeaders(proccessedImage.getProperties());
+        return ResponseEntity.ok().headers(headers).body(proccessedImage.getData());
     }
-
-    
-
 
     @RequestMapping(value = "/images/{id}", params = "format", method = RequestMethod.GET)
     @ResponseBody

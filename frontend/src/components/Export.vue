@@ -15,11 +15,12 @@
 
         <div class="modal-body">
           <slot name="body">
-            Choose an image format:
+            <p> Choose an image format: </p>
             <div v-for="format in supportedFormat"
-                :key="format"
+                :key="format.type"
                 :value="format.type">
-              <input class="radio-btn" type="radio" v-model="selected" name="format.subType" :value="format.subType"> {{format.subType}}
+              <input id=i class="radio-btn" type="radio" v-model="selected" name="format.subType" :value="format.subType">
+              <label for=${format.subType}>{{format.subType}} </label>        
             </div>
           </slot>
         </div>
@@ -60,16 +61,13 @@ export default {
 
   methods: {
     downloadToFormat() {
-      console.log("images/" + this.id + "?format=image/" + this.selected, { responseType: "blob" });
       axios.get("images/" + this.id + "?format=image/" + this.selected, { responseType: "blob" }).then(r => {
         var reader = new window.FileReader();
         reader.readAsDataURL(r.data);
         reader.onload = () => {
           const link = document.createElement("a");
           link.href = reader.result;
-          
-          console.log(r.headers.name);
-
+      
           link.setAttribute("download", r.headers.name);
           document.body.appendChild(link);
           console.log(link);
@@ -93,6 +91,12 @@ export default {
 
 <style>
 
+
+
+.radio-btn{
+  margin: 8px;
+}
+
 .modal-mask {
   position: fixed;
   z-index: 9998;
@@ -105,9 +109,6 @@ export default {
   transition: opacity 0.3s ease;
 }
 
-.radio-btn{
-  margin: 8px;
-}
 
 
 

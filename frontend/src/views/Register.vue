@@ -51,7 +51,7 @@
 			<div class="form-group">
 				<input
 					class="submit-button"
-					:disabled="loading"
+					:disabled="submitted"
 					value="Sign in"
 					type="submit"
 				/>
@@ -107,6 +107,7 @@ export default {
 				error => {
 					this.message = error.response.data.message;
 					this.successful = false;
+					this.submitted = false;
 				}
 			);
 		}

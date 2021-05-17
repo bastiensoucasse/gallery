@@ -195,7 +195,11 @@ header {
 	user-select: none;
 }
 
-.theme-button:hover {
+.theme-button:disabled{
+	background-color: #3c4855;
+}
+
+.theme-button:hover:enabled {
 	background-color: #0059b3;
 }
 
@@ -224,7 +228,9 @@ header {
 	user-select: none;
 }
 
-.feature-link:hover {
+
+
+.feature-link:hover:enabled {
 	background: rgba(255, 255, 255, 0.1);
 }
 

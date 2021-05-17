@@ -74,6 +74,8 @@ public class ImageManager
         return imageInByte;
     }
 
+  
+
 
     /**
      * Change the format of an image, for example from png -> jpeg

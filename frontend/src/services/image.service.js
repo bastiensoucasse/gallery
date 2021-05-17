@@ -38,6 +38,10 @@ class ImageService{
         return axios.get(public_URL + parameters, {responseType: "blob", headers: authHeader()});
     }
 
+    applyAlgorithmOnFile(parameters, multipart_file){
+        return axios.post(public_URL + parameters, multipart_file, {responseType: "blob", headers: multipartHeader()});
+    }
+
     readBlob(response){
         let reader = new window.FileReader();
         reader.readAsDataURL(response.data);
