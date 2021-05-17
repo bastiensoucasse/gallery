@@ -58,7 +58,10 @@
 			</div>
 
 			<div class="form-group">
-				<label>You already have an account ? <router-link to="/login">Log in here </router-link> </label>
+				<label
+					>You already have an account ?
+					<router-link to="/login">Log in here </router-link>
+				</label>
 			</div>
 
 			<div class="form-group">
@@ -67,13 +70,17 @@
 				</div>
 			</div>
 		</form>
+
+		<loading-screen v-if="submitted" :title="'Creating you an account ...'" />
 	</div>
 </template>
 
 <script>
 import User from "../models/user";
+import LoadingScreen from "@/components/LoadingScreen.vue";
 
 export default {
+	components: { LoadingScreen },
 	name: "Register",
 	data() {
 		return {
@@ -128,9 +135,6 @@ export default {
 	border-color: rgba(0, 0, 0, 0);
 	box-shadow: none;
 	-webkit-box-shadow: none;
-
-
-
 }
 
 .form-control:focus {

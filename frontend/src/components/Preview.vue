@@ -70,7 +70,7 @@
 
 		<div class="preview-visual">
 			<img class="preview-image" :src="image" @error="$emit('close')" />
-			<div class="chevrons">
+			<div class="chevrons" v-if="!loading">
 				<span class="material-icons chevron" @click="$emit('loadPrevious')" @keydown.arrow-left="$emit('loadPrevious')">
 					chevron_left
 				</span>
@@ -391,6 +391,8 @@
 				:name="name"
 			></Export>
 		</div>
+
+		<loading-screen v-if="loading" :title="'Algorithm in Process ...'"/>
 	</div>
 </template>
 
@@ -399,10 +401,12 @@ import Export from "@/components/Export.vue";
 import ImageService from "@/services/image.service";
 //import Image from "/@/models/image.js";
 import FileParser from "@/services/file-parser";
+import LoadingScreen from '@/components/LoadingScreen.vue';
 
 export default {
 	components: {
 		Export,
+		LoadingScreen,
 	},
 	name: "Preview",
 
@@ -424,7 +428,7 @@ export default {
 			x4: "",
 			n1: "meanFilter",
 			n2: "horizontalMirror",
-			loading: false
+			loading: false,
 		};
 	},
 
@@ -557,9 +561,9 @@ export default {
 		},
 		logKey(e){
 			//console.log(e);
-			if(e.key === "ArrowRight"){
+			if(e.key === "ArrowRight" && !this.loading){
 				this.$emit('loadNext');
-			}else if (e.key === "ArrowLeft"){
+			}else if (e.key === "ArrowLeft" && !this.loading){
 				this.$emit('loadPrevious');
 			}
 		}
@@ -719,11 +723,11 @@ input[type="number"] {
 }
 
 .chevron {
-	width: 90px;
+	width: 100px;
 	display: flex;
 	justify-content: center;
 	align-items: center;
-	height: 90px;
+	height: 100px;
 	margin-left: 20px;
 	margin-right: 20px;
 	/*background-color: crimson;*/
@@ -733,8 +737,8 @@ input[type="number"] {
 .chevron:hover {
 	scale: 20px;
 	cursor: pointer;
-	transition: font-size 0.17s;
-	font-size: 200px;
+	transition: font-size 0.15s;
+	font-size: 150px;
 }
 
 .break {

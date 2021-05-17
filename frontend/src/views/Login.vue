@@ -42,7 +42,7 @@
 				</div>
 			</div>
 		</form>
-		<loading-screen v-if="loading"/>
+		<loading-screen v-if="loading" :title="'Almost there ...'"/>
 	</div>
 </template>
 
