@@ -35,19 +35,22 @@
 			v-if="alertBox"
 		></dialog-box>
 
-		<preview
-			:id="id"
-			:name="name"
-			:type="type"
-			:dimensions="dimensions"
-			:image="selectedImageData"
-			@close="closePreview"
-			@updatePreview="loadPreview"
-			@saveImage="savePreview"
-			@loadNext="loadNextImagePreview"
-			@loadPrevious="loadPreviousImagePreview"
-			v-if="isImageSelected"
-		></preview>
+		<keep-alive>
+			<preview
+				:id="id"
+				:name="name"
+				:type="type"
+				:dimensions="dimensions"
+				:image="selectedImageData"
+				@close="closePreview"
+				@updatePreview="loadPreview"
+				@reloadImage="reloadImage"
+				@saveImage="savePreview"
+				@loadNext="loadNextImagePreview"
+				@loadPrevious="loadPreviousImagePreview"
+				v-if="isImageSelected"
+			></preview>
+		</keep-alive>
 
 		<importer @close="closeImporter" v-if="importing"></importer>
 	</div>
@@ -106,7 +109,7 @@ export default {
 	},
 
 	methods: {
-		reloadPreview(id, name, data, type, size){
+		reloadPreview(id, name, data, type, size) {
 			this.id = Number(id);
 			this.name = name;
 			this.selectedImageData = data;
@@ -118,21 +121,37 @@ export default {
 			this.reloadPreview(id, name, data, type, size);
 			this.image_key = this.getImageKey();
 		},
-		
-		getImageKey(){
-			let index;
-			for(index = 0; index < this.response.length; index++){
-				if(this.response[index].id == this.id){
-					return index;
+
+		reloadImage() {
+			console.log(this.image_key);
+			console.log(this.response[this.image_key]);
+			let id = this.response[this.image_key].id;
+			this.reloadPreview(
+				this.response[this.image_key],
+				this.response[this.image_key].name,
+				this.images[id],
+				this.response[this.image_key].type,
+				this.response[this.image_key].size
+			);
+		},
+
+		getImageKey() {
+			if (!isNaN(this.id)) {
+				let index;
+				for (index = 0; index < this.response.length; index++) {
+					if (this.response[index].id == this.id) {
+						return index;
+					}
 				}
+				return index;
 			}
-			return index;
+			return this.image_key;
+			
 		},
 		savePreview(id) {
 			this.cacheImages(this.currentUser);
 			this.id = id;
 		},
-		
 
 		closePreview() {
 			this.id = -1;
@@ -141,27 +160,42 @@ export default {
 			this.dimensions = "";
 			this.selectedImageData = null;
 			this.image_key = null;
-
 		},
-		loadNextImagePreview(){
+		loadNextImagePreview() {
 			this.image_key = this.nextImageKey();
 			console.log(this.image_key);
 			let img = this.response[this.image_key];
-			this.reloadPreview(img.id, img.name, this.images[img.id], img.type, img.size);
+			this.reloadPreview(
+				img.id,
+				img.name,
+				this.images[img.id],
+				img.type,
+				img.size
+			);
 		},
-		loadPreviousImagePreview(){
+		loadPreviousImagePreview() {
 			this.image_key = this.previousImageKey();
 			console.log(this.image_key);
 			let img = this.response[this.image_key];
-			this.reloadPreview(img.id, img.name, this.images[img.id], img.type, img.size);
-		}, 
-
-		nextImageKey(){
-			return (this.image_key+1) % this.response.length;
+			this.reloadPreview(
+				img.id,
+				img.name,
+				this.images[img.id],
+				img.type,
+				img.size
+			);
 		},
 
-		previousImageKey(){
-			return (((this.image_key-1) % this.response.length) + this.response.length)% this.response.length;
+		nextImageKey() {
+			return (this.image_key + 1) % this.response.length;
+		},
+
+		previousImageKey() {
+			return (
+				(((this.image_key - 1) % this.response.length) +
+					this.response.length) %
+				this.response.length
+			);
 		},
 		deleteImage(image_id) {
 			delete this.images[image_id];

@@ -4,12 +4,12 @@
 			<button
 				class="feature-link"
 				title="Close"
-				:disabled="loading"
+				:disabled="disable"
 				@click="close"
 			>
 				<span
 					class="material-icons"
-					v-bind:class="{ 'disable-icons': loading }"
+					v-bind:class="{ 'disable-icons': disable }"
 					>close</span
 				>
 			</button>
@@ -19,8 +19,8 @@
 				class="feature-link"
 				title="Delete"
 				@click="remove"
-				:disabled="loading"
-				v-bind:class="{ 'disable-icons': loading }"
+				:disabled="disable"
+				v-bind:class="{ 'disable-icons': disable }"
 			>
 				<span class="material-icons">delete</span>
 			</button>
@@ -30,8 +30,8 @@
 				class="feature-link"
 				title="Save"
 				@click="save"
-				:disabled="loading"
-				v-bind:class="{ 'disable-icons': loading }"
+				:disabled="disable"
+				v-bind:class="{ 'disable-icons': disable }"
 			>
 				<span class="material-icons-outlined">save</span>
 			</button>
@@ -41,8 +41,8 @@
 				class="feature-link"
 				title="Download"
 				@click="showExport = true"
-				:disabled="loading"
-				v-bind:class="{ 'disable-icons': loading }"
+				:disabled="disable"
+				v-bind:class="{ 'disable-icons': disable }"
 			>
 				<span class="material-icons">download</span>
 			</button>
@@ -50,8 +50,8 @@
 			<button
 				class="feature-link"
 				title="Edit"
-				:disabled="loading"
-				v-bind:class="{ 'disable-icons': loading }"
+				:disabled="disable"
+				v-bind:class="{ 'disable-icons': disable }"
 				@click="edit"
 			>
 				<span class="material-icons">edit</span>
@@ -59,9 +59,21 @@
 
 			<button
 				class="feature-link"
+				title="Restore original image"
+				:disabled="disable"
+				v-bind:class="{ 'disable-icons': disable }"
+				@click="restore"
+				v-if="!isImageSaved"
+			>
+				<span class="material-icons-outlined">
+					restore
+				</span>
+			</button>
+			<button
+				class="feature-link"
 				title="Details"
-				:disabled="loading"
-				v-bind:class="{ 'disable-icons': loading }"
+				:disabled="disable"
+				v-bind:class="{ 'disable-icons': disable }"
 				@click="details"
 			>
 				<span class="material-icons-outlined">info</span>
@@ -70,14 +82,21 @@
 
 		<div class="preview-visual">
 			<img class="preview-image" :src="image" @error="$emit('close')" />
-			<div class="chevrons" v-if="!loading">
-				<span class="material-icons chevron" @click="$emit('loadPrevious')" @keydown.arrow-left="$emit('loadPrevious')">
+			<div class="chevrons" v-if="!disable">
+				<span class="material-icons chevron" @click="loadPreviousImage">
 					chevron_left
 				</span>
-				<span class="material-icons chevron" @click="$emit('loadNext')">
+				<span class="material-icons chevron" @click="loadNextImage">
 					chevron_right
 				</span>
-			</div>	
+			</div>
+			<loading-screen v-if="loading" />
+			<pop-up
+				v-if="deleteDialog"
+				:title="'Do you really want to delete this image ?'"
+				@cancel="deleteDialog = false"
+				@delete="deleteImage"
+			/>
 		</div>
 
 		<div id="details-panel" class="preview-features">
@@ -117,7 +136,7 @@
 			<h2 class="title">Edit</h2>
 
 			<div class="preview-details">
-				<form
+				<!-- <form
 					class="preview-feature"
 					@submit.prevent="onSubmit('resize')"
 				>
@@ -129,7 +148,7 @@
 					>
 						Resize
 					</button>
-				</form>
+				</form> -->
 
 				<form
 					class="preview-feature"
@@ -139,7 +158,7 @@
 					<button
 						class="theme-button"
 						type="submit"
-						:disabled="loading"
+						:disabled="disable"
 					>
 						to Gray Scale
 					</button>
@@ -153,7 +172,7 @@
 					<button
 						class="theme-button"
 						type="submit"
-						:disabled="loading"
+						:disabled="disable"
 					>
 						Apply Negative Filter
 					</button>
@@ -176,7 +195,7 @@
 					<button
 						class="theme-button"
 						type="submit"
-						:disabled="loading"
+						:disabled="disable"
 					>
 						Change Brightness
 					</button>
@@ -201,7 +220,7 @@
 					<button
 						class="theme-button"
 						type="submit"
-						:disabled="loading"
+						:disabled="disable"
 					>
 						Colorize
 					</button>
@@ -215,7 +234,7 @@
 					<button
 						class="theme-button"
 						type="submit"
-						:disabled="loading"
+						:disabled="disable"
 					>
 						Extend Dynamic
 					</button>
@@ -238,7 +257,7 @@
 							value="1"
 							id="c1"
 							required
-							:disabled="loading"
+							:disabled="disable"
 							checked
 						/>
 						<label for="c1">Saturation</label>
@@ -249,7 +268,7 @@
 							v-model="x3"
 							name="channel"
 							value="2"
-							:disabled="loading"
+							:disabled="disable"
 							id="c2"
 						/>
 						<label for="c2">Brightness</label>
@@ -259,7 +278,7 @@
 						type="submit"
 						class="theme-button"
 						value="Equalize"
-						:disabled="loading"
+						:disabled="disable"
 					/>
 				</form>
 
@@ -275,7 +294,7 @@
 						name="radius"
 						v-model="x4"
 						min="1"
-						:disabled="loading"
+						:disabled="disable"
 						max="10"
 						required
 					/>
@@ -288,7 +307,7 @@
 							v-model="n1"
 							value="meanFilter"
 							id="mf"
-							:disabled="loading"
+							:disabled="disable"
 							checked
 						/>
 						<label for="mf">Mean</label>
@@ -299,7 +318,7 @@
 							name="algorithm"
 							v-model="n1"
 							value="gaussianFilter"
-							:disabled="loading"
+							:disabled="disable"
 							id="gf"
 						/>
 						<label for="gf">Gaussian</label>
@@ -308,7 +327,7 @@
 					<button
 						class="theme-button"
 						type="submit"
-						:disabled="loading"
+						:disabled="disable"
 					>
 						Apply filter"
 					</button>
@@ -322,7 +341,7 @@
 					<button
 						class="theme-button"
 						type="submit"
-						:disabled="loading"
+						:disabled="disable"
 					>
 						Apply Sobel operator"
 					</button>
@@ -342,7 +361,7 @@
 							name="algorithm"
 							value="horizontalMirror"
 							v-model="n2"
-							:disabled="loading"
+							:disabled="disable"
 							id="hm"
 							checked
 						/>
@@ -353,7 +372,7 @@
 							type="radio"
 							name="algorithm"
 							v-model="n2"
-							:disabled="loading"
+							:disabled="disable"
 							value="verticalMirror"
 							id="vm"
 						/>
@@ -364,7 +383,7 @@
 							v-model="n2"
 							type="radio"
 							name="algorithm"
-							:disabled="loading"
+							:disabled="disable"
 							value="completeMirror"
 							id="cm"
 						/>
@@ -376,7 +395,7 @@
 					<button
 						class="theme-button"
 						type="submit"
-						:disabled="loading"
+						:disabled="disable"
 					>
 						Apply Filter
 					</button>
@@ -391,8 +410,7 @@
 				:name="name"
 			></Export>
 		</div>
-
-		<loading-screen v-if="loading" :title="'Algorithm in Process ...'"/>
+		<BlackLayer v-if="loading" />
 	</div>
 </template>
 
@@ -401,12 +419,16 @@ import Export from "@/components/Export.vue";
 import ImageService from "@/services/image.service";
 //import Image from "/@/models/image.js";
 import FileParser from "@/services/file-parser";
-import LoadingScreen from '@/components/LoadingScreen.vue';
+import LoadingScreen from "@/components/LoadingScreen.vue";
+import BlackLayer from "@/components/BlackLayer.vue";
+import PopUp from "./PopUp.vue";
 
 export default {
 	components: {
 		Export,
 		LoadingScreen,
+		BlackLayer,
+		PopUp
 	},
 	name: "Preview",
 
@@ -429,6 +451,8 @@ export default {
 			n1: "meanFilter",
 			n2: "horizontalMirror",
 			loading: false,
+			deleteDialog: false,
+			last_id: Number
 		};
 	},
 
@@ -438,6 +462,8 @@ export default {
 		saveImage: null,
 		loadNext: null,
 		loadPrevious: null,
+		loadImageById: null,
+		deleteImage: null
 	},
 
 	computed: {
@@ -451,6 +477,9 @@ export default {
 		warning() {
 			if (this.currentUser) return "This image is not saved !";
 			else return "You can't save images if you're not logged in!";
+		},
+		disable() {
+			return this.loading || this.deleteDialog;
 		}
 	},
 
@@ -488,6 +517,7 @@ export default {
 						this.loading = false;
 					});
 			} else {
+				this.last_id = this.id;
 				ImageService.applyAlgorithm(
 					this.id + "?algorithm=" + parameters
 				)
@@ -512,7 +542,8 @@ export default {
 			}
 		},
 		remove() {
-			if (confirm("Dou you really want to delete this image"))
+			this.deleteDialog = true;
+			/*if (confirm("Dou you really want to delete this image"))
 				ImageService.deleteImage(this.id, this.currentUser).then(
 					response => {
 						this.$emit("deleteImage", this.id);
@@ -522,7 +553,20 @@ export default {
 					error => {
 						alert(error);
 					}
-				);
+				);*/
+		},
+		deleteImage() {
+			this.deleteDialog = false;
+			ImageService.deleteImage(this.id, this.currentUser).then(
+				() => {
+					this.$emit("deleteImage", this.id);
+
+					location.href = "/";
+				},
+				error => {
+					console.log(error);
+				}
+			);
 		},
 
 		edit() {
@@ -559,20 +603,40 @@ export default {
 		close() {
 			this.$emit("close");
 		},
-		logKey(e){
+		loadNextImage() {
+			//if (!this.isImageSaved) {
+			//this.dialogSave = true;
+			//} else {
+			this.$emit("loadNext");
+			//}
+		},
+		loadPreviousImage() {
+			//if (!this.isImageSaved) {
+			//this.dialogSave = true;
+			//} else {
+			this.$emit("loadPrevious");
+			//}
+		},
+
+		handleInputKey(e) {
 			//console.log(e);
-			if(e.key === "ArrowRight" && !this.loading){
-				this.$emit('loadNext');
-			}else if (e.key === "ArrowLeft" && !this.loading){
-				this.$emit('loadPrevious');
-			}
+			if (e.key === "ArrowRight" && !this.loading) this.loadNextImage();
+			else if (e.key === "ArrowLeft" && !this.loading)
+				this.loadPreviousImage();
+		},
+		restore() {
+			if (!isNaN(this.last_id)) this.$emit("reloadImage");
 		}
-
 	},
-	mounted(){
+	created() {
+		console.log("created");
+		document.addEventListener("keydown", this.handleInputKey);
+	},
+	mounted() {
 		console.log("preview mounted !");
-		document.addEventListener('keydown', this.logKey);
-
+	},
+	updated() {
+		console.log("updated");
 	}
 };
 </script>
@@ -599,8 +663,6 @@ export default {
 	align-items: center;
 	background-color: rgba(32, 33, 36, 0.9);
 }
-
-
 
 .preview-image {
 	display: block;
@@ -715,7 +777,9 @@ input[type="number"] {
 	color: #3c4855;
 }
 
-.chevrons{
+.chevrons {
+	position: fixed;
+	bottom: 0;
 	display: flex;
 	justify-content: center;
 	align-items: center;
@@ -730,7 +794,6 @@ input[type="number"] {
 	height: 100px;
 	margin-left: 20px;
 	margin-right: 20px;
-	/*background-color: crimson;*/
 	font-size: 48px;
 }
 
@@ -738,7 +801,7 @@ input[type="number"] {
 	scale: 20px;
 	cursor: pointer;
 	transition: font-size 0.15s;
-	font-size: 150px;
+	font-size: 65px;
 }
 
 .break {

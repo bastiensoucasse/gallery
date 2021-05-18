@@ -3,6 +3,7 @@ import Home from '../views/Home.vue'
 import Login from '../views/Login'
 import Register from '../views/Register'
 import Board from '../views/Board'
+import NotFound from '../views/NotFound'
 
 const routes = [
     {
@@ -14,12 +15,6 @@ const routes = [
                 location.reload();
             }
         }
-    },
-
-    {
-        path: '/:preview',
-        name: 'Preview',
-        component: Home
     },
     {
         path: "/login",
@@ -41,6 +36,11 @@ const routes = [
         name: 'Profile',
         component: () => import("../views/Profile.vue")
     },
+    {
+        path: '/:patchMatch(.*)*',
+        name: 'notFound',
+        component: NotFound,
+    }
 
 ]
 
