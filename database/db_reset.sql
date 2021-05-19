@@ -1,1 +1,1 @@
-drop database if exists `db_example`;
+drop database if exists `backend_db`;
